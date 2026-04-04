@@ -18,8 +18,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tipo de propiedad *</label>
-                    <select name="type" data-ts data-placeholder="Seleccionar tipo...">
-                        <option value=""></option>
+                    <select name="type" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                        <option value="">Seleccionar tipo...</option>
                         @foreach(\App\Models\Property::typesList() as $value => $label)
                         <option value="{{ $value }}" {{ old('type') == $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -139,25 +139,25 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por hora (ARS) *</label>
                     <input type="number" id="inp-hora" name="price_per_hour" value="{{ old('price_per_hour') }}" min="1" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="5000">
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
                     @error('price_per_hour')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por día (ARS)</label>
-                    <input type="number" id="inp-dia" name="price_per_day" value="{{ old('price_per_day') }}" min="0" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Se calcula solo">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por día (ARS) *</label>
+                    <input type="number" id="inp-dia" name="price_per_day" value="{{ old('price_per_day') }}" min="1" step="100"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
                     @error('price_per_day')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por semana (ARS)</label>
-                    <input type="number" id="inp-sem" name="price_per_week" value="{{ old('price_per_week') }}" min="0" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Se calcula solo">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por semana (ARS) *</label>
+                    <input type="number" id="inp-sem" name="price_per_week" value="{{ old('price_per_week') }}" min="1" step="100"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
                     @error('price_per_week')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por mes (ARS)</label>
-                    <input type="number" id="inp-mes" name="price_per_month" value="{{ old('price_per_month') }}" min="0" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Se calcula solo">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio por mes (ARS) *</label>
+                    <input type="number" id="inp-mes" name="price_per_month" value="{{ old('price_per_month') }}" min="1" step="100"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
                     @error('price_per_month')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
@@ -167,17 +167,17 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Habitaciones *</label>
-                    <input type="number" name="bedrooms" value="{{ old('bedrooms', 0) }}" min="0" placeholder="0"
+                    <input type="number" name="bedrooms" value="{{ old('bedrooms') }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Baños *</label>
-                    <input type="number" name="bathrooms" value="{{ old('bathrooms', 0) }}" min="0" placeholder="0"
+                    <input type="number" name="bathrooms" value="{{ old('bathrooms') }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estacionamientos *</label>
-                    <input type="number" name="parking_spots" value="{{ old('parking_spots', 0) }}" min="0" placeholder="0"
+                    <input type="number" name="parking_spots" value="{{ old('parking_spots') }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
@@ -305,21 +305,6 @@
 
 @push('scripts')
 <script>
-// ===================== PRECIOS AUTOCALCULO =====================
-document.getElementById('inp-hora').addEventListener('input', function() {
-    var h = parseFloat(this.value);
-    if (!h || h <= 0) {
-        document.getElementById('inp-dia').value = '';
-        document.getElementById('inp-sem').value = '';
-        document.getElementById('inp-mes').value = '';
-        return;
-    }
-    var dia = Math.round(h * 24 / 100) * 100;
-    document.getElementById('inp-dia').value = dia;
-    document.getElementById('inp-sem').value = Math.round(dia * 7 / 100) * 100;
-    document.getElementById('inp-mes').value = Math.round(dia * 30 / 100) * 100;
-});
-
 // ===================== AUTOCOMPLETE PARTIDO / LOCALIDAD =====================
 var partidoOptions = [];
 var partidoId = null;
@@ -599,32 +584,16 @@ function validateForm() {
         if (invalid) { setErr(el, msg); errores.push(el); }
     }
 
-    function reqTs(name, msg) {
+    // Para campos numéricos donde 0 es válido: solo valida que no esté vacío
+    function reqNum(name, msg) {
         var el = form.querySelector('[name="' + name + '"]');
-        var v = el ? (el.value || '').trim() : '';
-        var invalid = !el || !v;
-        if (invalid) {
-            // TomSelect puede dejar el <select> dentro o como hermano del .ts-wrapper
-            var wrap = el
-                ? (el.closest('.ts-wrapper') || el.parentElement.querySelector('.ts-wrapper'))
-                : null;
-            console.log('[reqTs]', name, '| wrap encontrado:', wrap, '| el.parentElement:', el ? el.parentElement : null);
-            if (wrap) {
-                wrap.classList.add('inp-err');
-                if (!wrap.nextElementSibling || !wrap.nextElementSibling.classList.contains('err-msg')) {
-                    var sp = document.createElement('span');
-                    sp.className = 'err-msg';
-                    sp.textContent = msg;
-                    wrap.insertAdjacentElement('afterend', sp);
-                }
-                errores.push(wrap);
-            } else {
-                console.warn('[reqTs] no se encontró .ts-wrapper para:', name, '| el:', el);
-            }
+        if (!el) return;
+        if (el.value === '' || el.value === null || el.value === undefined) {
+            setErr(el, msg); errores.push(el);
         }
     }
 
-    reqTs('type',         'El tipo de propiedad es obligatorio.');
+    req('type',           'El tipo de propiedad es obligatorio.');
     req('name',           'El nombre es obligatorio.');
     req('description',    'La descripción es obligatoria.');
     // Provincia: validar el select visible (sel-province), no el hidden
@@ -637,7 +606,13 @@ function validateForm() {
     req('street_name',    'La calle es obligatoria.');
     req('street_number',  'El número es obligatorio.');
     req('capacity',       'La capacidad es obligatoria.');
+    reqNum('bedrooms',     'Las habitaciones son obligatorias (podés ingresar 0).');
+    reqNum('bathrooms',    'Los baños son obligatorios (podés ingresar 0).');
+    reqNum('parking_spots','Los estacionamientos son obligatorios (podés ingresar 0).');
     req('price_per_hour', 'El precio por hora es obligatorio.');
+    req('price_per_day',  'El precio por día es obligatorio.');
+    req('price_per_week', 'El precio por semana es obligatorio.');
+    req('price_per_month','El precio por mes es obligatorio.');
 
     console.log('[validateForm] campos con error:', errores.length, errores.map(function(e){ return e.getAttribute ? e.getAttribute('name') || e.className : '?'; }));
 

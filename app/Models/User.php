@@ -44,7 +44,16 @@ class User extends Authenticatable
     // Cualquier usuario autenticado puede reservar
     public function isClient(): bool { return true; }
 
-    public function hasSubscription(): bool { return $this->subscription_paid === true; }
+    public function subscriptionPayments() { return $this->hasMany(SubscriptionPayment::class); }
+
+    public function hasSubscription(): bool
+    {
+        if ($this->subscription_paid === true && $this->subscriptionPayments()->where('status', 'approved')->exists()) {
+            return true;
+        }
+
+        return false;
+    }
 
     public function propiedades() { return $this->hasMany(Property::class); }
     public function reservations() { return $this->hasMany(Reservation::class); }

@@ -45,8 +45,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tipo de propiedad *</label>
-                    <select name="type" data-ts data-placeholder="Seleccionar tipo...">
-                        <option value=""></option>
+                    <select name="type" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                        <option value="">Seleccionar tipo...</option>
                         @foreach($typesList as $value => $label)
                         <option value="{{ $value }}" {{ old('type', $propiedad->type) == $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -190,40 +190,28 @@
 
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Precio y Capacidad</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4"
-                x-data="{
-                    hora: {{ old('price_per_hour', $propiedad->price_per_hour ?? 0) }},
-                    dia:  {{ old('price_per_day',  $propiedad->price_per_day  ?? 0) }},
-                    sem:  {{ old('price_per_week', $propiedad->price_per_week ?? 0) }},
-                    mes:  {{ old('price_per_month',$propiedad->price_per_month?? 0) }},
-                    calcular() {
-                        if (!this.hora) return;
-                        this.dia = Math.round(this.hora * 24 / 100) * 100;
-                        this.sem = Math.round(this.dia  * 7 / 100) * 100;
-                        this.mes = Math.round(this.dia  * 30 / 100) * 100;
-                    }
-                }">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/hora (ARS) *</label>
-                    <input type="number" name="price_per_hour" x-model="hora" @input="calcular()" required min="0" step="100"
+                    <input type="number" name="price_per_hour" value="{{ old('price_per_hour', $propiedad->price_per_hour ?? '') }}" required min="1" step="100"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     @error('price_per_hour')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/día (ARS) *</label>
-                    <input type="number" name="price_per_day" x-model="dia" required min="0" step="100"
+                    <input type="number" name="price_per_day" value="{{ old('price_per_day', $propiedad->price_per_day ?? '') }}" required min="1" step="100"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     @error('price_per_day')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/semana (ARS) *</label>
-                    <input type="number" name="price_per_week" x-model="sem" required min="0" step="100"
+                    <input type="number" name="price_per_week" value="{{ old('price_per_week', $propiedad->price_per_week ?? '') }}" required min="1" step="100"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     @error('price_per_week')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/mes (ARS) *</label>
-                    <input type="number" name="price_per_month" x-model="mes" required min="0" step="100"
+                    <input type="number" name="price_per_month" value="{{ old('price_per_month', $propiedad->price_per_month ?? '') }}" required min="1" step="100"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     @error('price_per_month')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -457,24 +445,9 @@ document.querySelectorAll('.input-err').forEach(function(e){ e.classList.remove(
         }
     }
 
-    function chkTs(name, msg) {
-        var el = document.querySelector('[name="' + name + '"]');
-        var wrap = el ? el.closest('.ts-wrapper') : null;
-        var target = wrap || el;
-        if (!el || !el.value) {
-            if (target) target.classList.add('input-err');
-            var ex = target ? target.parentElement.querySelector('.err-txt') : null;
-            if (!ex && target) { var sp = document.createElement('span'); sp.className = 'err-txt'; sp.textContent = msg; target.parentElement.appendChild(sp); }
-            if (target) errores.push(target);
-        } else {
-            if (target) target.classList.remove('input-err');
-            var ex = target ? target.parentElement.querySelector('.err-txt') : null; if (ex) ex.remove();
-        }
-    }
-
     var form = document.getElementById('edit-form');
 
-    chkTs('type',        'El tipo de propiedad es obligatorio.');
+    chk(form.querySelector('[name="type"]'), 'El tipo de propiedad es obligatorio.');
     chk(form.querySelector('[name="name"]'),           'El nombre es obligatorio.');
     chk(form.querySelector('[name="description"]'),    'La descripción es obligatoria.');
     chk(form.querySelector('[name="state"]'),          'Seleccioná una provincia.');

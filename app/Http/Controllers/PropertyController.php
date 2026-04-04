@@ -197,14 +197,14 @@ class PropertyController extends Controller
             'state' => 'required|string',
             'country' => 'nullable|string|max:100',
             'price_per_hour'  => 'required|numeric|min:1',
-            'price_per_day'   => 'nullable|numeric|min:0',
-            'price_per_week'  => 'nullable|numeric|min:0',
-            'price_per_month' => 'nullable|numeric|min:0',
+            'price_per_day'   => 'required|numeric|min:1',
+            'price_per_week'  => 'required|numeric|min:1',
+            'price_per_month' => 'required|numeric|min:1',
             'price_weekend'   => 'nullable|numeric|min:0',
             'capacity' => 'required|integer|min:1',
-            'bedrooms' => 'nullable|integer|min:0',
-            'bathrooms' => 'nullable|integer|min:0',
-            'parking_spots' => 'nullable|integer|min:0',
+            'bedrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'parking_spots' => 'required|integer|min:0',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'map_url' => 'nullable|url|max:500',
@@ -217,11 +217,6 @@ class PropertyController extends Controller
             'available_to' => 'nullable|date_format:H:i',
             'images.*' => 'nullable|image|max:5120',
         ]);
-
-        $hora = $data['price_per_hour'];
-        $data['price_per_day']   = $data['price_per_day']   ?: round($hora * 24 / 100) * 100;
-        $data['price_per_week']  = $data['price_per_week']  ?: round($data['price_per_day'] * 7 / 100) * 100;
-        $data['price_per_month'] = $data['price_per_month'] ?: round($data['price_per_day'] * 30 / 100) * 100;
 
         $data['address'] = trim($data['street_name'] . ' ' . $data['street_number']);
         $data['city'] = $data['locality'];
@@ -295,9 +290,9 @@ class PropertyController extends Controller
             'price_per_month' => 'required|numeric|min:0',
             'price_weekend'   => 'nullable|numeric|min:0',
             'capacity' => 'required|integer|min:1',
-            'bedrooms' => 'nullable|integer|min:0',
-            'bathrooms' => 'nullable|integer|min:0',
-            'parking_spots' => 'nullable|integer|min:0',
+            'bedrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'parking_spots' => 'required|integer|min:0',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'map_url' => 'nullable|url|max:500',

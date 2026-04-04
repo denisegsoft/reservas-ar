@@ -62,16 +62,9 @@ class PaymentController extends Controller
             ['mp_preference_id' => $preference->id, 'amount' => $reservation->total_amount, 'status' => 'pending']
         );
 
-        $sandboxUrl = "https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id={$preference->id}";
-
-        $isSandbox = str_starts_with(config('services.mercadopago.access_token', ''), 'TEST-');
-        $initPoint = $isSandbox
-            ? ($preference->sandbox_init_point ?? $preference->init_point)
-            : $preference->init_point;
-
         return response()->json([
             'preference_id' => $preference->id,
-            'init_point'    => $initPoint,
+            'init_point'    => $preference->init_point,
         ]);
     }
 

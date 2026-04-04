@@ -22,19 +22,6 @@ class SubscriptionController extends Controller
         MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
     }
 
-    private static function isSandbox(): bool
-    {
-        return (bool) config('services.mercadopago.sandbox', false)
-            || str_starts_with(config('services.mercadopago.access_token', ''), 'TEST-');
-    }
-
-    private static function resolveInitPoint(object $preference): string
-    {
-        return static::isSandbox()
-            ? ($preference->sandbox_init_point ?? $preference->init_point)
-            : $preference->init_point;
-    }
-
     private static function isLocalhost(): bool
     {
         $url = config('app.url', '');
@@ -83,7 +70,49 @@ class SubscriptionController extends Controller
         return $data;
     }
 
-    // ── Crea preferencia y redirige directo a MercadoPago (desde alertas) ────
+    // ── Crea preferencia en MP y guarda en BD. Retorna init_point o null si falla. ──
+    private function createPreference(User $user): ?string
+    {
+        $price  = static::price();
+        $client = new PreferenceClient();
+
+        try {
+            $preference = $client->create($this->buildPreferenceData($user, $price));
+
+            $spRecord = SubscriptionPayment::create([
+                'user_id'          => $user->id,
+                'mp_preference_id' => $preference->id,
+                'amount'           => $price,
+                'status'           => 'initiated',
+            ]);
+
+            Log::info('[Subscription] Preference created', [
+                'user_id'                 => $user->id,
+                'mp_preference_id'        => $preference->id,
+                'subscription_payment_id' => $spRecord->id,
+            ]);
+
+            return $preference->init_point;
+
+        } catch (\MercadoPago\Exceptions\MPApiException $e) {
+            $apiResponse = $e->getApiResponse();
+            Log::error('[Subscription] MP API error creating preference', [
+                'user_id'       => $user->id,
+                'error'         => $e->getMessage(),
+                'status_code'   => $apiResponse?->getStatusCode(),
+                'response_body' => $apiResponse?->getContent(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[Subscription] Failed to create MP preference', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+        }
+
+        return null;
+    }
+
+    // ── Redirige directo a MercadoPago (desde alertas) ────────────────────────
     public function redirectToMP()
     {
         $user = auth()->user();
@@ -93,104 +122,31 @@ class SubscriptionController extends Controller
                 ->with('info', '¡Ya tenés tu suscripción activa!');
         }
 
-        $price  = static::price();
-        $client = new PreferenceClient();
+        $initPoint = $this->createPreference($user);
 
-        try {
-            $preference = $client->create($this->buildPreferenceData($user, $price));
-
-            SubscriptionPayment::create([
-                'user_id'          => $user->id,
-                'mp_preference_id' => $preference->id,
-                'amount'           => $price,
-                'status'           => 'initiated',
-            ]);
-
-            Log::info('[Subscription] Direct redirect to MP', [
-                'user_id'          => $user->id,
-                'mp_preference_id' => $preference->id,
-            ]);
-
-            return redirect()->away(static::resolveInitPoint($preference));
-
-        } catch (\Exception $e) {
-            Log::error('[Subscription] Failed to create MP preference (direct redirect)', [
-                'user_id' => $user->id,
-                'error'   => $e->getMessage(),
-            ]);
-
+        if (!$initPoint) {
             return redirect()->route('subscription.payment')
                 ->with('error', 'No se pudo conectar con MercadoPago. Intentá de nuevo.');
         }
+
+        return redirect()->away($initPoint);
     }
 
-    // ── Muestra la página de pago y crea la preferencia en MP ────────────────
+    // ── Muestra la página de pago ─────────────────────────────────────────────
     public function show()
     {
         $user = auth()->user();
 
         if ($user->hasSubscription()) {
-            Log::info('[Subscription] User already subscribed, redirecting', ['user_id' => $user->id]);
             return redirect()->route('owner.properties.index')
                 ->with('info', '¡Ya tenés tu suscripción activa!');
         }
 
-        $price  = static::price();
-        $client = new PreferenceClient();
+        $initPoint = $this->createPreference($user);
+        $price     = static::price();
+        $mpError   = $initPoint ? null : 'No se pudo conectar con MercadoPago.';
 
-        Log::info('[Subscription] Creating MP preference', [
-            'user_id' => $user->id,
-            'email'   => $user->email,
-            'amount'  => $price,
-            'sandbox' => static::isSandbox(),
-        ]);
-
-        $preferenceId = null;
-        $initPoint    = null;
-        $mpError      = null;
-
-        try {
-            $preference = $client->create($this->buildPreferenceData($user, $price));
-
-            $preferenceId = $preference->id;
-            $initPoint    = static::resolveInitPoint($preference);
-
-            // Guardar en BD: intento iniciado
-            $spRecord = SubscriptionPayment::create([
-                'user_id'          => $user->id,
-                'mp_preference_id' => $preferenceId,
-                'amount'           => $price,
-                'status'           => 'initiated',
-            ]);
-
-            Log::info('[Subscription] Preference created & DB record saved', [
-                'user_id'                 => $user->id,
-                'mp_preference_id'        => $preferenceId,
-                'subscription_payment_id' => $spRecord->id,
-                'init_point'              => $initPoint,
-            ]);
-        } catch (\MercadoPago\Exceptions\MPApiException $e) {
-            $apiResponse = $e->getApiResponse();
-            $mpError = $e->getMessage();
-            Log::error('[Subscription] MP API error creating preference', [
-                'user_id'       => $user->id,
-                'error'         => $mpError,
-                'status_code'   => $apiResponse?->getStatusCode(),
-                'response_body' => $apiResponse?->getContent(),
-            ]);
-        } catch (\Exception $e) {
-            $mpError = $e->getMessage();
-            Log::error('[Subscription] Failed to create MP preference', [
-                'user_id' => $user->id,
-                'error'   => $mpError,
-                'class'   => get_class($e),
-            ]);
-        }
-
-        $publicKey = config('services.mercadopago.public_key');
-        $isLocal   = static::isLocalhost();
-
-        return view('subscription.pago', compact('price', 'preferenceId', 'initPoint', 'publicKey', 'mpError', 'isLocal'));
+        return view('subscription.pago', compact('price', 'initPoint', 'mpError'));
     }
 
     // ── Callback: pago aprobado (redirect de MP) ──────────────────────────────
