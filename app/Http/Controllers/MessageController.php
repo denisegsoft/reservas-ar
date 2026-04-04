@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewMessageNotification;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
 {
@@ -118,6 +120,8 @@ class MessageController extends Controller
             'reservation_id' => $request->reservation_id ?: null,
             'body'           => $request->body,
         ]);
+
+        Mail::to($user->email)->queue(new NewMessageNotification($user, auth()->user()));
 
         if ($request->expectsJson()) {
             return response()->json([

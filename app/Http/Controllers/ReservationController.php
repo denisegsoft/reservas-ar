@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewReservationNotification;
 use App\Models\Property;
 use App\Models\Reservation;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class ReservationController extends Controller
@@ -96,6 +98,8 @@ class ReservationController extends Controller
             'payment_status' => 'unpaid',
             'notes' => $request->notes,
         ]);
+
+        Mail::to($propiedad->owner->email)->queue(new NewReservationNotification($propiedad->owner));
 
         return redirect()->route('reservations.payment', $reservation)
             ->with('success', 'Reserva creada. Completa el pago para confirmarla.');
