@@ -4,7 +4,17 @@
         <p class="text-sm text-gray-500 mt-1">Ingresa a tu cuenta para continuar</p>
     </div>
 
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if(session('status') === 'passwords.reset')
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <span>¡Tu contraseña fue actualizada correctamente! Ya podés iniciar sesión.</span>
+    </div>
+    @elseif(session('status'))
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        <span>{{ session('status') }}</span>
+    </div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
@@ -27,12 +37,12 @@
         <div>
             <div class="flex items-center justify-between mb-1.5">
                 <label for="password" class="block text-sm font-semibold text-gray-700">
-                    Contrasena
+                    contraseña
                 </label>
                 @if (Route::has('password.request'))
                     <a href="{{ route('password.request') }}"
                        class="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
-                        Olvide mi contrasena
+                        Olvidé mi contraseña
                     </a>
                 @endif
             </div>

@@ -36,7 +36,7 @@ class SubscriptionController extends Controller
         $data = [
             "items" => [[
                 "id"          => "subscription-owner",
-                "title"       => "Suscripción EspaciosAR - Propietario",
+                "title"       => "Suscripción ReservasAR - Propietario",
                 "description" => "Pago unico para recibir contactos, leer mensajes y gestionar reservas.",
                 "category_id" => "services",
                 "quantity"    => 1,

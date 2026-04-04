@@ -84,7 +84,7 @@ class DashboardController extends Controller
             $query->where('check_out', '<=', $request->date_to);
         }
 
-        $reservations = $query->paginate(3)->withQueryString();
+        $reservations = $query->paginate(15)->withQueryString();
 
         return view('owner.reservations', compact('reservations', 'propiedades'));
     }
