@@ -41,7 +41,7 @@
         @csrf @method('PUT')
 
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-lg font-bold text-gray-900 mb-4">Informacion Basica</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Información Básica</h2>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tipo de propiedad *</label>
@@ -223,6 +223,11 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Habitaciones *</label>
                     <input type="number" name="bedrooms" value="{{ old('bedrooms', $propiedad->bedrooms) }}" min="0" placeholder="0"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Camas</label>
+                    <input type="number" name="beds" value="{{ old('beds', $propiedad->beds) }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>

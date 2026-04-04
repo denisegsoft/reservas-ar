@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Mendez',
             'email'     => 'carlos@owner.com',
             'password'  => Hash::make('password'),
-            'role'      => 'owner',
+            'role'      => 'user',
             'phone'     => '1155555555',
             'avatar'    => 'https://api.dicebear.com/9.x/adventurer/svg?seed=Carlos',
         ]);
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Gomez',
             'email'     => 'laura@owner.com',
             'password'  => Hash::make('password'),
-            'role'      => 'owner',
+            'role'      => 'user',
             'phone'     => '1166666666',
             'avatar'    => 'https://api.dicebear.com/9.x/adventurer/svg?seed=Laura',
         ]);
@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
             'last_name' => 'Rodriguez',
             'email'     => 'maria@gmail.com',
             'password'  => Hash::make('password'),
-            'role'      => 'client',
+            'role'      => 'user',
             'phone'     => '1177777777',
             'avatar'    => 'https://api.dicebear.com/9.x/adventurer/svg?seed=Maria',
         ]);

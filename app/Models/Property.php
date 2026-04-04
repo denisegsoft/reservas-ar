@@ -16,7 +16,7 @@ class Property extends Model
     protected $fillable = [
         'user_id', 'name', 'slug', 'description', 'short_description',
         'address', 'street_name', 'street_number', 'locality', 'partido', 'city', 'state', 'country', 'zip_code', 'latitude', 'longitude', 'map_url',
-        'price_per_hour', 'price_per_day', 'price_per_week', 'price_per_month', 'price_weekend', 'capacity', 'bedrooms', 'bathrooms',
+        'price_per_hour', 'price_per_day', 'price_per_week', 'price_per_month', 'price_weekend', 'capacity', 'bedrooms', 'beds', 'bathrooms',
         'parking_spots', 'amenities', 'cover_image', 'status', 'rating',
         'reviews_count', 'featured', 'rules', 'min_days', 'max_days', 'type', 'available_from', 'available_to', 'deleted', 'views_count',
     ];

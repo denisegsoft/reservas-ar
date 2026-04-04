@@ -53,21 +53,40 @@ class DashboardController extends Controller
         return !$user->isAdmin() && !$user->hasSubscription();
     }
 
-    public function reservations()
+    public function reservations(Request $request)
     {
         if ($this->requiresSubscription()) {
             return redirect()->route('subscription.payment')
                 ->with('info', 'Necesitás activar tu suscripción para ver las reservas recibidas.');
         }
 
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
+        $user         = Auth::user();
+        $propiedadIds = $user->propiedades()->pluck('id');
+        $propiedades  = $user->propiedades()->orderBy('name')->get(['id', 'name']);
 
-        $reservations = Reservation::whereIn('property_id', $propiedadIds)
+        $query = Reservation::whereIn('property_id', $propiedadIds)
             ->with(['property', 'user', 'payment'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->orderBy('created_at', 'desc');
 
-        return view('owner.reservations', compact('reservations'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+        if ($request->filled('property_id')) {
+            $query->where('property_id', $request->property_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->where('check_in', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->where('check_out', '<=', $request->date_to);
+        }
+
+        $reservations = $query->paginate(3)->withQueryString();
+
+        return view('owner.reservations', compact('reservations', 'propiedades'));
     }
 
     public function createReservation()
@@ -78,7 +97,7 @@ class DashboardController extends Controller
         }
 
         $propiedades = Auth::user()->propiedades()->where('status', 'active')->get();
-        $clientes = User::where('role', 'client')->orderBy('name')->get();
+        $clientes = User::where('role', 'user')->orderBy('name')->get();
         return view('owner.reservation-create', compact('propiedades', 'clientes'));
     }
 
@@ -115,7 +134,7 @@ class DashboardController extends Controller
                     'last_name' => $request->client_last_name ?? '',
                     'phone'     => $request->client_phone,
                     'dni'       => $request->client_dni,
-                    'role'      => 'client',
+                    'role'      => 'user',
                     'password'  => bcrypt(\Illuminate\Support\Str::random(16)),
                 ]
             );

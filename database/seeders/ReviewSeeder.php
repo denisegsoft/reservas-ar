@@ -32,7 +32,7 @@ class ReviewSeeder extends Seeder
                     'name'      => $data['name'],
                     'last_name' => $data['last_name'],
                     'password'  => Hash::make('password'),
-                    'role'      => 'client',
+                    'role'      => 'user',
                     'phone'     => '1199999999',
                     'avatar'    => 'https://api.dicebear.com/9.x/adventurer/svg?seed=' . urlencode($data['name']),
                 ]

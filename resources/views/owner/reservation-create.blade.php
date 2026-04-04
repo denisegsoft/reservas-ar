@@ -198,15 +198,7 @@ document.addEventListener('alpine:init', () => {
         selectedProperty: null,
         properties: @json($propiedades->map(fn($p) => ['id' => $p->id, 'price_per_day' => (float) $p->price_per_day])->values()),
 
-        calcTotal() {
-            if (!this.selectedProperty) return;
-            const ci = this.$refs.checkIn?.value;
-            const co = this.$refs.checkOut?.value;
-            if (!ci || !co) return;
-            const days = Math.ceil((new Date(co) - new Date(ci)) / 86400000);
-            if (days <= 0) return;
-            this.$refs.total.value = (days * this.selectedProperty.price_per_day).toFixed(0);
-        },
+        calcTotal() {},
     }));
 });
 </script>

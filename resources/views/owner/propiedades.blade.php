@@ -7,13 +7,6 @@
 
     @include('components.subscription-alert')
 
-    @if(auth()->user()->hasSubscription())
-    <div class="mb-6 bg-green-50 border border-green-200 rounded-2xl px-5 py-3.5 flex items-center gap-3">
-        <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-        <p class="text-green-700 text-sm font-medium">Suscripción activa — Tus clientes pueden ver tu contacto y podés leer mensajes.</p>
-    </div>
-    @endif
-
     @if(session('success'))
     <div x-data="{ show: true }" x-show="show" x-transition.opacity
          class="mb-6 bg-green-50 border border-green-200 text-green-800 text-sm px-5 py-3.5 rounded-2xl flex items-center gap-2">
@@ -290,10 +283,6 @@ function renderCal() {
             <div style="width:13px;height:13px;border-radius:4px;background:#dcfce7;border:1px solid #86efac"></div>
             <span style="font-size:.72rem;color:#6b7280">Confirmada</span>
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:13px;height:13px;border-radius:4px;background:#fef3c7;border:1px solid #fcd34d"></div>
-            <span style="font-size:.72rem;color:#6b7280">Ambas</span>
-        </div>
     </div>`;
 
     if (!_rmReservas.length) {
@@ -330,6 +319,9 @@ function showResDetail(dateStr) {
                 <span>👥 ${r.guests} personas</span>
                 <span>💰 $${r.total}</span>
             </div>
+            <a href="{{ url('/usuario/reservas') }}/${r.id}" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:.75rem;font-weight:600;color:#4f46e5;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                Gestionar reserva →
+            </a>
         </div>`;
     });
 
