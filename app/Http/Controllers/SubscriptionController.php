@@ -275,6 +275,19 @@ class SubscriptionController extends Controller
         ]);
 
         Log::info('[Subscription] User subscription activated', ['user_id' => $userId]);
+
+        $user = User::find($userId);
+        if ($user) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)
+                    ->send(new \App\Mail\SubscriptionActivatedNotification($user));
+            } catch (\Throwable $e) {
+                Log::error('[Subscription] Failed to send activation email', [
+                    'user_id' => $userId,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     // ── Procesar pago vía webhook (llamado desde PaymentController) ───────────
