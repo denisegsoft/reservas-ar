@@ -24,7 +24,6 @@ class ReservationController extends Controller
             session([
                 'pending_reservation'      => $request->except('_token'),
                 'pending_reservation_slug' => $propiedad->slug,
-                'url.intended'             => route('properties.show', $propiedad->slug),
             ]);
             return redirect()->route('login');
         }
@@ -44,21 +43,41 @@ class ReservationController extends Controller
             'check_out.after'         => 'La fecha de salida debe ser posterior a la de entrada.',
         ]);
 
-        $checkInDt  = Carbon::parse($request->check_in . ' ' . ($request->check_in_time ?? '14:00'));
-        $checkOutDt = Carbon::parse($request->check_out . ' ' . ($request->check_out_time ?? '11:00'));
+        $result = $this->buildReservation($request->only([
+            'check_in', 'check_in_time', 'check_out', 'check_out_time', 'notes',
+        ]), $propiedad);
+
+        if (isset($result['error'])) {
+            return back()->withErrors($result['error']);
+        }
+
+        return redirect()->route('reservations.show', $result['reservation'])
+            ->with('reservation_created', true);
+    }
+
+public function buildReservation(array $data, Property $propiedad): array
+    {
+        $checkIn     = $data['check_in'] ?? null;
+        $checkOut    = $data['check_out'] ?? null;
+        $checkInTime = $data['check_in_time'] ?? null;
+        $checkOutTime= $data['check_out_time'] ?? null;
+        $notes       = $data['notes'] ?? null;
+
+        $checkInDt  = Carbon::parse($checkIn  . ' ' . ($checkInTime  ?? '14:00'));
+        $checkOutDt = Carbon::parse($checkOut . ' ' . ($checkOutTime ?? '11:00'));
         $totalHours = (int) $checkInDt->diffInHours($checkOutDt);
         $totalDays  = (int) $checkInDt->diffInDays($checkOutDt) ?: 1;
 
         if ($totalHours <= 0) {
-            return back()->withErrors(['check_out' => 'La fecha y hora de salida debe ser posterior a la de entrada.']);
+            return ['error' => ['check_out' => 'La fecha y hora de salida debe ser posterior a la de entrada.']];
         }
 
         if ($totalDays < $propiedad->min_days) {
-            return back()->withErrors(['check_out' => "La estadía mínima es de {$propiedad->min_days} día(s)."]);
+            return ['error' => ['check_out' => "La estadía mínima es de {$propiedad->min_days} día(s)."]];
         }
 
-        if (!$propiedad->isAvailable($request->check_in, $request->check_out)) {
-            return back()->withErrors(['check_in' => 'Las fechas seleccionadas no están disponibles.']);
+        if (!$propiedad->isAvailable($checkIn, $checkOut)) {
+            return ['error' => ['check_in' => 'Las fechas seleccionadas no están disponibles.']];
         }
 
         $pricePerDay   = $propiedad->price_per_day;
@@ -78,31 +97,27 @@ class ReservationController extends Controller
             $subtotal = round($pricePerMonth * $totalMonths, 2);
         }
 
-        $serviceFee = 0;
-        $total = $subtotal;
-
         $reservation = Reservation::create([
             'property_id'    => $propiedad->id,
             'user_id'        => Auth::id(),
-            'check_in'       => $request->check_in,
-            'check_in_time'  => $request->check_in_time,
-            'check_out'      => $request->check_out,
-            'check_out_time' => $request->check_out_time,
+            'check_in'       => $checkIn,
+            'check_in_time'  => $checkInTime,
+            'check_out'      => $checkOut,
+            'check_out_time' => $checkOutTime,
             'guests'         => 1,
-            'price_per_day' => $pricePerDay,
-            'total_days' => $totalDays,
-            'subtotal' => $subtotal,
-            'service_fee' => $serviceFee,
-            'total_amount' => $total,
-            'status' => 'pending',
+            'price_per_day'  => $pricePerDay,
+            'total_days'     => $totalDays,
+            'subtotal'       => $subtotal,
+            'service_fee'    => 0,
+            'total_amount'   => $subtotal,
+            'status'         => 'pending',
             'payment_status' => 'unpaid',
-            'notes' => $request->notes,
+            'notes'          => $notes,
         ]);
 
-        Mail::to($propiedad->owner->email)->queue(new NewReservationNotification($propiedad->owner));
+        Mail::to($propiedad->owner->email)->send(new NewReservationNotification($propiedad->owner));
 
-        return redirect()->route('reservations.payment', $reservation)
-            ->with('success', 'Reserva creada. Completa el pago para confirmarla.');
+        return ['reservation' => $reservation];
     }
 
     public function show(Reservation $reservation)

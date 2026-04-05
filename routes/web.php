@@ -46,7 +46,7 @@ Route::middleware(['auth', 'avatar'])->group(function () {
     // Reservations
     Route::get('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'create'])->name('reservations.create');
     Route::post('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'store'])->name('reservations.store');
-    Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->name('reservations.index');
+Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->name('reservations.index');
     Route::get('/mis-reservas/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
     Route::get('/mis-reservas/{reservation}/pago', [ReservationController::class, 'payment'])->name('reservations.payment');
     Route::post('/mis-reservas/{reservation}/cancelar', [ReservationController::class, 'cancel'])->name('reservations.cancel');

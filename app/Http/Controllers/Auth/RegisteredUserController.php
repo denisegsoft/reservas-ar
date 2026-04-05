@@ -43,6 +43,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        // Si hay pendientes (favorito o reserva), los procesa y redirige
+        if ($request->session()->has('pending_favorite') || $request->session()->has('pending_reservation')) {
+            return AuthenticatedSessionController::processPendingAndRedirect($user, $request);
+        }
+
         if (Setting::get('avatar_required', '1') === '1') {
             return redirect()->route('avatar.setup');
         }

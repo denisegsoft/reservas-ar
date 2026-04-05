@@ -156,21 +156,7 @@ class PropertyController extends Controller
                 ->first();
         }
 
-        $pendingReservation = null;
-        if (auth()->check() && session('pending_reservation_slug') === $propiedad->slug) {
-            $pendingReservation = session()->pull('pending_reservation');
-            session()->forget('pending_reservation_slug');
-        }
-
-        if (auth()->check() && session('pending_favorite') === $propiedad->slug) {
-            $user = auth()->user();
-            if (!$user->favorites()->where('property_id', $propiedad->id)->exists()) {
-                $user->favorites()->attach($propiedad->id);
-            }
-            session()->forget('pending_favorite');
-        }
-
-        return view('propiedades.show', compact('propiedad', 'unavailableDates', 'similarPropiedades', 'reservaParaReseña', 'pendingReservation'));
+        return view('propiedades.show', compact('propiedad', 'unavailableDates', 'similarPropiedades', 'reservaParaReseña'));
     }
 
     // Owner CRUD

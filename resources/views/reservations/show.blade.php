@@ -4,6 +4,28 @@
 @section('content')
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    @if(session('reservation_created'))
+    <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
+        <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+            <p class="font-semibold text-green-800">¡Reserva enviada correctamente!</p>
+            <p class="text-sm text-green-700 mt-0.5">Tu solicitud fue recibida. El propietario la revisará y te confirmará a la brevedad.</p>
+        </div>
+    </div>
+    @endif
+
+    @if(session('success'))
+    <div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
+        <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-green-800 font-medium">{{ session('success') }}</p>
+    </div>
+    @endif
+
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-black text-gray-900">Reserva #{{ $reservation->id }}</h1>

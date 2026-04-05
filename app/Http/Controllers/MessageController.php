@@ -121,7 +121,7 @@ class MessageController extends Controller
             'body'           => $request->body,
         ]);
 
-        Mail::to($user->email)->queue(new NewMessageNotification($user, auth()->user()));
+        Mail::to($user->email)->send(new NewMessageNotification($user, auth()->user()));
 
         if ($request->expectsJson()) {
             return response()->json([
