@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Property;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -15,6 +16,7 @@ class NewReservationNotification extends Mailable
 
     public function __construct(
         public User $owner,
+        public Property $property,
     ) {}
 
     public function envelope(): Envelope

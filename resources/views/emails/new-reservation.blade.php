@@ -1,7 +1,7 @@
 <x-mail::message>
 # ¡Hola, {{ $owner->name }}!
 
-Recibiste una nueva solicitud de reserva en {{ config('app.name') }}.
+Recibiste una nueva solicitud de reserva para **{{ $property->name }}** en {{ config('app.name') }}.
 
 Ingresá a tu panel para ver los detalles y gestionarla.
 

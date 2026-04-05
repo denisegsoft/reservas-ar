@@ -20,9 +20,23 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Guardar pendientes ANTES de regenerar la sesión
+        $pendingReservation     = $request->session()->get('pending_reservation');
+        $pendingReservationSlug = $request->session()->get('pending_reservation_slug');
+        $pendingFavorite        = $request->session()->get('pending_favorite');
+
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Restaurar pendientes si se perdieron tras regenerar
+        if ($pendingReservation && !$request->session()->has('pending_reservation')) {
+            $request->session()->put('pending_reservation', $pendingReservation);
+            $request->session()->put('pending_reservation_slug', $pendingReservationSlug);
+        }
+        if ($pendingFavorite && !$request->session()->has('pending_favorite')) {
+            $request->session()->put('pending_favorite', $pendingFavorite);
+        }
 
         return $this->processPendingAndRedirect(Auth::user(), $request);
     }
@@ -39,6 +53,12 @@ class AuthenticatedSessionController extends Controller
 
     public static function processPendingAndRedirect($user, Request $request): RedirectResponse
     {
+        \Illuminate\Support\Facades\Log::info('[Pending] Session keys after login', [
+            'all' => array_keys($request->session()->all()),
+            'has_reservation' => $request->session()->has('pending_reservation'),
+            'has_favorite'    => $request->session()->has('pending_favorite'),
+        ]);
+
         // Favorito pendiente
         if ($request->session()->has('pending_favorite')) {
             $slug = $request->session()->pull('pending_favorite');

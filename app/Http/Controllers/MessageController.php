@@ -121,7 +121,11 @@ class MessageController extends Controller
             'body'           => $request->body,
         ]);
 
-        Mail::to($user->email)->send(new NewMessageNotification($user, auth()->user()));
+        try {
+            Mail::to($user->email)->send(new NewMessageNotification($user, auth()->user()));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[Message] Mail failed', ['error' => $e->getMessage()]);
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

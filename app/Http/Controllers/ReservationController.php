@@ -115,7 +115,14 @@ public function buildReservation(array $data, Property $propiedad): array
             'notes'          => $notes,
         ]);
 
-        Mail::to($propiedad->owner->email)->send(new NewReservationNotification($propiedad->owner));
+        try {
+            Mail::to($propiedad->owner->email)->send(new NewReservationNotification($propiedad->owner, $propiedad));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[Reservation] Mail failed', [
+                'reservation_id' => $reservation->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return ['reservation' => $reservation];
     }

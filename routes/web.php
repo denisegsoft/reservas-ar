@@ -28,6 +28,9 @@ Route::get('/propiedades/{propiedad:slug}', [PropertyController::class, 'show'])
 Route::get('/api/cities', [PropertyController::class, 'citiesByProvince'])->name('api.cities');
 Route::get('/favoritos/{propiedad:slug}/guardar', [FavoriteController::class, 'loginAndSave'])->name('favorites.login-and-save');
 
+// Reservar (público — guarda en sesión si no está logueado)
+Route::post('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'store'])->name('reservations.store');
+
 // Payment webhook (no auth needed)
 Route::post('/webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('payments.webhook');
 
@@ -45,7 +48,6 @@ Route::middleware(['auth', 'avatar'])->group(function () {
 
     // Reservations
     Route::get('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'create'])->name('reservations.create');
-    Route::post('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'store'])->name('reservations.store');
 Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->name('reservations.index');
     Route::get('/mis-reservas/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
     Route::get('/mis-reservas/{reservation}/pago', [ReservationController::class, 'payment'])->name('reservations.payment');
