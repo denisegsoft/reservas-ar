@@ -3,77 +3,96 @@
 @section('sidebar') @include('components.user-sidebar') @endsection
 @section('content')
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="flex items-center justify-between mb-8">
-        <h1 class="text-2xl font-black text-gray-900">Mis Reservas</h1>
+        <div>
+            <h1 class="text-2xl font-black text-gray-900">Mis Reservas</h1>
+            <p class="text-gray-500 text-sm">Tus reservas realizadas</p>
+        </div>
         <a href="{{ route('properties.index') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">
             Nueva Reserva
         </a>
     </div>
 
-    @if($reservations->count())
-    <div class="space-y-4">
-        @foreach($reservations as $reservation)
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-            <div class="flex flex-col sm:flex-row">
-                <div class="sm:w-40 sm:flex-shrink-0">
-                    <img src="{{ $reservation->property->cover_image_url }}" alt="{{ $reservation->property->name }}"
-                         class="w-full h-40 sm:h-full object-cover"
-                         onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&q=80'">
-                </div>
-                <div class="flex-1 p-5">
-                    <div class="flex items-start justify-between gap-3 mb-2">
-                        <div>
-                            <h3 class="font-bold text-gray-900">{{ $reservation->property->name }}</h3>
-                            <p class="text-gray-500 text-sm">{{ $reservation->property->city }}, {{ $reservation->property->state }}</p>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0
-                            {{ $reservation->status === 'confirmed' ? 'bg-green-100 text-green-700' : '' }}
-                            {{ $reservation->status === 'pending' ? 'bg-yellow-100 text-yellow-700' : '' }}
-                            {{ $reservation->status === 'cancelled' ? 'bg-red-100 text-red-700' : '' }}
-                            {{ $reservation->status === 'completed' ? 'bg-blue-100 text-blue-700' : '' }}">
-                            {{ $reservation->status_label }}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                        <span>{{ $reservation->check_in->format('d/m/Y') }} → {{ $reservation->check_out->format('d/m/Y') }}</span>
-                        <span class="hidden sm:inline">•</span>
-                        <span class="hidden sm:inline">{{ $reservation->total_days }} noches</span>
-                        <span class="hidden sm:inline">•</span>
-                        <span class="hidden sm:inline">{{ $reservation->guests }} personas</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="font-bold text-gray-900">${{ number_format($reservation->total_amount, 0, ',', '.') }} ARS</span>
-                            @if($reservation->payment_status === 'paid')
-                            <span class="ml-2 text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Pagado</span>
-                            @else
-                            <span class="ml-2 text-xs font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">Pendiente pago</span>
-                            @endif
-                        </div>
-                        <div class="flex items-center gap-2">
-                            @if($reservation->isPending() && !$reservation->isPaid())
-                            <a href="{{ route('reservations.payment', $reservation) }}"
-                               class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                                Pagar
-                            </a>
-                            @endif
-                            <a href="{{ route('reservations.show', $reservation) }}"
-                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                                Ver detalle
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endforeach
+    @if(session('success'))
+    <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl">
+        {{ session('success') }}
     </div>
+    @endif
 
-    <div class="mt-8">{{ $reservations->links() }}</div>
+    @if($reservations->count())
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Propiedad</th>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fechas</th>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Personas</th>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Total</th>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Pago</th>
+                        <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach($reservations as $reservation)
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="py-3 px-4">
+                            <p class="text-sm font-semibold text-gray-800">{{ $reservation->property->name }}</p>
+                            <p class="text-xs text-gray-400">{{ $reservation->property->city }}, {{ $reservation->property->state }}</p>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-600">
+                            {{ $reservation->check_in->format('d/m/Y') }}<br>
+                            <span class="text-gray-400">{{ $reservation->check_out->format('d/m/Y') }}</span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-600">
+                            {{ $reservation->guests }}
+                        </td>
+                        <td class="py-3 px-4 text-sm font-bold text-gray-900">
+                            ${{ number_format($reservation->total_amount, 0, ',', '.') }}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                {{ $reservation->status === 'confirmed' ? 'bg-green-100 text-green-700' : '' }}
+                                {{ $reservation->status === 'pending'   ? 'bg-yellow-100 text-yellow-700' : '' }}
+                                {{ $reservation->status === 'cancelled' ? 'bg-red-100 text-red-700' : '' }}
+                                {{ $reservation->status === 'completed' ? 'bg-blue-100 text-blue-700' : '' }}">
+                                {{ $reservation->status_label }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                {{ $reservation->payment_status === 'paid'     ? 'bg-green-100 text-green-700' : '' }}
+                                {{ $reservation->payment_status === 'unpaid'   ? 'bg-orange-100 text-orange-600' : '' }}
+                                {{ $reservation->payment_status === 'refunded' ? 'bg-gray-100 text-gray-600' : '' }}">
+                                {{ $reservation->payment_status === 'paid' ? 'Pagado' : ($reservation->payment_status === 'refunded' ? 'Reembolsado' : 'Pendiente') }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                @if($reservation->isPending() && !$reservation->isPaid())
+                                <a href="{{ route('reservations.payment', $reservation) }}"
+                                   class="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 rounded-lg transition-colors">
+                                    Pagar
+                                </a>
+                                @endif
+                                <a href="{{ route('reservations.show', $reservation) }}"
+                                   class="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+                                    Ver detalle
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="mt-6">{{ $reservations->links() }}</div>
 
     @else
-    <div class="text-center py-20 bg-white rounded-3xl border border-gray-100">
+    <div class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
         <div class="text-6xl mb-4">&#128197;</div>
         <h3 class="text-xl font-bold text-gray-800 mb-2">Todavia no tenes reservas</h3>
         <p class="text-gray-500 mb-6">Explora nuestras propiedades y reserva la tuya hoy.</p>

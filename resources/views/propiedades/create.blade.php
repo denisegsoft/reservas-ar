@@ -171,11 +171,6 @@
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Camas</label>
-                    <input type="number" name="beds" value="{{ old('beds') }}" min="0" placeholder="0"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Baños *</label>
                     <input type="number" name="bathrooms" value="{{ old('bathrooms') }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -278,6 +273,8 @@
             @endforeach
         </div>
         @endif
+
+        <x-property-services-form />
 
         <div class="flex gap-4">
             <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-200">

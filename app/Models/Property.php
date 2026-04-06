@@ -55,6 +55,7 @@ class Property extends Model
     public function reservations() { return $this->hasMany(Reservation::class); }
     public function reviews() { return $this->hasMany(Review::class)->where('approved', true); }
     public function blockedDates() { return $this->hasMany(BlockedDate::class); }
+    public function services() { return $this->hasMany(PropertyService::class)->orderBy('name'); }
 
     public function getCoverImageUrlAttribute(): string
     {
@@ -85,7 +86,7 @@ class Property extends Model
         if ($blocked) return false;
 
         return !$this->reservations()
-            ->whereIn('status', ['confirmed', 'pending'])
+            ->whereIn('status', ['confirmed'])
             ->where(function ($q) use ($checkIn, $checkOut) {
                 $q->whereBetween('check_in', [$checkIn, $checkOut])
                   ->orWhereBetween('check_out', [$checkIn, $checkOut])

@@ -229,6 +229,25 @@ $breadcrumbSchema = [
             </div>
             @endif
 
+            {{-- Servicios adicionales --}}
+            @if($propiedad->services->count())
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Servicios adicionales</h2>
+                <div class="space-y-2">
+                    @foreach($propiedad->services as $service)
+                    <div class="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+                        <span class="text-sm font-medium text-gray-700">{{ $service->name }}</span>
+                        <span class="text-sm font-semibold text-indigo-700">
+                            ${{ number_format($service->price, 0, ',', '.') }}
+                            <span class="text-xs text-gray-400 font-normal">× {{ rtrim(rtrim(number_format($service->quantity, 2, ',', '.'), '0'), ',') }} {{ $service->unit }}</span>
+                        </span>
+                    </div>
+                    @endforeach
+                </div>
+                <p class="text-xs text-gray-400 mt-3">* Los servicios son opcionales y se acuerdan con el propietario al confirmar la reserva.</p>
+            </div>
+            @endif
+
             {{-- Rules --}}
             @if($propiedad->rules && count($propiedad->rules))
             <div class="mb-8">
@@ -295,7 +314,7 @@ $breadcrumbSchema = [
                             {{-- Cantidad de personas --}}
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 mb-1.5">Cantidad de personas</label>
-                                <input type="number" name="guests" min="1" max="{{ $propiedad->max_guests ?? 99 }}"
+                                <input type="number" name="guests" min="1" max="{{ $propiedad->max_guests ?? '' }}"
                                     value="{{ old('guests') }}" placeholder="0"
                                     @change="errors.guests = ''"
                                     :class="errors.guests ? 'border-red-400' : 'border-gray-200'"

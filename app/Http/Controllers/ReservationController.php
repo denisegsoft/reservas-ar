@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewReservationNotification;
 use App\Models\Property;
 use App\Models\Reservation;
+use App\Models\ReservationService;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,7 @@ public function buildReservation(array $data, Property $propiedad): array
         $checkInTime = $data['check_in_time'] ?? null;
         $checkOutTime= $data['check_out_time'] ?? null;
         $notes       = $data['notes'] ?? null;
+        $guests      = $data['guests'] ?? null;
 
         $checkInDt  = Carbon::parse($checkIn  . ' ' . ($checkInTime  ?? '14:00'));
         $checkOutDt = Carbon::parse($checkOut . ' ' . ($checkOutTime ?? '11:00'));
@@ -104,7 +106,7 @@ public function buildReservation(array $data, Property $propiedad): array
             'check_in_time'  => $checkInTime,
             'check_out'      => $checkOut,
             'check_out_time' => $checkOutTime,
-            'guests'         => 1,
+            'guests'         => $guests,
             'price_per_day'  => $pricePerDay,
             'total_days'     => $totalDays,
             'subtotal'       => $subtotal,
@@ -129,7 +131,7 @@ public function buildReservation(array $data, Property $propiedad): array
 
     public function show(Reservation $reservation)
     {
-        $reservation->load(['property.images', 'property.owner', 'payment']);
+        $reservation->load(['property.images', 'property.owner', 'property.services', 'payment', 'services.propertyService']);
         return view('reservations.show', compact('reservation'));
     }
 
@@ -152,6 +154,25 @@ public function buildReservation(array $data, Property $propiedad): array
 
         return redirect()->route('reservations.show', $reservation)
             ->with('success', 'Reserva cancelada correctamente.');
+    }
+
+    public function updateServices(Reservation $reservation, Request $request)
+    {
+        // Only allow while not cancelled
+        abort_if($reservation->isCancelled(), 403);
+
+        $reservation->services()->delete();
+        foreach ($request->input('reservation_services', []) as $s) {
+            if (empty($s['property_service_id'])) continue;
+            ReservationService::create([
+                'reservation_id'      => $reservation->id,
+                'property_service_id' => $s['property_service_id'],
+                'quantity'            => (float) ($s['quantity'] ?? 1),
+                'price'               => (float) ($s['price'] ?? 0),
+            ]);
+        }
+
+        return back()->with('success', 'Servicios actualizados correctamente.');
     }
 
     public function myReservations()

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Property;
 use App\Models\Reservation;
+use App\Models\ReservationService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -96,7 +97,7 @@ class DashboardController extends Controller
                 ->with('info', 'Necesitás activar tu suscripción para crear reservas.');
         }
 
-        $propiedades = Auth::user()->propiedades()->where('status', 'active')->get();
+        $propiedades = Auth::user()->propiedades()->where('status', 'active')->with('services')->get();
         $clientes = User::where('role', 'user')->orderBy('name')->get();
 
         // Reservas confirmadas por propiedad para el calendario
@@ -182,6 +183,8 @@ class DashboardController extends Controller
             'notes'          => $request->notes,
         ]);
 
+        $this->syncReservationServices($reservation, $request->input('reservation_services', []));
+
         return redirect()->route('owner.reservations.show', $reservation)->with('success', 'Reserva creada correctamente.');
     }
 
@@ -195,7 +198,7 @@ class DashboardController extends Controller
         $propiedadIds = Auth::user()->propiedades()->pluck('id');
         abort_unless($propiedadIds->contains($reservation->property_id), 403);
 
-        $reservation->load(['property', 'user', 'payment']);
+        $reservation->load(['property.services', 'user', 'payment', 'services.propertyService']);
 
         $reservasPropiedad = $reservation->property->reservations()
             ->whereIn('status', ['confirmed', 'pending'])
@@ -238,7 +241,25 @@ class DashboardController extends Controller
             'guests', 'total_amount', 'notes', 'cancellation_reason',
         ]));
 
+        if ($request->has('reservation_services')) {
+            $this->syncReservationServices($reservation, $request->input('reservation_services', []));
+        }
+
         return back()->with('success', 'Reserva actualizada.');
+    }
+
+    private function syncReservationServices(Reservation $reservation, array $services): void
+    {
+        $reservation->services()->delete();
+        foreach ($services as $s) {
+            if (empty($s['property_service_id'])) continue;
+            ReservationService::create([
+                'reservation_id'      => $reservation->id,
+                'property_service_id' => $s['property_service_id'],
+                'quantity'            => (float) ($s['quantity'] ?? 1),
+                'price'               => (float) ($s['price'] ?? 0),
+            ]);
+        }
     }
 
     public function propiedadesList()

@@ -54,6 +54,7 @@ Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->n
         Route::get('/mis-reservas/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
         Route::get('/mis-reservas/{reservation}/pago', [ReservationController::class, 'payment'])->name('reservations.payment');
         Route::post('/mis-reservas/{reservation}/cancelar', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+        Route::patch('/mis-reservas/{reservation}/servicios', [ReservationController::class, 'updateServices'])->name('reservations.services.update');
         Route::post('/mis-reservas/{reservation}/crear-preferencia', [PaymentController::class, 'createPreference'])->name('payments.create-preference');
         Route::get('/mis-reservas/{reservation}/pago/exito', [PaymentController::class, 'success'])->name('payments.success');
         Route::get('/mis-reservas/{reservation}/pago/fallo', [PaymentController::class, 'failure'])->name('payments.failure');

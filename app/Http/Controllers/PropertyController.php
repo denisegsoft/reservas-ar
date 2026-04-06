@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\Property;
 use App\Models\PropertyAmenityLog;
 use App\Models\PropertyImage;
+use App\Models\PropertyService;
 use App\Models\Province;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -121,7 +122,7 @@ class PropertyController extends Controller
                 ->increment('views_count');
         }
 
-        $propiedad->load(['images', 'owner', 'reviews.user', 'blockedDates']);
+        $propiedad->load(['images', 'owner', 'reviews.user', 'blockedDates', 'services']);
 
         $blockedDates = $propiedad->blockedDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'));
         $reservedDates = $propiedad->reservations()
@@ -215,6 +216,9 @@ class PropertyController extends Controller
 
         $propiedad = Property::create($data);
 
+        // Services
+        $this->syncServices($propiedad, $request->input('services', []));
+
         // Log custom amenities (not in predefined list)
         $knownKeys = array_keys(Property::amenitiesList());
         foreach (array_diff($data['amenities'] ?? [], $knownKeys) as $custom) {
@@ -253,7 +257,7 @@ class PropertyController extends Controller
         $amenitiesList = Property::amenitiesList();
         $typesList = Property::typesList();
         $provinces = Province::where('active', true)->orderBy('order')->get(['id', 'name']);
-        $propiedad->load('images');
+        $propiedad->load('images', 'services');
         return view('propiedades.edit', compact('propiedad', 'amenitiesList', 'typesList', 'provinces'));
     }
 
@@ -341,8 +345,37 @@ class PropertyController extends Controller
             $propiedad->update(['cover_image' => $firstImage->path]);
         }
 
+        // Services
+        $this->syncServices($propiedad, $request->input('services', []));
+
         return redirect()->route('owner.properties.index')
             ->with('success', 'Propiedad actualizada correctamente.');
+    }
+
+    private function syncServices(Property $propiedad, array $services): void
+    {
+        $keptIds = [];
+        foreach ($services as $s) {
+            if (empty($s['name'])) continue;
+            $id = !empty($s['id']) ? (int) $s['id'] : null;
+            $attrs = [
+                'name'     => $s['name'],
+                'price'    => (float) ($s['price'] ?? 0),
+                'quantity' => (float) ($s['quantity'] ?? 1),
+                'unit'     => $s['unit'] ?? 'unidad',
+            ];
+            if ($id && $propiedad->services()->where('id', $id)->exists()) {
+                $propiedad->services()->where('id', $id)->update($attrs);
+                $keptIds[] = $id;
+            } else {
+                $new = $propiedad->services()->create($attrs);
+                $keptIds[] = $new->id;
+            }
+        }
+        // Delete removed services (only those without reservations)
+        $propiedad->services()->whereNotIn('id', $keptIds)
+            ->whereDoesntHave('reservationServices')
+            ->delete();
     }
 
     public function toggleStatus(Property $propiedad)

@@ -160,6 +160,17 @@
             </div>
         </div>
 
+        {{-- Servicios adicionales --}}
+        @if($reservation->property->services->count())
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Servicios adicionales</h2>
+            <x-reservation-services
+                :available-services="$reservation->property->services"
+                :selected-services="$reservation->services"
+            />
+        </div>
+        @endif
+
         {{-- Notas --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Notas internas</h2>

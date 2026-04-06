@@ -226,11 +226,6 @@
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Camas</label>
-                    <input type="number" name="beds" value="{{ old('beds', $propiedad->beds) }}" min="0" placeholder="0"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Baños *</label>
                     <input type="number" name="bathrooms" value="{{ old('bathrooms', $propiedad->bathrooms) }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -366,6 +361,8 @@
 
             <input type="file" id="photos-hidden-input" name="images[]" multiple accept="image/*" class="hidden">
         </div>
+
+        <x-property-services-form :existing-services="$propiedad->services" />
 
         <div class="flex gap-4">
             <button type="button" onclick="submitEdit()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition-all">
