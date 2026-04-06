@@ -22,22 +22,21 @@ class SubscriptionController extends Controller
         MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
     }
 
-    private static function isLocalhost(): bool
+    private function isPublicUrl(): bool
     {
         $url = config('app.url', '');
-        return str_contains($url, 'localhost') || str_contains($url, '127.0.0.1');
+        return !str_contains($url, 'localhost') && !str_contains($url, '127.0.0.1');
     }
 
     private function buildPreferenceData(User $user, int $price): array
     {
-        $appUrl    = rtrim(config('app.url'), '/');
-        $isLocal   = static::isLocalhost();
+        $appUrl = rtrim(config('app.url'), '/');
 
         $data = [
             "items" => [[
                 "id"          => "subscription-owner",
-                "title"       => "Suscripción ReservasAR - Propietario",
-                "description" => "Pago unico para recibir contactos, leer mensajes y gestionar reservas.",
+                "title"       => "Suscripción " . config('app.name') . " - Propietario",
+                "description" => "Pago único para recibir contactos, leer mensajes y gestionar reservas.",
                 "category_id" => "services",
                 "quantity"    => 1,
                 "currency_id" => "ARS",
@@ -50,9 +49,7 @@ class SubscriptionController extends Controller
             "external_reference" => "subscription-{$user->id}",
         ];
 
-        // MP requiere URLs públicas para back_urls y notification_url
-        // En localhost se omiten para evitar errores de validación
-        if (!$isLocal) {
+        if ($this->isPublicUrl()) {
             $data["back_urls"] = [
                 "success" => $appUrl . '/usuario/suscripcion/exito',
                 "failure" => $appUrl . '/usuario/suscripcion/fallo',
@@ -62,15 +59,9 @@ class SubscriptionController extends Controller
             $data["notification_url"] = $appUrl . '/webhooks/mercadopago';
         }
 
-        Log::info('[Subscription] Preference data built', [
-            'is_local' => $isLocal,
-            'app_url'  => $appUrl,
-        ]);
-
         return $data;
     }
 
-    // ── Crea preferencia en MP y guarda en BD. Retorna init_point o null si falla. ──
     private function createPreference(User $user): ?string
     {
         $price  = static::price();
@@ -79,28 +70,21 @@ class SubscriptionController extends Controller
         try {
             $preference = $client->create($this->buildPreferenceData($user, $price));
 
-            $spRecord = SubscriptionPayment::create([
+            SubscriptionPayment::create([
                 'user_id'          => $user->id,
                 'mp_preference_id' => $preference->id,
                 'amount'           => $price,
                 'status'           => 'initiated',
             ]);
 
-            Log::info('[Subscription] Preference created', [
-                'user_id'                 => $user->id,
-                'mp_preference_id'        => $preference->id,
-                'subscription_payment_id' => $spRecord->id,
-            ]);
-
             return $preference->init_point;
 
         } catch (\MercadoPago\Exceptions\MPApiException $e) {
-            $apiResponse = $e->getApiResponse();
             Log::error('[Subscription] MP API error creating preference', [
                 'user_id'       => $user->id,
                 'error'         => $e->getMessage(),
-                'status_code'   => $apiResponse?->getStatusCode(),
-                'response_body' => $apiResponse?->getContent(),
+                'status_code'   => $e->getApiResponse()?->getStatusCode(),
+                'response_body' => $e->getApiResponse()?->getContent(),
             ]);
         } catch (\Exception $e) {
             Log::error('[Subscription] Failed to create MP preference', [
@@ -112,13 +96,30 @@ class SubscriptionController extends Controller
         return null;
     }
 
-    // ── Redirige directo a MercadoPago (desde alertas) ────────────────────────
+    // Muestra la página de pago
+    public function show()
+    {
+        $user = auth()->user();
+
+        if ($user->hasSubscription()) {
+            return redirect()->route('owner.dashboard')
+                ->with('info', '¡Ya tenés tu suscripción activa!');
+        }
+
+        $initPoint = $this->createPreference($user);
+        $price     = static::price();
+        $mpError   = $initPoint ? null : 'No se pudo conectar con MercadoPago.';
+
+        return view('subscription.pago', compact('price', 'initPoint', 'mpError'));
+    }
+
+    // Redirige directo a MercadoPago (desde alertas/banners)
     public function redirectToMP()
     {
         $user = auth()->user();
 
         if ($user->hasSubscription()) {
-            return redirect()->route('owner.properties.index')
+            return redirect()->route('owner.dashboard')
                 ->with('info', '¡Ya tenés tu suscripción activa!');
         }
 
@@ -132,45 +133,25 @@ class SubscriptionController extends Controller
         return redirect()->away($initPoint);
     }
 
-    // ── Muestra la página de pago ─────────────────────────────────────────────
-    public function show()
-    {
-        $user = auth()->user();
-
-        if ($user->hasSubscription()) {
-            return redirect()->route('owner.properties.index')
-                ->with('info', '¡Ya tenés tu suscripción activa!');
-        }
-
-        $initPoint = $this->createPreference($user);
-        $price     = static::price();
-        $mpError   = $initPoint ? null : 'No se pudo conectar con MercadoPago.';
-
-        return view('subscription.pago', compact('price', 'initPoint', 'mpError'));
-    }
-
-    // ── Callback: pago aprobado (redirect de MP) ──────────────────────────────
+    // Callback: pago aprobado
     public function success(Request $request)
     {
-        $user        = auth()->user();
-        $paymentId   = $request->get('payment_id');
-        $status      = $request->get('status');
+        $user         = auth()->user();
+        $paymentId    = $request->get('payment_id');
+        $status       = $request->get('status');
         $preferenceId = $request->get('preference_id');
 
-        Log::info('[Subscription] Success callback received', [
+        Log::info('[Subscription] Success callback', [
             'user_id'       => $user?->id,
             'payment_id'    => $paymentId,
             'status'        => $status,
             'preference_id' => $preferenceId,
-            'query'         => $request->all(),
         ]);
 
         if ($status === 'approved' && $paymentId && $user) {
-            // Actualizar registro en BD
             $spRecord = SubscriptionPayment::where('mp_preference_id', $preferenceId)
                 ->where('user_id', $user->id)
-                ->latest()
-                ->first();
+                ->latest()->first();
 
             if ($spRecord) {
                 $spRecord->update([
@@ -178,12 +159,7 @@ class SubscriptionController extends Controller
                     'status'        => 'approved',
                     'paid_at'       => now(),
                 ]);
-                Log::info('[Subscription] DB record updated to approved (success callback)', [
-                    'subscription_payment_id' => $spRecord->id,
-                    'mp_payment_id'           => $paymentId,
-                ]);
             } else {
-                // Fallback: crear registro si no existe (ej: navegación directa)
                 SubscriptionPayment::create([
                     'user_id'          => $user->id,
                     'mp_preference_id' => $preferenceId,
@@ -192,40 +168,23 @@ class SubscriptionController extends Controller
                     'status'           => 'approved',
                     'paid_at'          => now(),
                 ]);
-                Log::warning('[Subscription] No existing record found, created new approved record', [
-                    'user_id'    => $user->id,
-                    'payment_id' => $paymentId,
-                ]);
             }
 
             static::activateSubscription($user->id);
 
-            return redirect()->route('owner.properties.index')
-                ->with('success', '🎉 ¡Suscripción activada! Ahora podés ver quién te contacta, leer mensajes y mostrar tu información a los clientes.');
+            return redirect()->route('owner.dashboard')
+                ->with('success', '¡Suscripción activada! Ahora podés ver quién te contacta, leer mensajes y gestionar tus reservas.');
         }
 
-        Log::warning('[Subscription] Success callback but status not approved', [
-            'user_id' => $user?->id,
-            'status'  => $status,
-        ]);
-
-        return redirect()->route('owner.properties.index')
+        return redirect()->route('owner.dashboard')
             ->with('info', 'Recibimos tu pago, estamos procesándolo. Te avisaremos cuando se confirme.');
     }
 
-    // ── Callback: pago rechazado ───────────────────────────────────────────────
+    // Callback: pago rechazado
     public function failure(Request $request)
     {
         $user         = auth()->user();
         $preferenceId = $request->get('preference_id');
-        $paymentId    = $request->get('payment_id');
-
-        Log::warning('[Subscription] Failure callback received', [
-            'user_id'       => $user?->id,
-            'payment_id'    => $paymentId,
-            'preference_id' => $preferenceId,
-            'query'         => $request->all(),
-        ]);
 
         if ($preferenceId && $user) {
             SubscriptionPayment::where('mp_preference_id', $preferenceId)
@@ -238,19 +197,12 @@ class SubscriptionController extends Controller
             ->with('error', 'El pago fue rechazado. Podés intentar nuevamente.');
     }
 
-    // ── Callback: pago pendiente ───────────────────────────────────────────────
+    // Callback: pago pendiente
     public function pending(Request $request)
     {
         $user         = auth()->user();
         $preferenceId = $request->get('preference_id');
         $paymentId    = $request->get('payment_id');
-
-        Log::info('[Subscription] Pending callback received', [
-            'user_id'       => $user?->id,
-            'payment_id'    => $paymentId,
-            'preference_id' => $preferenceId,
-            'query'         => $request->all(),
-        ]);
 
         if ($preferenceId && $user) {
             SubscriptionPayment::where('mp_preference_id', $preferenceId)
@@ -262,11 +214,11 @@ class SubscriptionController extends Controller
                 ]);
         }
 
-        return redirect()->route('owner.properties.index')
+        return redirect()->route('owner.dashboard')
             ->with('info', 'Tu pago está pendiente de acreditación. Te avisaremos cuando se confirme.');
     }
 
-    // ── Activar suscripción en users (llamado desde success y webhook) ─────────
+    // Activar suscripción (llamado desde success y webhook)
     public static function activateSubscription(int $userId): void
     {
         User::withoutGlobalScope('active')->where('id', $userId)->update([
@@ -274,7 +226,7 @@ class SubscriptionController extends Controller
             'subscription_paid_at' => now(),
         ]);
 
-        Log::info('[Subscription] User subscription activated', ['user_id' => $userId]);
+        Log::info('[Subscription] Activated', ['user_id' => $userId]);
 
         $user = User::find($userId);
         if ($user) {
@@ -282,39 +234,24 @@ class SubscriptionController extends Controller
                 \Illuminate\Support\Facades\Mail::to($user->email)
                     ->send(new \App\Mail\SubscriptionActivatedNotification($user));
             } catch (\Throwable $e) {
-                Log::error('[Subscription] Failed to send activation email', [
-                    'user_id' => $userId,
-                    'error'   => $e->getMessage(),
-                ]);
+                Log::error('[Subscription] Mail failed', ['user_id' => $userId, 'error' => $e->getMessage()]);
             }
         }
     }
 
-    // ── Procesar pago vía webhook (llamado desde PaymentController) ───────────
+    // Procesar pago vía webhook
     public static function processWebhookPayment(int $userId, string $mpPaymentId, object $payment): void
     {
-        Log::info('[Subscription] Webhook processing payment', [
+        Log::info('[Subscription] Webhook payment', [
             'user_id'       => $userId,
             'mp_payment_id' => $mpPaymentId,
             'mp_status'     => $payment->status,
-            'mp_status_detail' => $payment->status_detail ?? null,
-            'preference_id' => $payment->preference_id ?? null,
         ]);
 
-        // Buscar registro existente por preference_id o mp_payment_id
         $spRecord = SubscriptionPayment::where('mp_preference_id', $payment->preference_id ?? null)
             ->where('user_id', $userId)
-            ->latest()
-            ->first()
+            ->latest()->first()
             ?? SubscriptionPayment::where('mp_payment_id', $mpPaymentId)->latest()->first();
-
-        $mpResponse = [];
-        try {
-            // Convertir objeto MP a array para guardar en BD
-            $mpResponse = json_decode(json_encode($payment), true) ?? [];
-        } catch (\Exception $e) {
-            Log::warning('[Subscription] Could not serialize MP response', ['error' => $e->getMessage()]);
-        }
 
         $statusMap = [
             'approved'   => 'approved',
@@ -326,40 +263,23 @@ class SubscriptionController extends Controller
         ];
         $dbStatus = $statusMap[$payment->status] ?? 'pending';
 
-        if ($spRecord) {
-            $spRecord->update([
-                'mp_payment_id'    => $mpPaymentId,
-                'status'           => $dbStatus,
-                'mp_status_detail' => $payment->status_detail ?? null,
-                'payment_method'   => $payment->payment_method_id ?? null,
-                'payment_type'     => $payment->payment_type_id ?? null,
-                'mp_response'      => $mpResponse,
-                'paid_at'          => $payment->status === 'approved' ? now() : null,
-            ]);
+        $fields = [
+            'mp_payment_id'    => $mpPaymentId,
+            'status'           => $dbStatus,
+            'mp_status_detail' => $payment->status_detail ?? null,
+            'payment_method'   => $payment->payment_method_id ?? null,
+            'payment_type'     => $payment->payment_type_id ?? null,
+            'paid_at'          => $payment->status === 'approved' ? now() : null,
+        ];
 
-            Log::info('[Subscription] DB record updated via webhook', [
-                'subscription_payment_id' => $spRecord->id,
-                'new_status'              => $dbStatus,
-            ]);
+        if ($spRecord) {
+            $spRecord->update($fields);
         } else {
-            // Sin registro previo (pago iniciado fuera del flujo normal)
-            $spRecord = SubscriptionPayment::create([
+            SubscriptionPayment::create(array_merge($fields, [
                 'user_id'          => $userId,
                 'mp_preference_id' => $payment->preference_id ?? null,
-                'mp_payment_id'    => $mpPaymentId,
                 'amount'           => $payment->transaction_amount ?? static::price(),
-                'status'           => $dbStatus,
-                'mp_status_detail' => $payment->status_detail ?? null,
-                'payment_method'   => $payment->payment_method_id ?? null,
-                'payment_type'     => $payment->payment_type_id ?? null,
-                'mp_response'      => $mpResponse,
-                'paid_at'          => $payment->status === 'approved' ? now() : null,
-            ]);
-
-            Log::warning('[Subscription] No prior DB record found, created via webhook', [
-                'subscription_payment_id' => $spRecord->id,
-                'user_id'                 => $userId,
-            ]);
+            ]));
         }
 
         if ($payment->status === 'approved') {

@@ -98,7 +98,26 @@ class DashboardController extends Controller
 
         $propiedades = Auth::user()->propiedades()->where('status', 'active')->get();
         $clientes = User::where('role', 'user')->orderBy('name')->get();
-        return view('owner.reservation-create', compact('propiedades', 'clientes'));
+
+        // Reservas confirmadas por propiedad para el calendario
+        $reservasPorPropiedad = [];
+        foreach ($propiedades as $p) {
+            $reservasPorPropiedad[$p->id] = $p->reservations()
+                ->whereIn('status', ['confirmed', 'pending'])
+                ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
+                ->map(fn($r) => [
+                    'id'       => $r->id,
+                    'check_in' => $r->check_in->format('Y-m-d'),
+                    'check_out'=> $r->check_out->format('Y-m-d'),
+                    'status'   => $r->status,
+                    'guests'   => $r->guests,
+                    'total'    => number_format($r->total_amount, 0, ',', '.'),
+                    'guest'    => $r->user?->full_name ?? 'Cliente',
+                ])
+                ->values();
+        }
+
+        return view('owner.reservation-create', compact('propiedades', 'clientes', 'reservasPorPropiedad'));
     }
 
     public function storeReservation(Request $request)
@@ -178,7 +197,21 @@ class DashboardController extends Controller
 
         $reservation->load(['property', 'user', 'payment']);
 
-        return view('owner.reservation-show', compact('reservation'));
+        $reservasPropiedad = $reservation->property->reservations()
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->where('id', '!=', $reservation->id)
+            ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
+            ->map(fn($r) => [
+                'id'       => $r->id,
+                'check_in' => $r->check_in->format('Y-m-d'),
+                'check_out'=> $r->check_out->format('Y-m-d'),
+                'status'   => $r->status,
+                'guests'   => $r->guests,
+                'total'    => number_format($r->total_amount, 0, ',', '.'),
+                'guest'    => $r->user?->full_name ?? 'Cliente',
+            ])->values();
+
+        return view('owner.reservation-show', compact('reservation', 'reservasPropiedad'));
     }
 
     public function updateReservation(Reservation $reservation, Request $request)

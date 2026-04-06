@@ -19,7 +19,6 @@ class PaymentController extends Controller
 
     public function createPreference(Reservation $reservation)
     {
-        $this->authorize('view', $reservation);
         abort_if($reservation->isPaid(), 400, 'Ya fue pagada.');
 
         $client = new PreferenceClient();

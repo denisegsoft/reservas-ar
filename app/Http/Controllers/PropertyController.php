@@ -125,7 +125,7 @@ class PropertyController extends Controller
 
         $blockedDates = $propiedad->blockedDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'));
         $reservedDates = $propiedad->reservations()
-            ->whereIn('status', ['confirmed', 'pending'])
+            ->where('status', 'confirmed')
             ->get()
             ->flatMap(function ($res) {
                 $dates = [];

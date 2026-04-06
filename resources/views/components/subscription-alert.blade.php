@@ -56,9 +56,9 @@
         <div class="mb-4 flex flex-wrap items-center gap-x-1 text-sm text-gray-600">
             @if($views > 0)
             <span>🔥 Tus propiedades ya tienen&nbsp;</span>
-            <strong class="text-indigo-700">{{ number_format($views, 0, ',', '.') }} visitas</strong>
+            <strong class="text-indigo-700"> visitas</strong>
             <span>—</span>
-            <strong class="text-red-600">{{ number_format($views, 0, ',', '.') }} clientes quieren contactarte</strong>
+            <strong class="text-red-600">hay clientes que quieren contactarte</strong>
             <span>&nbsp;y no pueden.</span>
             @endif
         </div>

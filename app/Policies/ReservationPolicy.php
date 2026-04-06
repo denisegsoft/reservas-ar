@@ -13,4 +13,9 @@ class ReservationPolicy
             || $reservation->user_id === $user->id
             || $reservation->property->user_id === $user->id;
     }
+
+    public function viewOwn(User $user, Reservation $reservation): bool
+    {
+        return $reservation->user_id === $user->id;
+    }
 }

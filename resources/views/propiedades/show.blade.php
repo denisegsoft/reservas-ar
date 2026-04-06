@@ -326,26 +326,6 @@ $breadcrumbSchema = [
                         </p>
                         @endif
 
-                        {{-- Desglose de precio (aparece cuando hay fechas) --}}
-                        <template x-if="totalDays > 0 || totalHours > 0">
-                            <div class="bg-gray-50 rounded-2xl p-4 mb-4 space-y-2">
-                                <div class="flex justify-between text-sm text-gray-600">
-                                    <span x-text="label"></span>
-                                    <span class="font-medium" x-text="`$${fmt(baseTotal)}`"></span>
-                                </div>
-                                <template x-if="discount !== 0">
-                                    <div class="flex justify-between text-sm" :class="discount > 0 ? 'text-green-600' : 'text-orange-500'">
-                                        <span x-text="discountLabel"></span>
-                                        <span class="font-medium" x-text="discount > 0 ? `-$${fmt(discount)}` : `+$${fmt(Math.abs(discount))}`"></span>
-                                    </div>
-                                </template>
-                                <div class="border-t border-gray-200 pt-2 flex justify-between font-bold text-gray-900">
-                                    <span>Total estimado</span>
-                                    <span x-text="`$${fmt(total)}`"></span>
-                                </div>
-                                <p class="text-xs text-gray-400">* El total final se acordará con el propietario.</p>
-                            </div>
-                        </template>
 
                         @if($errors->any())
                         <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
@@ -505,7 +485,13 @@ $breadcrumbSchema = [
         <div style="position:sticky;top:0;background:#fff;padding:12px 0 8px;z-index:1;">
             <div style="width:36px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 12px;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
-                <h3 style="font-size:18px;font-weight:800;color:#111827;margin:0;">Solicitar reserva</h3>
+                <div>
+                    <h3 style="font-size:18px;font-weight:800;color:#111827;margin:0 0 6px;">Solicitar reserva</h3>
+                    <div style="display:inline-flex;align-items:baseline;gap:4px;background:#eef2ff;border-radius:12px;padding:5px 12px;">
+                        <span style="font-size:22px;font-weight:900;color:#4338ca;">${{ number_format($propiedad->price_per_day, 0, ',', '.') }}</span>
+                        <span style="font-size:12px;font-weight:600;color:#6366f1;">/ día</span>
+                    </div>
+                </div>
                 <button onclick="closeBookingSheet()" style="width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;">
                     <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -519,6 +505,7 @@ $breadcrumbSchema = [
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
 .flatpickr-day.flatpickr-disabled { background: #f3f4f6 !important; color: #d1d5db !important; text-decoration: line-through; }
+.dayContainer { padding: 8px !important; }
 </style>
 @endpush
 

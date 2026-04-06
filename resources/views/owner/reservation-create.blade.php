@@ -113,7 +113,16 @@
 
         {{-- Fechas y huéspedes --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Fechas y huéspedes</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Fechas y huéspedes</h2>
+                <button type="button" onclick="abrirCalendarioDisponibilidad()"
+                        class="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Ver disponibilidad
+                </button>
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1.5">Check-in</label>
@@ -167,7 +176,6 @@
                     <select name="status" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                         <option value="confirmed" {{ old('status', 'confirmed') === 'confirmed' ? 'selected' : '' }}>Confirmada</option>
                         <option value="pending"   {{ old('status') === 'pending' ? 'selected' : '' }}>Pendiente</option>
-                        <option value="completed" {{ old('status') === 'completed' ? 'selected' : '' }}>Completada</option>
                         <option value="cancelled" {{ old('status') === 'cancelled' ? 'selected' : '' }}>Cancelada</option>
                     </select>
                 </div>
@@ -190,7 +198,10 @@
     </form>
 </div>
 
+<x-calendar-modal />
+
 @push('scripts')
+<script src="{{ asset('js/reservas-calendar.js') }}"></script>
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('reservaForm', () => ({
@@ -201,6 +212,16 @@ document.addEventListener('alpine:init', () => {
         calcTotal() {},
     }));
 });
+
+/* ── Calendario disponibilidad ── */
+const _dispReservas = @json($reservasPorPropiedad);
+
+function abrirCalendarioDisponibilidad() {
+    const propId   = document.querySelector('[name="property_id"]')?.value;
+    const propName = document.querySelector('[name="property_id"] option:checked')?.text ?? 'Propiedad';
+    if (!propId) { alert('Primero seleccioná una propiedad.'); return; }
+    calendarModal.open(propName, _dispReservas[propId] ?? []);
+}
 </script>
 @endpush
 

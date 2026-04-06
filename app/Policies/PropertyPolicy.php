@@ -9,7 +9,7 @@ class PropertyPolicy
 {
     public function create(User $user): bool
     {
-        return $user->isOwner() || $user->isAdmin();
+        return true; // Cualquier usuario autenticado puede publicar propiedades
     }
 
     public function update(User $user, Property $propiedad): bool

@@ -49,15 +49,16 @@ Route::middleware(['auth', 'avatar'])->group(function () {
     // Reservations
     Route::get('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'create'])->name('reservations.create');
 Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->name('reservations.index');
-    Route::get('/mis-reservas/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
-    Route::get('/mis-reservas/{reservation}/pago', [ReservationController::class, 'payment'])->name('reservations.payment');
-    Route::post('/mis-reservas/{reservation}/cancelar', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 
-    // Payments
-    Route::post('/mis-reservas/{reservation}/crear-preferencia', [PaymentController::class, 'createPreference'])->name('payments.create-preference');
-    Route::get('/mis-reservas/{reservation}/pago/exito', [PaymentController::class, 'success'])->name('payments.success');
-    Route::get('/mis-reservas/{reservation}/pago/fallo', [PaymentController::class, 'failure'])->name('payments.failure');
-    Route::get('/mis-reservas/{reservation}/pago/pendiente', [PaymentController::class, 'pending'])->name('payments.pending');
+    Route::middleware('can:viewOwn,reservation')->group(function () {
+        Route::get('/mis-reservas/{reservation}', [ReservationController::class, 'show'])->name('reservations.show');
+        Route::get('/mis-reservas/{reservation}/pago', [ReservationController::class, 'payment'])->name('reservations.payment');
+        Route::post('/mis-reservas/{reservation}/cancelar', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+        Route::post('/mis-reservas/{reservation}/crear-preferencia', [PaymentController::class, 'createPreference'])->name('payments.create-preference');
+        Route::get('/mis-reservas/{reservation}/pago/exito', [PaymentController::class, 'success'])->name('payments.success');
+        Route::get('/mis-reservas/{reservation}/pago/fallo', [PaymentController::class, 'failure'])->name('payments.failure');
+        Route::get('/mis-reservas/{reservation}/pago/pendiente', [PaymentController::class, 'pending'])->name('payments.pending');
+    });
 
     // Favorites
     Route::get('/favoritos', [FavoriteController::class, 'index'])->name('favorites.index');
@@ -69,7 +70,7 @@ Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->n
     Route::post('/mensajes/{user}', [MessageController::class, 'store'])->name('messages.store');
 
     // Reviews
-    Route::post('/mis-reservas/{reservation}/resena', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/mis-reservas/{reservation}/resena', [ReviewController::class, 'store'])->middleware('can:viewOwn,reservation')->name('reviews.store');
 
     // Suggestions
     Route::get('/sugerencias', [SuggestionController::class, 'create'])->name('suggestions.create');

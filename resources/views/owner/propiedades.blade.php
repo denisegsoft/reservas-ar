@@ -101,7 +101,7 @@
                     ]);
                 @endphp
                 <button type="button"
-                        onclick="verReservas({{ Js::from($propiedad->name) }}, {{ Js::from($reservasData) }})"
+                        onclick="{{ auth()->user()->hasSubscription() ? 'calendarModal.open(' . Js::from($propiedad->name) . ', ' . Js::from($reservasData) . ')' : 'new bootstrap.Modal(document.getElementById(\'calendarModal\')).show()' }}"
                         class="w-full mt-2 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl transition-colors"
                         style="background:#eff6ff;color:#1d4ed8;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -127,30 +127,12 @@
     @endif
 </div>
 
-{{-- Modal Ver Reservas --}}
-<div class="modal fade" id="reservasModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border:none;border-radius:1.25rem;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25)">
-            <div class="modal-header" style="border-bottom:1px solid #f3f4f6;padding:1.25rem 1.5rem">
-                <div>
-                    <h5 class="modal-title" style="font-size:1rem;font-weight:700;color:#111827;margin:0">Reservas</h5>
-                    <p id="rm-nombre" style="font-size:.8rem;color:#6b7280;margin:0"></p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="padding:1.5rem">
-                <div id="rm-calendar"></div>
-                <div id="rm-detail"></div>
-            </div>
-            <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:.75rem 1.5rem">
-                <a href="{{ route('owner.reservations') }}" style="font-size:.8rem;color:#4f46e5;font-weight:600;text-decoration:none">
-                    Ver todas las reservas →
-                </a>
-                <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="margin-left:auto;background:#f3f4f6;border:none;border-radius:10px;padding:6px 16px;font-size:.8rem">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
+@php $hasSub = auth()->user()->hasSubscription() || auth()->user()->isAdmin(); @endphp
+<x-calendar-modal
+    title="Reservas"
+    :locked="!$hasSub"
+    :footer-link="$hasSub ? ['href' => route('owner.reservations'), 'label' => 'Ver todas las reservas →'] : null"
+/>
 
 {{-- Modal confirmar eliminación (Bootstrap) --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
@@ -191,8 +173,8 @@
 </form>
 
 @push('scripts')
+<script src="{{ asset('js/reservas-calendar.js') }}"></script>
 <script>
-/* ── Eliminar ── */
 function confirmDelete(action, name) {
     document.getElementById('deleteModalName').textContent = name;
     document.getElementById('deleteForm').action = action;
@@ -200,133 +182,6 @@ function confirmDelete(action, name) {
 }
 function submitDelete() {
     document.getElementById('deleteForm').submit();
-}
-
-/* ── Ver Reservas / Calendario ── */
-let _rmReservas = [], _rmYear, _rmMonth, _rmModal;
-
-function verReservas(nombre, reservas) {
-    _rmReservas = reservas;
-    document.getElementById('rm-nombre').textContent = nombre;
-    document.getElementById('rm-detail').innerHTML = '';
-    const now = new Date();
-    _rmYear = now.getFullYear();
-    _rmMonth = now.getMonth();
-    renderCal();
-    if (!_rmModal) _rmModal = new bootstrap.Modal(document.getElementById('reservasModal'));
-    _rmModal.show();
-}
-
-function prevMonth() { if (--_rmMonth < 0) { _rmMonth = 11; _rmYear--; } renderCal(); }
-function nextMonth() { if (++_rmMonth > 11) { _rmMonth = 0; _rmYear++; } renderCal(); }
-
-function renderCal() {
-    const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-    const semana = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-    const firstDay = new Date(_rmYear, _rmMonth, 1).getDay();
-    const totalDays = new Date(_rmYear, _rmMonth + 1, 0).getDate();
-    const today = new Date().toISOString().split('T')[0];
-
-    // Mapear días con reservas
-    const dayMap = {};
-    _rmReservas.forEach(r => {
-        let d = new Date(r.check_in + 'T00:00:00');
-        const end = new Date(r.check_out + 'T00:00:00');
-        while (d <= end) {
-            const key = d.toISOString().split('T')[0];
-            if (!dayMap[key]) dayMap[key] = [];
-            dayMap[key].push(r);
-            d.setDate(d.getDate() + 1);
-        }
-    });
-
-    let html = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-        <button onclick="prevMonth()" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:1.1rem;color:#374151">&#8249;</button>
-        <span style="font-weight:700;font-size:1rem;color:#111827">${meses[_rmMonth]} ${_rmYear}</span>
-        <button onclick="nextMonth()" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:1.1rem;color:#374151">&#8250;</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">
-        ${semana.map(d => `<div style="text-align:center;font-size:.68rem;font-weight:600;color:#9ca3af;padding:4px 0">${d}</div>`).join('')}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">`;
-
-    for (let i = 0; i < firstDay; i++) html += `<div></div>`;
-
-    for (let d = 1; d <= totalDays; d++) {
-        const dateStr = `${_rmYear}-${String(_rmMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const res = dayMap[dateStr] || [];
-        const isToday = dateStr === today;
-
-        let bg = '#f9fafb', color = '#6b7280', border = '1px solid transparent', cursor = 'default';
-        if (res.length) {
-            const hasPending   = res.some(r => r.status === 'pending');
-            const hasConfirmed = res.some(r => r.status === 'confirmed');
-            if (hasPending && hasConfirmed) { bg = '#fef3c7'; color = '#92400e'; border = '1px solid #fcd34d'; }
-            else if (hasPending)            { bg = '#fef9c3'; color = '#854d0e'; border = '1px solid #fde047'; }
-            else                            { bg = '#dcfce7'; color = '#166534'; border = '1px solid #86efac'; }
-            cursor = 'pointer';
-        }
-        const todayStyle = isToday ? 'outline:2px solid #6366f1;outline-offset:1px;font-weight:700;' : '';
-
-        html += `<div onclick="${res.length ? `showResDetail('${dateStr}')` : ''}"
-            style="text-align:center;padding:7px 2px;border-radius:8px;font-size:.8rem;background:${bg};color:${color};border:${border};cursor:${cursor};${todayStyle}">${d}</div>`;
-    }
-
-    html += `</div>
-    <div style="display:flex;gap:16px;margin-top:1rem;justify-content:center">
-        <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:13px;height:13px;border-radius:4px;background:#fef9c3;border:1px solid #fde047"></div>
-            <span style="font-size:.72rem;color:#6b7280">Pendiente</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:13px;height:13px;border-radius:4px;background:#dcfce7;border:1px solid #86efac"></div>
-            <span style="font-size:.72rem;color:#6b7280">Confirmada</span>
-        </div>
-    </div>`;
-
-    if (!_rmReservas.length) {
-        html += `<div style="text-align:center;padding:1.5rem 0;color:#9ca3af;font-size:.85rem">No hay reservas pendientes ni confirmadas.</div>`;
-    }
-
-    document.getElementById('rm-calendar').innerHTML = html;
-}
-
-function showResDetail(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    const res = _rmReservas.filter(r => {
-        return d >= new Date(r.check_in + 'T00:00:00') && d <= new Date(r.check_out + 'T00:00:00');
-    });
-    if (!res.length) return;
-
-    let html = `<div style="margin-top:1.25rem;border-top:1px solid #f3f4f6;padding-top:1rem">
-        <p style="font-size:.72rem;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">Reservas en esta fecha</p>`;
-
-    res.forEach(r => {
-        const isPending = r.status === 'pending';
-        const bg    = isPending ? '#fef9c3' : '#dcfce7';
-        const color = isPending ? '#854d0e' : '#166534';
-        const label = isPending ? 'Pendiente' : 'Confirmada';
-        const icon  = isPending ? '⏳' : '✅';
-        html += `
-        <div style="background:#f9fafb;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid #f3f4f6">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <span style="font-weight:700;font-size:.875rem;color:#111827">👤 ${r.guest}</span>
-                <span style="font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:20px;background:${bg};color:${color}">${icon} ${label}</span>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.75rem;color:#6b7280">
-                <span>📅 ${r.check_in} → ${r.check_out}</span>
-                <span>👥 ${r.guests} personas</span>
-                <span>💰 $${r.total}</span>
-            </div>
-            <a href="{{ url('/usuario/reservas') }}/${r.id}" style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:.75rem;font-weight:600;color:#4f46e5;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                Gestionar reserva →
-            </a>
-        </div>`;
-    });
-
-    html += `</div>`;
-    document.getElementById('rm-detail').innerHTML = html;
 }
 </script>
 @endpush

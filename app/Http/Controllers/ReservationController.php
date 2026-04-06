@@ -129,14 +129,12 @@ public function buildReservation(array $data, Property $propiedad): array
 
     public function show(Reservation $reservation)
     {
-        $this->authorize('view', $reservation);
         $reservation->load(['property.images', 'property.owner', 'payment']);
         return view('reservations.show', compact('reservation'));
     }
 
     public function payment(Reservation $reservation)
     {
-        $this->authorize('view', $reservation);
         abort_if($reservation->isPaid(), 404);
         $reservation->load(['property', 'payment']);
         return view('reservations.payment', compact('reservation'));
@@ -144,7 +142,6 @@ public function buildReservation(array $data, Property $propiedad): array
 
     public function cancel(Reservation $reservation)
     {
-        $this->authorize('view', $reservation);
         abort_if($reservation->isCancelled() || $reservation->isConfirmed() && $reservation->check_in->isPast(), 403);
 
         $reservation->update([
