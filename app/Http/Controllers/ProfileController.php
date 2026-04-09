@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Suggestion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,8 +19,13 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $hasWebRequest = Suggestion::where('user_id', $request->user()->id)
+            ->where('title', 'Solicitud: necesito web/redes profesionales')
+            ->exists();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user'          => $request->user(),
+            'hasWebRequest' => $hasWebRequest,
         ]);
     }
 

@@ -97,6 +97,40 @@
                         'website'   => $owner->website,
                     ]);
                 @endphp
+                {{-- Datos bancarios --}}
+                @if($owner->bank_cbu || $owner->bank_alias)
+                <div class="mt-4 bg-blue-50 border border-blue-100 rounded-2xl p-4">
+                    <p class="text-xs font-bold text-blue-700 uppercase tracking-wide mb-2.5 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        Datos para transferencia
+                    </p>
+                    <div class="space-y-1.5 text-sm">
+                        @if($owner->bank_holder)
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-500 w-14 text-xs flex-shrink-0">Titular</span>
+                            <span class="font-semibold text-gray-800">{{ $owner->bank_holder }}</span>
+                        </div>
+                        @endif
+                        @if($owner->bank_cbu)
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-500 w-14 text-xs flex-shrink-0">CBU/CVU</span>
+                            <span class="font-mono font-semibold text-gray-800 tracking-wide">{{ $owner->bank_cbu }}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ $owner->bank_cbu }}'); this.textContent='✓ Copiado'; setTimeout(()=>this.textContent='Copiar',1500)"
+                                class="text-xs text-blue-600 hover:text-blue-800 font-medium ml-1">Copiar</button>
+                        </div>
+                        @endif
+                        @if($owner->bank_alias)
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-500 w-14 text-xs flex-shrink-0">Alias</span>
+                            <span class="font-mono font-semibold text-gray-800">{{ $owner->bank_alias }}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ $owner->bank_alias }}'); this.textContent='✓ Copiado'; setTimeout(()=>this.textContent='Copiar',1500)"
+                                class="text-xs text-blue-600 hover:text-blue-800 font-medium ml-1">Copiar</button>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 @if(count($redes))
                 <div class="flex flex-wrap gap-2 mt-3">
                     @if($owner->social_instagram)
@@ -148,7 +182,25 @@
     </div>
     @endif
 
-    {{-- Servicios adicionales --}}
+    {{-- Details --}}
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-5">
+        <h3 class="font-bold text-gray-900 mb-4">Detalles de la reserva</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div><p class="text-xs text-gray-400 mb-0.5">Check-in</p><p class="font-semibold">{{ $reservation->check_in->format('d/m/Y') }}</p></div>
+            <div><p class="text-xs text-gray-400 mb-0.5">Check-out</p><p class="font-semibold">{{ $reservation->check_out->format('d/m/Y') }}</p></div>
+            <div><p class="text-xs text-gray-400 mb-0.5">Personas</p><p class="font-semibold">{{ $reservation->guests }}</p></div>
+            <div><p class="text-xs text-gray-400 mb-0.5">días</p><p class="font-semibold">{{ $reservation->total_days }}</p></div>
+            <div><p class="text-xs text-gray-400 mb-0.5">Precio/día</p><p class="font-semibold">${{ number_format($reservation->price_per_day, 0, ',', '.') }}</p></div>
+            <div>
+                <p class="text-xs text-gray-400 mb-0.5">Pago</p>
+                <span class="text-xs font-semibold px-2 py-1 rounded-full {{ $reservation->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                    {{ $reservation->payment_status === 'paid' ? 'Pagado' : 'Pendiente' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+        {{-- Servicios adicionales --}}
     @if($reservation->property->services->count())
     <form action="{{ route('reservations.services.update', $reservation) }}" method="POST" class="mb-5">
         @csrf
@@ -167,27 +219,8 @@
     </form>
     @endif
 
-    {{-- Details --}}
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-5">
-        <h3 class="font-bold text-gray-900 mb-4">Detalles de la reserva</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
-            <div><p class="text-xs text-gray-400 mb-0.5">Check-in</p><p class="font-semibold">{{ $reservation->check_in->format('d/m/Y') }}</p></div>
-            <div><p class="text-xs text-gray-400 mb-0.5">Check-out</p><p class="font-semibold">{{ $reservation->check_out->format('d/m/Y') }}</p></div>
-            <div><p class="text-xs text-gray-400 mb-0.5">Personas</p><p class="font-semibold">{{ $reservation->guests }}</p></div>
-            <div><p class="text-xs text-gray-400 mb-0.5">Noches</p><p class="font-semibold">{{ $reservation->total_days }}</p></div>
-            <div><p class="text-xs text-gray-400 mb-0.5">Precio/dia</p><p class="font-semibold">${{ number_format($reservation->price_per_day, 0, ',', '.') }}</p></div>
-            <div>
-                <p class="text-xs text-gray-400 mb-0.5">Pago</p>
-                <span class="text-xs font-semibold px-2 py-1 rounded-full {{ $reservation->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                    {{ $reservation->payment_status === 'paid' ? 'Pagado' : 'Pendiente' }}
-                </span>
-            </div>
-        </div>
-        <div class="border-t border-gray-100 pt-4 space-y-1.5">
-            <div class="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>${{ number_format($reservation->subtotal, 0, ',', '.') }}</span></div>
-            <div class="flex justify-between text-sm text-gray-600"><span>Cargo servicio</span><span>${{ number_format($reservation->service_fee, 0, ',', '.') }}</span></div>
-            <div class="flex justify-between font-bold text-gray-900 border-t border-gray-100 pt-2"><span>Total</span><span>${{ number_format($reservation->total_amount, 0, ',', '.') }} ARS</span></div>
-        </div>
+    <div class="mb-5">
+        <x-reservation-price-summary :reservation="$reservation" />
     </div>
 
 

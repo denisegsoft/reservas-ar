@@ -71,12 +71,6 @@
                         </td>
                         <td class="py-3 px-4">
                             <div class="flex items-center gap-2">
-                                @if($reservation->isPending() && !$reservation->isPaid())
-                                <a href="{{ route('reservations.payment', $reservation) }}"
-                                   class="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 rounded-lg transition-colors">
-                                    Pagar
-                                </a>
-                                @endif
                                 <a href="{{ route('reservations.show', $reservation) }}"
                                    class="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
                                     Ver detalle

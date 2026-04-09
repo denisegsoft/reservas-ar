@@ -12,8 +12,10 @@ class Reservation extends Model
 
     protected $fillable = [
         'property_id', 'user_id', 'check_in', 'check_in_time', 'check_out', 'check_out_time', 'guests',
-        'price_per_day', 'total_days', 'subtotal', 'service_fee', 'total_amount',
-        'status', 'payment_status', 'notes', 'cancellation_reason', 'cancelled_at',
+        'price_per_day', 'total_days', 'subtotal', 'price_breakdown', 'service_fee', 'total_amount',
+        'status', 'payment_status', 'payment_method', 'notes', 'cancellation_reason', 'cancelled_at',
+        'checkin_reminder_sent_at', 'review_requested_at',
+        'invoice_path', 'invoice_uploaded_at',
     ];
 
     protected function casts(): array
@@ -22,8 +24,12 @@ class Reservation extends Model
             'check_in' => 'date',
             'check_out' => 'date',
             'cancelled_at' => 'datetime',
+            'checkin_reminder_sent_at' => 'datetime',
+            'review_requested_at' => 'datetime',
+            'invoice_uploaded_at' => 'datetime',
             'price_per_day' => 'decimal:2',
             'subtotal' => 'decimal:2',
+            'price_breakdown' => 'array',
             'service_fee' => 'decimal:2',
             'total_amount' => 'decimal:2',
         ];
@@ -34,6 +40,8 @@ class Reservation extends Model
     public function payment() { return $this->hasOne(Payment::class); }
     public function review() { return $this->hasOne(Review::class); }
     public function services() { return $this->hasMany(ReservationService::class)->with('propertyService'); }
+    public function extraCosts() { return $this->hasMany(ReservationExtraCost::class); }
+    public function discounts() { return $this->hasMany(ReservationDiscount::class); }
 
     public function getStatusLabelAttribute(): string
     {

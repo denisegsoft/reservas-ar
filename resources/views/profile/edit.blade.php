@@ -165,6 +165,73 @@
                 </div>
             </div>
 
+            {{-- CTA: solicitar web/redes --}}
+            @if(!$hasWebRequest)
+            <div x-data="{ sent: false, loading: false,
+                async send() {
+                    if (this.sent || this.loading) return;
+                    this.loading = true;
+                    try {
+                        const res = await fetch('{{ route('profile.request-website') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                'Accept': 'application/json',
+                            },
+                        });
+                        this.sent = true;
+                    } catch(e) {}
+                    this.loading = false;
+                }
+            }" class="mt-1">
+                <p class="text-xs text-gray-400">
+                    ¿No tienes web profesional ni redes?
+                    <button type="button" @click="send"
+                        :disabled="sent || loading"
+                        class="font-medium underline text-indigo-500 hover:text-indigo-700 disabled:opacity-50 disabled:no-underline disabled:cursor-default transition-colors">
+                        <span x-show="!sent && !loading">Haz clic aquí si necesitas una</span>
+                        <span x-show="loading" class="inline-flex items-center gap-1">
+                            <svg class="btn-spinner w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0110 10" /></svg>
+                            Enviando...
+                        </span>
+                        <span x-show="sent">¡Solicitud enviada! Te contactaremos pronto.</span>
+                    </button>
+                </p>
+            </div>
+            @endif
+
+            {{-- Datos bancarios --}}
+            <div class="space-y-3 border-t border-gray-100 pt-5">
+                <p class="text-sm font-medium text-gray-700">Datos bancarios para transferencias</p>
+                <p class="text-xs text-gray-400 -mt-2">Si sos propietario, se mostrarán a los clientes en sus reservas.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label for="bank_holder" class="block text-xs font-medium text-gray-500 mb-1">Titular de la cuenta</label>
+                        <input id="bank_holder" name="bank_holder" type="text"
+                               value="{{ $user->bank_holder ?? '' }}"
+                               placeholder="Nombre y apellido"
+                               class="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p id="err_bank_holder" class="mt-1 text-sm text-red-600 hidden"></p>
+                    </div>
+                    <div>
+                        <label for="bank_cbu" class="block text-xs font-medium text-gray-500 mb-1">CBU / CVU</label>
+                        <input id="bank_cbu" name="bank_cbu" type="text"
+                               value="{{ $user->bank_cbu ?? '' }}"
+                               placeholder="22 dígitos" maxlength="22"
+                               class="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p id="err_bank_cbu" class="mt-1 text-sm text-red-600 hidden"></p>
+                    </div>
+                    <div>
+                        <label for="bank_alias" class="block text-xs font-medium text-gray-500 mb-1">Alias</label>
+                        <input id="bank_alias" name="bank_alias" type="text"
+                               value="{{ $user->bank_alias ?? '' }}"
+                               placeholder="mi.alias.banco"
+                               class="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p id="err_bank_alias" class="mt-1 text-sm text-red-600 hidden"></p>
+                    </div>
+                </div>
+            </div>
+
             {{-- Alert --}}
             <div id="profileInfoAlert" class="hidden"></div>
 

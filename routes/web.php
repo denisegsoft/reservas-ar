@@ -45,6 +45,7 @@ Route::middleware(['auth', 'avatar'])->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/perfil/solicitar-web', [SuggestionController::class, 'requestWebsite'])->name('profile.request-website');
 
     // Reservations
     Route::get('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'create'])->name('reservations.create');
@@ -93,10 +94,14 @@ Route::middleware(['auth', 'avatar'])->prefix('usuario')->name('owner.')->group(
     Route::get('/panel', [OwnerDashboard::class, 'index'])->name('dashboard');
     Route::get('/propiedades', [OwnerDashboard::class, 'propiedadesList'])->name('properties.index');
     Route::get('/reservas', [OwnerDashboard::class, 'reservations'])->name('reservations');
+    Route::get('/reservas/exportar', [OwnerDashboard::class, 'exportReservations'])->name('reservations.export');
     Route::get('/reservas/crear', [OwnerDashboard::class, 'createReservation'])->name('reservations.create');
     Route::post('/reservas', [OwnerDashboard::class, 'storeReservation'])->name('reservations.store');
     Route::get('/reservas/{reservation}', [OwnerDashboard::class, 'showReservation'])->name('reservations.show');
     Route::patch('/reservas/{reservation}/estado', [OwnerDashboard::class, 'updateReservation'])->name('reservations.update');
+    Route::get('/reservas/{reservation}/pdf', [OwnerDashboard::class, 'downloadPdf'])->name('reservations.pdf');
+Route::post('/reservas/{reservation}/factura', [OwnerDashboard::class, 'uploadInvoice'])->name('reservations.invoice.upload');
+    Route::delete('/reservas/{reservation}/factura', [OwnerDashboard::class, 'deleteInvoice'])->name('reservations.invoice.delete');
     Route::get('/propiedades/crear', [PropertyController::class, 'create'])->name('properties.create');
     Route::post('/propiedades', [PropertyController::class, 'store'])->name('properties.store');
     Route::delete('/imagenes/{image}', [PropertyController::class, 'destroyImage'])->name('properties.images.destroy');

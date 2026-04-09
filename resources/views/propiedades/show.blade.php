@@ -324,27 +324,37 @@ $breadcrumbSchema = [
                             </div>
                         </div>
 
-                        {{-- Hint descuentos --}}
+                        {{-- Hint descuentos por estadía --}}
                         @php
-                            $hints = [];
-                            $weekBase  = $propiedad->price_per_day * 7;
-                            $monthBase = $propiedad->price_per_day * 30;
-                            if ($weekBase > 0 && $propiedad->price_per_week < $weekBase) {
-                                $pct = round((1 - $propiedad->price_per_week / $weekBase) * 100);
-                                $hints[] = "+7 días {$pct}% OFF";
-                            }
-                            if ($monthBase > 0 && $propiedad->price_per_month < $monthBase) {
-                                $pct = round((1 - $propiedad->price_per_month / $monthBase) * 100);
-                                $hints[] = "+30 días {$pct}% OFF";
-                            }
+                            $dayDiscounts = collect($propiedad->day_discounts ?? [])
+                                ->filter(fn($t) => !empty($t['days']) && !empty($t['discount']))
+                                ->sortBy(fn($t) => (int)$t['days'])
+                                ->values();
                         @endphp
-                        @if(count($hints))
-                        <p class="text-xs text-indigo-500 mb-3 flex items-center gap-1">
+                        @if($dayDiscounts->isNotEmpty())
+                        <p class="text-xs text-indigo-500 mb-3 flex items-center gap-1 flex-wrap">
                             <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
-                            {{ ucfirst(implode(' · ', $hints)) }}
+                            {{ $dayDiscounts->map(fn($t) => '+' . (int)$t['days'] . ' días ' . (int)$t['discount'] . '% OFF')->implode(' · ') }}
                         </p>
                         @endif
 
+
+                        {{-- Detalle de precios --}}
+                        <template x-if="breakdown.length > 0">
+                            <div class="bg-gray-50 rounded-xl p-3 mb-4 space-y-1.5">
+                                <template x-for="line in breakdown" :key="line.label">
+                                    <div class="flex justify-between text-sm">
+                                        <span :class="line.type === 'discount' ? 'text-red-500' : 'text-gray-600'" x-text="line.label"></span>
+                                        <span :class="line.type === 'discount' ? 'text-red-500 font-medium' : 'text-gray-700 font-medium'"
+                                              x-text="(line.amount < 0 ? '-' : '') + '$' + fmt(Math.abs(line.amount))"></span>
+                                    </div>
+                                </template>
+                                <div class="border-t border-gray-200 pt-1.5 flex justify-between text-sm font-bold text-gray-900">
+                                    <span>Total</span>
+                                    <span x-text="'$' + fmt(total) + ' ARS'"></span>
+                                </div>
+                            </div>
+                        </template>
 
                         @if($errors->any())
                         <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
@@ -588,15 +598,14 @@ function bookingForm() {
         checkOutTime: '11:00',
         totalHours: 0,
         totalDays: 0,
-        pricePerHour:  {{ $propiedad->price_per_hour  ?? 0 }},
-        pricePerDay:   {{ $propiedad->price_per_day   ?? 0 }},
-        pricePerWeek:  {{ $propiedad->price_per_week  ?? 0 }},
-        pricePerMonth: {{ $propiedad->price_per_month ?? 0 }},
+        pricePerHour:    {{ $propiedad->price_per_hour ?? 0 }},
+        pricePerDay:     {{ $propiedad->price_per_day ?? 0 }},
+        dayDiscounts:    {!! json_encode($propiedad->day_discounts    ?? []) !!},
+        dateDiscounts:   {!! json_encode($propiedad->date_discounts   ?? []) !!},
+        weekdayDiscounts:{!! json_encode($propiedad->weekday_discounts ?? []) !!},
         baseTotal: 0,
         total: 0,
-        discount: 0,
-        label: '',
-        discountLabel: '',
+        breakdown: [],
         errors: { checkIn: '', checkOut: '', guests: '' },
         isLoggedIn: {{ auth()->check() ? 'true' : 'false' }},
         pendingData: @json($pendingReservation ?? null),
@@ -631,55 +640,96 @@ function bookingForm() {
         },
 
         calculateTotal() {
+            this.breakdown = [];
             if (!this.checkIn || !this.checkOut) return;
-            const d1 = new Date(this.checkIn + 'T' + (this.checkInTime || '14:00') + ':00');
+
+            const d1 = new Date(this.checkIn  + 'T' + (this.checkInTime  || '14:00') + ':00');
             const d2 = new Date(this.checkOut + 'T' + (this.checkOutTime || '11:00') + ':00');
             const diffMs = d2 - d1;
-            if (diffMs <= 0) { this.totalHours = 0; this.totalDays = 0; this.total = 0; this.label = ''; return; }
+            if (diffMs <= 0) { this.totalHours = 0; this.totalDays = 0; this.total = 0; return; }
 
             this.totalHours = Math.round(diffMs / (1000 * 60 * 60));
-            this.totalDays  = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-            this.discount      = 0;
-            this.discountLabel = '';
+            // días = diferencia de fechas calendario (sin horas)
+            const d1Day = new Date(this.checkIn  + 'T00:00:00');
+            const d2Day = new Date(this.checkOut + 'T00:00:00');
+            const totalNights = Math.round((d2Day - d1Day) / (1000 * 60 * 60 * 24));
+            this.totalDays = totalNights;
 
-            if (this.totalHours < 24) {
-                // Menos de 24hs → precio por hora
+            const sameDay = this.checkIn === this.checkOut;
+
+            if (sameDay) {
+                // Mismo día calendario → por hora
                 this.baseTotal = this.totalHours * this.pricePerHour;
-                this.label     = `$${this.fmt(this.pricePerHour)} × ${this.totalHours} hora${this.totalHours !== 1 ? 's' : ''}`;
-                this.total = this.baseTotal;
-
-            } else if (this.totalDays >= 30 && this.pricePerMonth > 0) {
-                // 30+ días → precio por mes
-                const months   = Math.ceil(this.totalDays / 30);
-                this.baseTotal = this.totalDays * this.pricePerDay;
-                this.total     = months * this.pricePerMonth;
-                this.label     = `$${this.fmt(this.pricePerDay)} × ${this.totalDays} días`;
-                const saved    = this.baseTotal - this.total;
-                if (saved > 0) {
-                    const pct          = Math.round((saved / this.baseTotal) * 100);
-                    this.discount      = saved;
-                    this.discountLabel = `Descuento mensual (${pct}% off)`;
-                }
-
-            } else if (this.totalDays >= 7 && this.pricePerWeek > 0) {
-                // 7+ días → precio por semana
-                const weeks    = Math.ceil(this.totalDays / 7);
-                this.baseTotal = this.totalDays * this.pricePerDay;
-                this.total     = weeks * this.pricePerWeek;
-                this.label     = `$${this.fmt(this.pricePerDay)} × ${this.totalDays} días`;
-                const saved    = this.baseTotal - this.total;
-                if (saved > 0) {
-                    const pct          = Math.round((saved / this.baseTotal) * 100);
-                    this.discount      = saved;
-                    this.discountLabel = `Descuento semanal (${pct}% off)`;
-                }
-
-            } else {
-                // 1-6 días → precio por día
-                this.baseTotal = this.totalDays * this.pricePerDay;
                 this.total     = this.baseTotal;
-                this.label     = `$${this.fmt(this.pricePerDay)} × ${this.totalDays} día${this.totalDays !== 1 ? 's' : ''}`;
+                this.breakdown = [{ type: 'base', label: `${this.totalHours} hs × $${this.fmt(this.pricePerHour)}/h`, amount: this.total }];
+                return;
+            }
+
+            // Por días con descuentos por día
+            let subtotal  = 0;
+            const discountGroups = {}; // key → { discPct, reason, count, saved }
+
+            let cursor = new Date(d1Day);
+            while (cursor < d2Day) {
+                const dateStr = cursor.toISOString().split('T')[0];
+                const weekday = cursor.getDay(); // 0=Dom
+
+                let dayDiscount = 0;
+                let discountReason = null;
+
+                // Descuento por día de semana
+                for (const t of (this.weekdayDiscounts || [])) {
+                    const days = (t.days || []).map(Number);
+                    if (days.includes(weekday) && Number(t.discount) > dayDiscount) {
+                        dayDiscount    = Number(t.discount);
+                        discountReason = 'Día especial';
+                    }
+                }
+                // Descuento por fecha especial
+                for (const t of (this.dateDiscounts || [])) {
+                    if (!t.date_from || !t.date_to) continue;
+                    if (dateStr >= t.date_from && dateStr <= t.date_to && Number(t.discount) > dayDiscount) {
+                        dayDiscount    = Number(t.discount);
+                        discountReason = 'Fecha especial';
+                    }
+                }
+
+                const dayPrice = dayDiscount > 0
+                    ? Math.round(this.pricePerDay * (1 - dayDiscount / 100))
+                    : this.pricePerDay;
+                subtotal += dayPrice;
+
+                if (dayDiscount > 0) {
+                    const key = dayDiscount + '|' + discountReason;
+                    if (!discountGroups[key]) discountGroups[key] = { discPct: dayDiscount, reason: discountReason, count: 0, saved: 0 };
+                    discountGroups[key].count++;
+                    discountGroups[key].saved += (this.pricePerDay - dayPrice);
+                }
+
+                cursor.setDate(cursor.getDate() + 1);
+            }
+
+            // Descuento por cantidad de días
+            let durationPct = 0;
+            const sorted = [...(this.dayDiscounts || [])].sort((a, b) => Number(b.days) - Number(a.days));
+            for (const t of sorted) {
+                if (totalNights >= Number(t.days)) { durationPct = Number(t.discount); break; }
+            }
+            const subtotalAfterDuration = durationPct > 0 ? Math.round(subtotal * (1 - durationPct / 100)) : subtotal;
+            const savedDuration = subtotal - subtotalAfterDuration;
+
+            this.baseTotal = totalNights * this.pricePerDay;
+            this.total     = subtotalAfterDuration;
+
+            // Armar líneas del detalle
+            this.breakdown.push({ type: 'base', label: `${totalNights} día${totalNights !== 1 ? 's' : ''} × $${this.fmt(this.pricePerDay)}/día`, amount: this.baseTotal });
+            for (const key of Object.keys(discountGroups)) {
+                const g = discountGroups[key];
+                this.breakdown.push({ type: 'discount', label: `${g.count} día${g.count !== 1 ? 's' : ''} · -${g.discPct}% ${g.reason}`, amount: -g.saved });
+            }
+            if (durationPct > 0) {
+                this.breakdown.push({ type: 'discount', label: `${totalNights} días · -${durationPct}% por estadía`, amount: -savedDuration });
             }
         },
 

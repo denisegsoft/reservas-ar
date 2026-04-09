@@ -37,4 +37,26 @@ class SuggestionController extends Controller
         return redirect()->route('suggestions.create')
             ->with('success', '¡Gracias! Tu sugerencia fue enviada correctamente.');
     }
+
+    public function requestWebsite(Request $request)
+    {
+        $user = auth()->user();
+
+        $alreadyRequested = Suggestion::where('user_id', $user->id)
+            ->where('title', 'Solicitud: necesito web/redes profesionales')
+            ->exists();
+
+        if ($alreadyRequested) {
+            return response()->json(['message' => 'Ya enviaste esta solicitud anteriormente.'], 409);
+        }
+
+        Suggestion::create([
+            'user_id'     => $user->id,
+            'title'       => 'Solicitud: necesito web/redes profesionales',
+            'description' => "El usuario {$user->full_name} ({$user->email}) solicitó ayuda para crear una web profesional o gestionar sus redes sociales.",
+            'attachments' => null,
+        ]);
+
+        return response()->json(['message' => '¡Solicitud enviada! Nos pondremos en contacto con vos pronto.']);
+    }
 }

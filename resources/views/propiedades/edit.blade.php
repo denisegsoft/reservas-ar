@@ -190,7 +190,8 @@
 
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Precio y Capacidad</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {{-- Fila de precios --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/hora (ARS) *</label>
                     <input type="number" name="price_per_hour" value="{{ old('price_per_hour', $propiedad->price_per_hour ?? '') }}" required min="1" step="100"
@@ -203,18 +204,10 @@
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     @error('price_per_day')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/semana (ARS) *</label>
-                    <input type="number" name="price_per_week" value="{{ old('price_per_week', $propiedad->price_per_week ?? '') }}" required min="1" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                    @error('price_per_week')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/mes (ARS) *</label>
-                    <input type="number" name="price_per_month" value="{{ old('price_per_month', $propiedad->price_per_month ?? '') }}" required min="1" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                    @error('price_per_month')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </div>
+            </div>
+
+            {{-- Resto de campos --}}
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Capacidad *</label>
                     <input type="number" name="capacity" value="{{ old('capacity', $propiedad->capacity) }}" required min="1"
@@ -255,6 +248,165 @@
                     <input type="time" name="available_to" value="{{ old('available_to', $propiedad->available_to) }}"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
+            </div>
+
+            {{-- Descuentos por cantidad de días --}}
+            @php
+                $existingDiscounts = old('day_discounts', $propiedad->day_discounts ?? [['days'=>'','discount'=>'']]);
+                if (empty($existingDiscounts)) $existingDiscounts = [['days'=>'','discount'=>'']];
+            @endphp
+            <div class="mt-6 border-t border-gray-100 pt-5"
+                 x-data="{
+                    discounts: {{ json_encode($existingDiscounts) }},
+                    addRow() { this.discounts.push({days:'',discount:''}) },
+                    removeRow(i) { if(this.discounts.length > 1) this.discounts.splice(i,1) }
+                 }">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-start gap-2">
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                                Descuentos por cantidad de días
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Se aplica el mayor descuento que corresponda según la cantidad de días.</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="addRow()"
+                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                        + Agregar tramo
+                    </button>
+                </div>
+                <div class="space-y-2">
+                    <template x-for="(row, i) in discounts" :key="i">
+                        <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                            <div class="flex flex-wrap items-end gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">A partir de (días)</label>
+                                    <input type="number" :name="`day_discounts[${i}][days]`" x-model="row.days"
+                                        min="1" placeholder="Ej: 7"
+                                        class="w-32 px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs text-gray-500 whitespace-nowrap">Descuento (%):</label>
+                                    <input type="number" :name="`day_discounts[${i}][discount]`" x-model="row.discount"
+                                        min="1" max="99" step="0.5" placeholder="10"
+                                        class="w-20 px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                            </div>
+                            <button type="button" @click="removeRow(i)" x-show="discounts.length > 1"
+                                class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-100 transition-colors ml-auto" title="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                @error('day_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
+            </div>
+
+            {{-- Descuentos por fechas especiales --}}
+            @php $existingDateDisc = old('date_discounts', $propiedad->date_discounts ?? []); @endphp
+            <div class="mt-6 border-t border-gray-100 pt-5"
+                 x-data="{
+                    rows: {{ json_encode($existingDateDisc) }},
+                    addRow() { this.rows.push({date_from:'',date_to:'',discount:''}) },
+                    removeRow(i) { this.rows.splice(i,1) }
+                 }">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-700">Descuentos por fechas especiales</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Ej: temporada baja, fiestas.  </p>
+                    </div>
+                    <button type="button" @click="addRow()"
+                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                        + Agregar fecha
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <template x-for="(row, i) in rows" :key="i">
+                        <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                            <div class="flex flex-wrap items-end gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Desde</label>
+                                    <input type="date" :name="`date_discounts[${i}][date_from]`" x-model="row.date_from"
+                                        class="px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Hasta</label>
+                                    <input type="date" :name="`date_discounts[${i}][date_to]`" x-model="row.date_to"
+                                        class="px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs text-gray-500 whitespace-nowrap">Descuento (%):</label>
+                                    <input type="number" :name="`date_discounts[${i}][discount]`" x-model="row.discount"
+                                        min="1" max="99" step="0.5" placeholder="15"
+                                        class="w-20 px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                            </div>
+                            <button type="button" @click="removeRow(i)"
+                                class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-100 transition-colors ml-auto" title="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                <p x-show="rows.length === 0" class="text-xs text-gray-400 italic">Sin descuentos por fecha configurados.</p>
+                @error('date_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
+            </div>
+
+            {{-- Descuentos por día de la semana --}}
+            @php
+                $diasSemana = [1=>'Lun',2=>'Mar',3=>'Mié',4=>'Jue',5=>'Vie',6=>'Sáb',0=>'Dom'];
+                $existingWeekDisc = old('weekday_discounts', $propiedad->weekday_discounts ?? []);
+            @endphp
+            <div class="mt-6 border-t border-gray-100 pt-5"
+                 x-data="{
+                    rows: {{ json_encode($existingWeekDisc) }},
+                    addRow() { this.rows.push({days:[],discount:''}) },
+                    removeRow(i) { this.rows.splice(i,1) },
+                    toggleDay(row, d) { const idx=row.days.indexOf(d); idx===-1 ? row.days.push(d) : row.days.splice(idx,1) },
+                    hasDay(row, d) { return row.days.indexOf(d) !== -1 }
+                 }">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-700">Descuentos por día de la semana</h3>
+                    </div>
+                    <button type="button" @click="addRow()"
+                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                        + Agregar descuento
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <template x-for="(row, i) in rows" :key="i">
+                        <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($diasSemana as $dv => $dl)
+                                <button type="button"
+                                    @click="toggleDay(row, {{ $dv }})"
+                                    :class="hasDay(row, {{ $dv }}) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'"
+                                    class="px-2.5 py-1 text-xs font-semibold border rounded-lg transition-colors select-none">
+                                    {{ $dl }}
+                                </button>
+                                @endforeach
+                            </div>
+                            @foreach($diasSemana as $dv => $dl)
+                            <template x-if="hasDay(row, {{ $dv }})">
+                                <input type="hidden" :name="`weekday_discounts[${i}][days][]`" value="{{ $dv }}">
+                            </template>
+                            @endforeach
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-gray-500 whitespace-nowrap">Descuento (%):</label>
+                                <input type="number" :name="`weekday_discounts[${i}][discount]`" x-model="row.discount"
+                                    min="1" max="99" step="0.5" placeholder="10"
+                                    class="w-20 px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <button type="button" @click="removeRow(i)"
+                                class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-100 transition-colors ml-auto" title="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                <p x-show="rows.length === 0" class="text-xs text-gray-400 italic">Sin descuentos por día de semana configurados.</p>
+                @error('weekday_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
             </div>
         </div>
 
@@ -302,6 +454,8 @@
                 </div>
             </div>
         </div>
+
+         <x-property-services-form :existing-services="$propiedad->services" />
 
         {{-- Reglas --}}
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
@@ -362,7 +516,7 @@
             <input type="file" id="photos-hidden-input" name="images[]" multiple accept="image/*" class="hidden">
         </div>
 
-        <x-property-services-form :existing-services="$propiedad->services" />
+
 
         <div class="flex gap-4">
             <button type="button" onclick="submitEdit()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition-all">
@@ -380,7 +534,11 @@
 
 <script>
 // ===================== REGLAS =====================
-var reglas = {!! json_encode(array_values(array_filter(array_map('trim', old('rules', $propiedad->rules ?? []))))) !!};
+@php
+    $rulesRaw = old('rules', $propiedad->rules ?? []);
+    $rulesArr = is_array($rulesRaw) ? $rulesRaw : array_filter(explode("\n", (string) $rulesRaw));
+@endphp
+var reglas = {!! json_encode(array_values(array_filter(array_map('trim', $rulesArr)))) !!};
 
 document.getElementById('regla-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); addRegla(); }

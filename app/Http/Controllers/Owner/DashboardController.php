@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InvoiceUploadedNotification;
+use App\Mail\ReservationCancelledClientNotification;
+use App\Mail\ReservationConfirmedNotification;
 use App\Models\Message;
 use App\Models\Property;
 use App\Models\Reservation;
@@ -10,6 +13,7 @@ use App\Models\ReservationService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class DashboardController extends Controller
 {
@@ -88,6 +92,73 @@ class DashboardController extends Controller
         $reservations = $query->paginate(15)->withQueryString();
 
         return view('owner.reservations', compact('reservations', 'propiedades'));
+    }
+
+    public function exportReservations(Request $request)
+    {
+        if ($this->requiresSubscription()) {
+            return redirect()->route('subscription.payment');
+        }
+
+        $user         = Auth::user();
+        $propiedadIds = $user->propiedades()->pluck('id');
+
+        $query = Reservation::whereIn('property_id', $propiedadIds)
+            ->with(['property', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('status'))         $query->where('status', $request->status);
+        if ($request->filled('payment_status')) $query->where('payment_status', $request->payment_status);
+        if ($request->filled('property_id'))    $query->where('property_id', $request->property_id);
+        if ($request->filled('date_from'))      $query->where('check_in', '>=', $request->date_from);
+        if ($request->filled('date_to'))        $query->where('check_out', '<=', $request->date_to);
+
+        $reservations = $query->get();
+
+        $filename = 'reservas-' . now()->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($reservations) {
+            $handle = fopen('php://output', 'w');
+            // BOM para que Excel abra bien los acentos
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID', 'Cliente', 'Email', 'Teléfono', 'Propiedad',
+                'Check-in', 'Check-out', 'Días', 'Huéspedes',
+                'Total', 'Estado', 'Pago', 'Fecha de reserva', 'Notas',
+            ], ';');
+
+            $statusMap  = ['pending' => 'Pendiente', 'confirmed' => 'Confirmada', 'cancelled' => 'Cancelada', 'completed' => 'Completada'];
+            $paymentMap = ['unpaid' => 'Pendiente', 'paid' => 'Pagado', 'refunded' => 'Reembolsado'];
+
+            foreach ($reservations as $r) {
+                fputcsv($handle, [
+                    $r->id,
+                    $r->user->full_name,
+                    $r->user->email,
+                    $r->user->phone ?? '',
+                    $r->property->name,
+                    $r->check_in->format('d/m/Y'),
+                    $r->check_out->format('d/m/Y'),
+                    $r->total_days,
+                    $r->guests,
+                    number_format($r->total_amount, 2, '.', ''),
+                    $statusMap[$r->status] ?? $r->status,
+                    $paymentMap[$r->payment_status] ?? $r->payment_status,
+                    $r->created_at->format('d/m/Y H:i'),
+                    $r->notes ?? '',
+                ], ';');
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function createReservation()
@@ -198,7 +269,8 @@ class DashboardController extends Controller
         $propiedadIds = Auth::user()->propiedades()->pluck('id');
         abort_unless($propiedadIds->contains($reservation->property_id), 403);
 
-        $reservation->load(['property.services', 'user', 'payment', 'services.propertyService']);
+        $reservation->load(['property.services', 'user', 'payment', 'services.propertyService', 'property', 'extraCosts', 'discounts']);
+        \App\Http\Controllers\ReservationController::ensureBreakdown($reservation);
 
         $reservasPropiedad = $reservation->property->reservations()
             ->whereIn('status', ['confirmed', 'pending'])
@@ -225,27 +297,256 @@ class DashboardController extends Controller
         $request->validate([
             'status'              => 'sometimes|in:pending,confirmed,cancelled,completed',
             'payment_status'      => 'sometimes|in:unpaid,paid,refunded',
+            'payment_method'      => 'sometimes|nullable|in:transfer,cash,credit',
             'check_in'            => 'sometimes|date',
             'check_out'           => 'sometimes|date|after:check_in',
             'check_in_time'       => 'sometimes|nullable',
             'check_out_time'      => 'sometimes|nullable',
             'guests'              => 'sometimes|integer|min:1',
-            'total_amount'        => 'sometimes|numeric|min:0',
             'notes'               => 'sometimes|nullable|string|max:1000',
             'cancellation_reason' => 'sometimes|nullable|string|max:1000',
+            'invoice'              => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'extra_costs.*.name'   => 'required|string|max:255',
+            'extra_costs.*.price'  => 'required|numeric|min:0',
+            'discounts.*.name'     => 'required|string|max:255',
+            'discounts.*.price'    => 'required|numeric|min:0',
+        ], [
+            'invoice.mimes'               => 'Solo se permiten PDF, JPG o PNG.',
+            'invoice.max'                 => 'El archivo no puede superar 5 MB.',
+            'extra_costs.*.name.required' => 'El nombre del costo es requerido.',
+            'extra_costs.*.price.required'=> 'El precio del costo es requerido.',
+            'discounts.*.name.required'   => 'El nombre del descuento es requerido.',
+            'discounts.*.price.required'  => 'El monto del descuento es requerido.',
         ]);
 
+        $previousStatus = $reservation->status;
+
         $reservation->update($request->only([
-            'status', 'payment_status',
+            'status', 'payment_status', 'payment_method',
             'check_in', 'check_out', 'check_in_time', 'check_out_time',
-            'guests', 'total_amount', 'notes', 'cancellation_reason',
+            'guests', 'notes', 'cancellation_reason',
         ]));
 
         if ($request->has('reservation_services')) {
             $this->syncReservationServices($reservation, $request->input('reservation_services', []));
         }
 
+        $this->syncExtraCosts($reservation, $request->input('extra_costs', []));
+        $this->syncDiscounts($reservation, $request->input('discounts', []));
+
+        // Recalcular precio
+        $reservation->refresh()->load(['property', 'services', 'extraCosts', 'discounts']);
+        $calc = \App\Http\Controllers\ReservationController::calculateBreakdown([
+            'check_in'       => $reservation->check_in->format('Y-m-d'),
+            'check_out'      => $reservation->check_out->format('Y-m-d'),
+            'check_in_time'  => $reservation->check_in_time,
+            'check_out_time' => $reservation->check_out_time,
+        ], $reservation->property);
+
+        if (!isset($calc['error'])) {
+            $serviciosTotal   = $reservation->services->sum(fn($s) => $s->price * $s->quantity);
+            $extraCostsTotal  = $reservation->extraCosts->sum('price');
+            $discountsTotal   = $reservation->discounts->sum('price');
+            $total = round($calc['subtotal'] + ($reservation->service_fee ?? 0) + $serviciosTotal + $extraCostsTotal - $discountsTotal, 2);
+            $reservation->update([
+                'price_breakdown' => $calc['breakdown'],
+                'subtotal'        => $calc['subtotal'],
+                'total_days'      => $calc['totalDays'],
+                'price_per_day'   => $calc['pricePerDay'],
+                'total_amount'    => $total,
+            ]);
+        }
+
+        $newStatus = $reservation->fresh()->status;
+        if ($newStatus !== $previousStatus) {
+            $reservation->load(['user', 'property.owner']);
+            $this->sendStatusChangeMail($reservation, $newStatus);
+        }
+
+        // Factura
+        if ($request->hasFile('invoice')) {
+            if ($reservation->invoice_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($reservation->invoice_path);
+            }
+            $ext  = $request->file('invoice')->getClientOriginalExtension();
+            $date = now()->format('Y-m-d');
+            $path = $request->file('invoice')->storeAs('invoices', "factura-reserva-{$reservation->id}-{$date}.{$ext}", 'public');
+            $reservation->update([
+                'invoice_path'        => $path,
+                'invoice_uploaded_at' => now(),
+            ]);
+            try {
+                $reservation->load(['user', 'property']);
+                Mail::to($reservation->user->email)->send(new InvoiceUploadedNotification($reservation));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('[Invoice] Mail failed', [
+                    'reservation_id' => $reservation->id,
+                    'error'          => $e->getMessage(),
+                ]);
+            }
+        }
+
         return back()->with('success', 'Reserva actualizada.');
+    }
+
+    public function downloadPdf(Reservation $reservation)
+    {
+        $propiedadIds = Auth::user()->propiedades()->pluck('id');
+        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+
+        $reservation->load(['property', 'user', 'services.propertyService', 'extraCosts', 'discounts']);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('owner.reservation-pdf', compact('reservation'));
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download("reserva-{$reservation->id}.pdf");
+    }
+
+    public function uploadInvoice(Reservation $reservation, Request $request)
+    {
+        $propiedadIds = Auth::user()->propiedades()->pluck('id');
+        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+
+        $request->validate([
+            'invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'invoice.required' => 'Seleccioná un archivo.',
+            'invoice.mimes'    => 'Solo se permiten PDF, JPG o PNG.',
+            'invoice.max'      => 'El archivo no puede superar 5 MB.',
+        ]);
+
+        // Eliminar factura anterior si existe
+        if ($reservation->invoice_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($reservation->invoice_path);
+        }
+
+        $ext  = $request->file('invoice')->getClientOriginalExtension();
+        $path = $request->file('invoice')->storeAs('invoices', "factura-reserva-{$reservation->id}.{$ext}", 'public');
+
+        $reservation->update([
+            'invoice_path'        => $path,
+            'invoice_uploaded_at' => now(),
+        ]);
+
+        try {
+            $reservation->load(['user', 'property']);
+            Mail::to($reservation->user->email)->send(new InvoiceUploadedNotification($reservation));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[Invoice] Mail failed', [
+                'reservation_id' => $reservation->id,
+                'error'          => $e->getMessage(),
+            ]);
+        }
+
+        return back()->with('success', 'Factura subida y notificación enviada al cliente.');
+    }
+
+    public function deleteInvoice(Reservation $reservation)
+    {
+        $propiedadIds = Auth::user()->propiedades()->pluck('id');
+        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+
+        if ($reservation->invoice_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($reservation->invoice_path);
+        }
+
+        $reservation->update([
+            'invoice_path'        => null,
+            'invoice_uploaded_at' => null,
+        ]);
+
+        return back()->with('success', 'Factura eliminada.');
+    }
+
+    public function previewPrice(Reservation $reservation, Request $request)
+    {
+        $propiedadIds = Auth::user()->propiedades()->pluck('id');
+        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+
+        $reservation->load(['property', 'services.propertyService']);
+
+        $calc = \App\Http\Controllers\ReservationController::calculateBreakdown([
+            'check_in'       => $request->input('check_in',       $reservation->check_in->format('Y-m-d')),
+            'check_out'      => $request->input('check_out',      $reservation->check_out->format('Y-m-d')),
+            'check_in_time'  => $request->input('check_in_time',  $reservation->check_in_time),
+            'check_out_time' => $request->input('check_out_time', $reservation->check_out_time),
+        ], $reservation->property);
+
+        if (isset($calc['error'])) {
+            return response()->json(['error' => array_values($calc['error'])[0]], 422);
+        }
+
+        // Calcular servicios con las cantidades que vienen del form
+        $services      = $request->input('reservation_services', []);
+        $serviciosTotal = 0;
+        foreach ($services as $s) {
+            $serviciosTotal += (float)($s['price'] ?? 0) * (float)($s['quantity'] ?? 1);
+        }
+        // Si no vienen servicios en el request, usar los actuales de la reserva
+        if (empty($services)) {
+            $serviciosTotal = $reservation->services->sum(fn($s) => $s->price * $s->quantity);
+        }
+
+        $total = round($calc['subtotal'] + ($reservation->service_fee ?? 0) + $serviciosTotal, 2);
+
+        // Clonar reserva en memoria con los valores recalculados para renderizar el componente
+        $preview = clone $reservation;
+        $preview->price_breakdown = $calc['breakdown'];
+        $preview->subtotal        = $calc['subtotal'];
+        $preview->total_days      = $calc['totalDays'];
+        $preview->price_per_day   = $calc['pricePerDay'];
+        $preview->total_amount    = $total;
+
+        $html = view('components.reservation-price-summary', [
+            'reservation'     => $preview,
+            'showRecalculate' => true,
+            'previewUrl'      => route('owner.reservations.preview-price', $reservation),
+        ])->render();
+
+        return response()->json(['html' => $html]);
+    }
+
+    private function sendStatusChangeMail(Reservation $reservation, string $newStatus): void
+    {
+        try {
+            if ($newStatus === 'confirmed') {
+                Mail::to($reservation->user->email)->send(new ReservationConfirmedNotification($reservation));
+            } elseif ($newStatus === 'cancelled') {
+                Mail::to($reservation->user->email)->send(new ReservationCancelledClientNotification($reservation));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[DashboardController] Status change mail failed', [
+                'reservation_id' => $reservation->id,
+                'new_status' => $newStatus,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function syncDiscounts(Reservation $reservation, array $discounts): void
+    {
+        $reservation->discounts()->delete();
+        foreach ($discounts as $d) {
+            if (empty($d['name']) || !isset($d['price'])) continue;
+            \App\Models\ReservationDiscount::create([
+                'reservation_id' => $reservation->id,
+                'name'           => $d['name'],
+                'price'          => (float) $d['price'],
+            ]);
+        }
+    }
+
+    private function syncExtraCosts(Reservation $reservation, array $costs): void
+    {
+        $reservation->extraCosts()->delete();
+        foreach ($costs as $cost) {
+            if (empty($cost['name']) || !isset($cost['price'])) continue;
+            \App\Models\ReservationExtraCost::create([
+                'reservation_id' => $reservation->id,
+                'name'           => $cost['name'],
+                'price'          => (float) $cost['price'],
+            ]);
+        }
     }
 
     private function syncReservationServices(Reservation $reservation, array $services): void

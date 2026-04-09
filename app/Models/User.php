@@ -13,6 +13,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'last_name', 'email', 'password', 'role', 'phone', 'dni', 'avatar', 'newsletter',
         'whatsapp_link', 'website',
+        'bank_holder', 'bank_cbu', 'bank_alias',
         'social_instagram', 'social_facebook', 'social_twitter', 'social_tiktok', 'social_youtube',
         'deleted', 'subscription_paid', 'subscription_paid_at',
     ];

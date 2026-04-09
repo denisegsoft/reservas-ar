@@ -1,3 +1,4 @@
+@use('Illuminate\Support\Facades\Storage')
 @extends('layouts.main')
 @section('title', 'Gestionar Reserva #' . $reservation->id)
 @section('sidebar') @include('components.user-sidebar') @endsection
@@ -12,10 +13,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
         </a>
-        <div>
+        <div class="flex-1 min-w-0">
             <h1 class="text-2xl font-black text-gray-900">Reserva #{{ $reservation->id }}</h1>
             <p class="text-gray-500 text-sm">{{ $reservation->property->name }}</p>
         </div>
+        {{-- <a href="{{ route('owner.reservations.pdf', $reservation) }}"
+           target="_blank"
+           class="inline-flex items-center gap-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition-colors flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Generar PDF
+        </a> --}}
     </div>
 
     @if(session('success'))
@@ -30,7 +39,7 @@
     </div>
     @endif
 
-    <form action="{{ route('owner.reservations.update', $reservation) }}" method="POST" class="space-y-6">
+    <form action="{{ route('owner.reservations.update', $reservation) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PATCH')
 
@@ -152,11 +161,6 @@
                     <input type="number" name="guests" value="{{ $reservation->guests }}" min="1"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Total (ARS)</label>
-                    <input type="number" name="total_amount" value="{{ $reservation->total_amount }}" min="0" step="0.01"
-                        class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
             </div>
         </div>
 
@@ -170,6 +174,110 @@
             />
         </div>
         @endif
+
+        {{-- Costos adicionales --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+             x-data="{
+                costs: {{ Js::from($reservation->extraCosts->map(fn($c) => ['name' => $c->name, 'price' => (float)$c->price])->values()) }},
+                add() { this.costs.push({ name: '', price: '' }) },
+                remove(i) { this.costs.splice(i, 1) }
+             }">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Costos adicionales</h2>
+                <button type="button" @click="add()"
+                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Agregar
+                </button>
+            </div>
+
+            <template x-if="costs.length === 0">
+                <p class="text-sm text-gray-400 text-center py-3">Sin costos adicionales. Hacé clic en Agregar para añadir uno.</p>
+            </template>
+
+            <div class="space-y-2">
+                <template x-for="(cost, index) in costs" :key="index">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text"
+                               :name="'extra_costs[' + index + '][name]'"
+                               x-model="cost.name"
+                               placeholder="Descripción"
+                               class="flex-1 max-[500px]:w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                                <input type="number"
+                                       :name="'extra_costs[' + index + '][price]'"
+                                       x-model="cost.price"
+                                       placeholder="0"
+                                       min="0" step="0.01"
+                                       class="w-32 pl-6 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <button type="button" @click="remove(index)"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        {{-- Descuentos adicionales --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+             x-data="{
+                discounts: {{ Js::from($reservation->discounts->map(fn($d) => ['name' => $d->name, 'price' => (float)$d->price])->values()) }},
+                add() { this.discounts.push({ name: '', price: '' }) },
+                remove(i) { this.discounts.splice(i, 1) }
+             }">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Descuentos adicionales</h2>
+                <button type="button" @click="add()"
+                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Agregar
+                </button>
+            </div>
+
+            <template x-if="discounts.length === 0">
+                <p class="text-sm text-gray-400 text-center py-3">Sin descuentos adicionales.</p>
+            </template>
+
+            <div class="space-y-2">
+                <template x-for="(discount, index) in discounts" :key="index">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text"
+                               :name="'discounts[' + index + '][name]'"
+                               x-model="discount.name"
+                               placeholder="Descripción del descuento"
+                               class="flex-1 max-[500px]:w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">-$</span>
+                                <input type="number"
+                                       :name="'discounts[' + index + '][price]'"
+                                       x-model="discount.price"
+                                       placeholder="0"
+                                       min="0" step="0.01" style="padding-left: 30px"
+                                       class="w-32 pl-[38px] pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                            </div>
+                            <button type="button" @click="remove(index)"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
 
         {{-- Notas --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -200,7 +308,52 @@
                         <option value="refunded" @selected($reservation->payment_status === 'refunded')>Reembolsado</option>
                     </select>
                 </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Medio de pago</label>
+                    <select name="payment_method"
+                        class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value=""       @selected(!$reservation->payment_method)>— Sin especificar —</option>
+                        <option value="transfer" @selected($reservation->payment_method === 'transfer')>Transferencia</option>
+                        <option value="cash"     @selected($reservation->payment_method === 'cash')>Efectivo</option>
+                        <option value="credit"   @selected($reservation->payment_method === 'credit')>Crédito</option>
+                    </select>
+                </div>
             </div>
+        </div>
+
+        <x-reservation-price-summary :reservation="$reservation" :recalculate="true" />
+
+        {{-- Factura --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Factura <span class="text-gray-300 font-normal normal-case">(opcional)</span></h2>
+
+            @if($reservation->invoice_path)
+            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
+                <svg class="w-8 h-8 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 truncate">{{ basename($reservation->invoice_path) }}</p>
+                    <p class="text-xs text-gray-400">Subida el {{ $reservation->invoice_uploaded_at->format('d/m/Y H:i') }}</p>
+                </div>
+                <a href="{{ Storage::url($reservation->invoice_path) }}" target="_blank"
+                   class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex-shrink-0">
+                    Ver
+                </a>
+            </div>
+            @endif
+
+            <label class="flex items-center gap-3 cursor-pointer border border-dashed border-gray-300 hover:border-indigo-400 rounded-xl px-4 py-3.5 transition-colors">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                <span class="text-sm text-gray-500" id="invoice-label">
+                    {{ $reservation->invoice_path ? 'Reemplazar factura' : 'Adjuntar factura (PDF, JPG, PNG — máx. 5 MB)' }}
+                </span>
+                <input type="file" name="invoice" accept=".pdf,.jpg,.jpeg,.png" class="sr-only"
+                       onchange="document.getElementById('invoice-label').textContent = this.files[0]?.name ?? ''">
+            </label>
+            <p class="text-xs text-gray-400 mt-2">Al guardar se le enviará un mail al cliente con la factura adjunta.</p>
         </div>
 
         <button type="submit"
@@ -209,6 +362,18 @@
         </button>
 
     </form>
+
+    {{-- Eliminar factura (form separado, fuera del form principal) --}}
+    @if($reservation->invoice_path)
+    <form action="{{ route('owner.reservations.invoice.delete', $reservation) }}" method="POST" class="mt-3"
+          onsubmit="return confirm('¿Eliminar la factura?')">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="w-full text-sm font-medium text-red-500 hover:text-red-700 py-2 transition-colors">
+            Eliminar factura adjunta
+        </button>
+    </form>
+    @endif
 </div>
 
 <x-calendar-modal />

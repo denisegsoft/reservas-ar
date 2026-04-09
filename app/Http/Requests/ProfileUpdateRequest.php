@@ -35,6 +35,9 @@ class ProfileUpdateRequest extends FormRequest
             'social_tiktok'    => ['nullable', 'string', 'max:255'],
             'social_youtube'   => ['nullable', 'string', 'max:255'],
             'website'          => ['nullable', 'string', 'max:255'],
+            'bank_holder'      => ['nullable', 'string', 'max:255'],
+            'bank_cbu'         => ['nullable', 'string', 'max:22'],
+            'bank_alias'       => ['nullable', 'string', 'max:100'],
             'avatar_file'      => ['nullable', 'image', 'max:3072'],
         ];
     }

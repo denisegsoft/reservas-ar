@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ReservationConfirmedNotification;
 use App\Models\Reservation;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Payment\PaymentClient;
@@ -28,7 +30,7 @@ class PaymentController extends Controller
                 [
                     "id" => "property-{$reservation->property_id}",
                     "title" => "Reserva: " . $reservation->property->name,
-                    "description" => "Check-in: {$reservation->check_in->format('d/m/Y')} - Check-out: {$reservation->check_out->format('d/m/Y')} ({$reservation->total_days} noches)",
+                    "description" => "Check-in: {$reservation->check_in->format('d/m/Y')} - Check-out: {$reservation->check_out->format('d/m/Y')} ({$reservation->total_days} días)",
                     "category_id" => "services",
                     "quantity" => 1,
                     "currency_id" => "ARS",
@@ -145,6 +147,16 @@ class PaymentController extends Controller
                 'status' => 'confirmed',
                 'payment_status' => 'paid',
             ]);
+
+            try {
+                $reservation->load(['user', 'property']);
+                Mail::to($reservation->user->email)->send(new ReservationConfirmedNotification($reservation));
+            } catch (\Throwable $e) {
+                Log::error('[Payment] Confirmed mail failed', [
+                    'reservation_id' => $reservation->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         } else {
             $paymentRecord->save();
         }

@@ -8,6 +8,7 @@ use App\Models\PropertyAmenityLog;
 use App\Models\PropertyImage;
 use App\Models\PropertyService;
 use App\Models\Province;
+use App\Services\ContactInfoDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -185,9 +186,18 @@ class PropertyController extends Controller
             'country' => 'nullable|string|max:100',
             'price_per_hour'  => 'required|numeric|min:1',
             'price_per_day'   => 'required|numeric|min:1',
-            'price_per_week'  => 'required|numeric|min:1',
-            'price_per_month' => 'required|numeric|min:1',
             'price_weekend'   => 'nullable|numeric|min:0',
+            'day_discounts'              => 'nullable|array',
+            'day_discounts.*.days'       => 'required_with:day_discounts.*|integer|min:1',
+            'day_discounts.*.discount'   => 'required_with:day_discounts.*|numeric|min:1|max:99',
+            'date_discounts'             => 'nullable|array',
+            'date_discounts.*.date_from' => 'required_with:date_discounts.*|date',
+            'date_discounts.*.date_to'   => 'required_with:date_discounts.*|date',
+            'date_discounts.*.discount'  => 'required_with:date_discounts.*|numeric|min:1|max:99',
+            'date_discounts.*.label'     => 'nullable|string|max:100',
+            'weekday_discounts'          => 'nullable|array',
+            'weekday_discounts.*.days'   => 'required_with:weekday_discounts.*|array',
+            'weekday_discounts.*.discount' => 'required_with:weekday_discounts.*|numeric|min:1|max:99',
             'capacity' => 'required|integer|min:1',
             'bedrooms' => 'required|integer|min:0',
             'beds'     => 'nullable|integer|min:0',
@@ -213,6 +223,7 @@ class PropertyController extends Controller
         $data['slug'] = Str::slug($data['name']);
         $data['rules'] = $request->filled('rules') ? explode("\n", $request->rules) : null;
         $data['status'] = 'active';
+        $this->filterDiscounts($data);
 
         $propiedad = Property::create($data);
 
@@ -225,9 +236,11 @@ class PropertyController extends Controller
             PropertyAmenityLog::create(['property_id' => $propiedad->id, 'amenity' => $custom]);
         }
 
+        $uploadedPaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
                 $path = $image->store('propiedades', 'public');
+                $uploadedPaths[] = $path;
                 PropertyImage::create([
                     'property_id' => $propiedad->id,
                     'path' => $path,
@@ -240,10 +253,18 @@ class PropertyController extends Controller
             }
         }
 
-        // Si el propietario aún no pagó su suscripción, llevarlo a la página de pago
+        // Si no tiene suscripción, verificar si hay datos de contacto
+        $pendingByContact = false;
+        if (!Auth::user()->hasSubscription() && $this->hasContactInfo($request, $data, $uploadedPaths)) {
+            $propiedad->update(['status' => 'pending']);
+            $pendingByContact = true;
+        }
+
         if (!Auth::user()->hasSubscription()) {
             return redirect()->route('subscription.payment')
-                ->with('success', 'Tu propiedad fue publicada. Activá tu suscripción para que los clientes puedan contactarte.')
+                ->with('success', $pendingByContact
+                    ? 'Tu propiedad está pendiente de revisión. Te avisaremos cuando sea aprobada.'
+                    : 'Tu propiedad fue publicada. Activá tu suscripción para que los clientes puedan contactarte.')
                 ->with('success_property_slug', $propiedad->slug);
         }
 
@@ -277,9 +298,18 @@ class PropertyController extends Controller
             'country' => 'nullable|string|max:100',
             'price_per_hour'  => 'required|numeric|min:0',
             'price_per_day'   => 'required|numeric|min:0',
-            'price_per_week'  => 'required|numeric|min:0',
-            'price_per_month' => 'required|numeric|min:0',
             'price_weekend'   => 'nullable|numeric|min:0',
+            'day_discounts'              => 'nullable|array',
+            'day_discounts.*.days'       => 'required_with:day_discounts.*|integer|min:1',
+            'day_discounts.*.discount'   => 'required_with:day_discounts.*|numeric|min:1|max:99',
+            'date_discounts'             => 'nullable|array',
+            'date_discounts.*.date_from' => 'required_with:date_discounts.*|date',
+            'date_discounts.*.date_to'   => 'required_with:date_discounts.*|date',
+            'date_discounts.*.discount'  => 'required_with:date_discounts.*|numeric|min:1|max:99',
+            'date_discounts.*.label'     => 'nullable|string|max:100',
+            'weekday_discounts'          => 'nullable|array',
+            'weekday_discounts.*.days'   => 'required_with:weekday_discounts.*|array',
+            'weekday_discounts.*.discount' => 'required_with:weekday_discounts.*|numeric|min:1|max:99',
             'capacity' => 'required|integer|min:1',
             'bedrooms' => 'required|integer|min:0',
             'beds'     => 'nullable|integer|min:0',
@@ -302,6 +332,7 @@ class PropertyController extends Controller
         $data['city'] = $data['locality'];
         $data['country'] = $data['country'] ?? 'Argentina';
         $data['rules'] = $request->filled('rules') ? explode("\n", $request->rules) : null;
+        $this->filterDiscounts($data);
 
         // Log newly added custom amenities
         $knownKeys   = array_keys(Property::amenitiesList());
@@ -326,10 +357,12 @@ class PropertyController extends Controller
         }
 
         // Upload new images
+        $uploadedPaths = [];
         if ($request->hasFile('images')) {
             $maxOrder = $propiedad->images()->max('order') ?? 0;
             foreach ($request->file('images') as $index => $image) {
                 $path = $image->store('propiedades', 'public');
+                $uploadedPaths[] = $path;
                 PropertyImage::create([
                     'property_id' => $propiedad->id,
                     'path' => $path,
@@ -347,6 +380,13 @@ class PropertyController extends Controller
 
         // Services
         $this->syncServices($propiedad, $request->input('services', []));
+
+        // Si no tiene suscripción, verificar datos de contacto en los campos editados
+        if (!Auth::user()->hasSubscription() && $this->hasContactInfo($request, $data, $uploadedPaths)) {
+            $propiedad->update(['status' => 'pending']);
+            return redirect()->route('owner.properties.index')
+                ->with('warning', 'Tu propiedad está pendiente de revisión porque detectamos posibles datos de contacto. Te avisaremos cuando sea aprobada.');
+        }
 
         return redirect()->route('owner.properties.index')
             ->with('success', 'Propiedad actualizada correctamente.');
@@ -412,5 +452,61 @@ class PropertyController extends Controller
             ->pluck('name');
 
         return response()->json($cities);
+    }
+
+    /**
+     * Checks name, descriptions and uploaded images for contact info.
+     * Returns true if anything suspicious is found.
+     */
+    private function hasContactInfo(Request $request, array $data, array $storedImagePaths = []): bool
+    {
+        $detector = new ContactInfoDetector();
+
+        $texts = array_filter([
+            $data['name']              ?? null,
+            $data['description']       ?? null,
+            $data['short_description'] ?? null,
+        ]);
+
+        foreach ($texts as $text) {
+            if ($detector->foundInText($text)) {
+                return true;
+            }
+        }
+
+        foreach ($storedImagePaths as $relativePath) {
+            $fullPath = Storage::disk('public')->path($relativePath);
+            if ($detector->foundInImage($fullPath)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function filterDiscounts(array &$data): void
+    {
+        if (!empty($data['day_discounts'])) {
+            $data['day_discounts'] = array_values(array_filter(
+                $data['day_discounts'],
+                fn($d) => !empty($d['days']) && isset($d['discount']) && $d['discount'] !== ''
+            ));
+        }
+        if (!empty($data['date_discounts'])) {
+            $data['date_discounts'] = array_values(array_filter(
+                $data['date_discounts'],
+                fn($d) => !empty($d['date_from']) && !empty($d['date_to']) && isset($d['discount']) && $d['discount'] !== ''
+            ));
+        }
+        if (!empty($data['weekday_discounts'])) {
+            $data['weekday_discounts'] = array_values(array_filter(
+                $data['weekday_discounts'],
+                fn($d) => !empty($d['days']) && isset($d['discount']) && $d['discount'] !== ''
+            ));
+            // Convertir días a enteros
+            foreach ($data['weekday_discounts'] as &$row) {
+                $row['days'] = array_map('intval', (array) $row['days']);
+            }
+        }
     }
 }

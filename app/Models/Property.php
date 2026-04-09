@@ -16,7 +16,9 @@ class Property extends Model
     protected $fillable = [
         'user_id', 'name', 'slug', 'description', 'short_description',
         'address', 'street_name', 'street_number', 'locality', 'partido', 'city', 'state', 'country', 'zip_code', 'latitude', 'longitude', 'map_url',
-        'price_per_hour', 'price_per_day', 'price_per_week', 'price_per_month', 'price_weekend', 'capacity', 'bedrooms', 'beds', 'bathrooms',
+        'price_per_hour', 'price_per_day', 'price_per_week', 'price_per_month', 'price_weekend',
+        'hour_day_threshold', 'day_discounts', 'date_discounts', 'weekday_discounts',
+        'capacity', 'bedrooms', 'beds', 'bathrooms',
         'parking_spots', 'amenities', 'cover_image', 'status', 'rating',
         'reviews_count', 'featured', 'rules', 'min_days', 'max_days', 'type', 'available_from', 'available_to', 'deleted', 'views_count',
     ];
@@ -32,6 +34,10 @@ class Property extends Model
             'price_per_week' => 'decimal:2',
             'price_per_month' => 'decimal:2',
             'price_weekend' => 'decimal:2',
+            'hour_day_threshold'  => 'integer',
+            'day_discounts'       => 'array',
+            'date_discounts'      => 'array',
+            'weekday_discounts'   => 'array',
             'rating' => 'decimal:2',
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
