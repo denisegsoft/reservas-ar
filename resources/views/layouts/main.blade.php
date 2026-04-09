@@ -39,106 +39,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .text-nowrap { text-wrap: nowrap; }
-        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card-hover:hover { transform: translateY(-6px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.18); }
-        .gradient-text { background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .btn-primary { @apply bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-indigo-200 hover:shadow-md; }
-        .btn-secondary { @apply bg-white hover:bg-gray-50 text-gray-700 font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm border border-gray-200; }
-        .input-field { @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white; }
-
-        /* Tom Select — estilos base para formularios de propietario */
-        .ts-wrapper { width: 100%; }
-        .ts-wrapper.single .ts-control,
-        .ts-wrapper.multi .ts-control {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 0.625rem 2.5rem 0.625rem 1rem;
-            font-size: 0.875rem;
-            color: #374151;
-            background: #fff;
-            box-shadow: none;
-            min-height: 46px;
-        }
-        .ts-wrapper.single.focus .ts-control,
-        .ts-wrapper.multi.focus .ts-control {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
-        }
-        .ts-dropdown {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            font-size: 0.875rem;
-            z-index: 100;
-        }
-        .ts-dropdown .option { padding: 0.5rem 1rem; color: #374151; }
-        .ts-dropdown .option:hover,
-        .ts-dropdown .option.active { background: #eef2ff; color: #4338ca; }
-        .ts-control .placeholder { color: #9ca3af; }
-    </style>
-    {{-- Bootstrap modal minimal CSS (sin importar el CSS completo de Bootstrap) --}}
-    <style>
-        .modal { display: none; position: fixed; inset: 0; z-index: 1055; overflow-x: hidden; overflow-y: auto; outline: 0; }
-        .modal.fade .modal-dialog { transition: transform .3s ease-out; transform: translate(0,-50px); }
-        .modal.show .modal-dialog { transform: none; }
-        .modal-dialog { position: relative; width: auto; margin: 1rem; pointer-events: none; }
-        .modal-dialog-centered { display: flex; align-items: center; min-height: calc(100% - 2rem); }
-        .modal-dialog-scrollable { height: calc(100% - 2rem); }
-        .modal-dialog-scrollable .modal-content { max-height: 100%; overflow: hidden; }
-        .modal-dialog-scrollable .modal-body { overflow-y: auto; }
-        .modal-content { position: relative; display: flex; flex-direction: column; width: 100%; pointer-events: auto; background-color: #fff; background-clip: padding-box; outline: 0; }
-        .modal-header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; }
-        .modal-body { position: relative; flex: 1 1 auto; }
-        .modal-footer { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
-        .modal-backdrop { position: fixed; inset: 0; z-index: 1050; background-color: #000; }
-        .modal-backdrop.fade { opacity: 0; }
-        .modal-backdrop.show { opacity: .6; }
-        @media (min-width: 576px) { .modal-dialog { max-width: 500px; margin: 1.75rem auto; } .modal-dialog-centered { min-height: calc(100% - 3.5rem); } .modal-dialog-scrollable { height: calc(100% - 3.5rem); } }
-        @keyframes floatHeart {
-            0%   { transform: translateY(0) scale(1);   opacity: 1; }
-            80%  { opacity: .7; }
-            100% { transform: translateY(-60px) scale(.4); opacity: 0; }
-        }
-        .float-heart { animation: floatHeart .9s ease-out forwards; pointer-events: none; position: absolute; }
-    </style>
-    <style>
-        /* ─── Sidebar layout ─── */
-        #app-sidebar {
-            position: fixed;
-            top: 64px;
-            left: 0;
-            bottom: 0;
-            width: 260px;
-            z-index: 40;
-            overflow-y: auto;
-            overflow-x: hidden;
-            background: linear-gradient(160deg, #1e1b4b 0%, #312e81 55%, #4c1d95 100%);
-            transform: translateX(-260px);
-            transition: transform .28s cubic-bezier(.4,0,.2,1);
-            display: none; /* visible sólo en desktop */
-        }
-        #app-content,
-        footer {
-            transition: margin-left .28s cubic-bezier(.4,0,.2,1);
-        }
-        #app-content {
-            min-height: 100vh;
-        }
-        #sb-open-tab {
-            display: none;
-        }
-        @media (min-width: 1024px) {
-            #app-sidebar  { display: flex; flex-direction: column; }
-            #sb-open-tab  { display: flex; }
-            body.sb-open #app-sidebar  { transform: translateX(0); }
-            body.sb-open #app-content  { margin-left: 260px; }
-            body.sb-open footer        { margin-left: 260px; }
-            body.sb-open #sb-open-tab  { display: none !important; }
-        }
-    </style>
     @stack('styles')
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
@@ -311,14 +211,6 @@
         @yield('content')
     </div>
 
-    <script>
-        (function() {
-            var open = localStorage.getItem('sb') !== '0';
-            if (open) document.body.classList.add('sb-open');
-        })();
-        function sidebarOpen()  { document.body.classList.add('sb-open');    localStorage.setItem('sb','1'); }
-        function sidebarClose() { document.body.classList.remove('sb-open'); localStorage.setItem('sb','0'); }
-    </script>
     @else
     @yield('content')
     @endif
@@ -378,74 +270,5 @@
 @stack('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Inicializar Tom Select en elementos con data-ts (ej: formularios de owner)
-    const tsInstances = {};
-    document.querySelectorAll('[data-ts]').forEach(function (el) {
-        const canCreate = el.hasAttribute('data-ts-create');
-        const instance = new TomSelect(el, {
-            allowEmptyOption: true,
-            placeholder: el.dataset.placeholder || 'Buscar...',
-            maxOptions: null,
-            create: canCreate,
-            createOnBlur: canCreate,
-            createFilter: canCreate ? function(input) { return input.trim().length > 0; } : null,
-        });
-        if (el.name) tsInstances[el.name] = instance;
-    });
-
-    // AJAX city loading para selects nativos (sin data-ts)
-    document.querySelectorAll('select[name="state"]:not([data-ts])').forEach(function (stateEl) {
-        const form = stateEl.closest('form');
-        const cityEl = form ? form.querySelector('select[name="city"]') : null;
-        if (!cityEl) return;
-
-        function loadCities(stateName, restoreCity) {
-            while (cityEl.options.length > 1) cityEl.remove(1);
-            if (!stateName) return;
-            fetch('/api/cities?state=' + encodeURIComponent(stateName))
-                .then(r => r.json())
-                .then(cities => {
-                    cities.forEach(function (c) {
-                        const opt = document.createElement('option');
-                        opt.value = c;
-                        opt.textContent = c;
-                        if (restoreCity && c === restoreCity) opt.selected = true;
-                        cityEl.appendChild(opt);
-                    });
-                })
-                .catch(function () {});
-        }
-
-        stateEl.addEventListener('change', function () {
-            loadCities(this.value, null);
-        });
-
-        // Si ya hay provincia seleccionada al cargar (desde URL), recargar ciudades
-        if (stateEl.value) {
-            loadCities(stateEl.value, cityEl.dataset.selected || null);
-        }
-    });
-});
-</script>
-<script>
-function customAmenities(initial) {
-    return {
-        items: initial || [],
-        input: '',
-        add() {
-            const val = this.input.trim();
-            if (val && !this.items.includes(val)) {
-                this.items.push(val);
-            }
-            this.input = '';
-        },
-        remove(i) {
-            this.items.splice(i, 1);
-        }
-    };
-}
-</script>
 </body>
 </html>

@@ -115,7 +115,8 @@ class PropertyController extends Controller
 
     public function show(Property $propiedad)
     {
-        abort_if($propiedad->status !== 'active', 404);
+        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+        abort_if(!$isAdmin && $propiedad->status !== 'active', 404);
 
         // Incrementar vistas (no contar al propietario mismo)
         if (!auth()->check() || auth()->id() !== $propiedad->user_id) {
@@ -173,6 +174,8 @@ class PropertyController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Property::class);
+
+        $this->stripEmptyDiscountRows($request);
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -286,6 +289,8 @@ class PropertyController extends Controller
     {
         $this->authorize('update', $propiedad);
 
+        $this->stripEmptyDiscountRows($request);
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -381,11 +386,18 @@ class PropertyController extends Controller
         // Services
         $this->syncServices($propiedad, $request->input('services', []));
 
-        // Si no tiene suscripción, verificar datos de contacto en los campos editados
-        if (!Auth::user()->hasSubscription() && $this->hasContactInfo($request, $data, $uploadedPaths)) {
-            $propiedad->update(['status' => 'pending']);
-            return redirect()->route('owner.properties.index')
-                ->with('warning', 'Tu propiedad está pendiente de revisión porque detectamos posibles datos de contacto. Te avisaremos cuando sea aprobada.');
+        // Si no tiene suscripción, verificar datos de contacto en textos y todas las imágenes
+        if (!Auth::user()->hasSubscription()) {
+            $allImagePaths = $propiedad->images()->pluck('path')->toArray();
+            if ($this->hasContactInfo($request, $data, $allImagePaths)) {
+                $propiedad->update(['status' => 'pending']);
+                return redirect()->route('owner.properties.index')
+                    ->with('warning', 'Tu propiedad está pendiente de revisión. Te avisaremos cuando sea aprobada.');
+            }
+            // Sin info de contacto: restaurar a active si estaba pendiente por esta razón
+            if ($propiedad->status === 'pending') {
+                $propiedad->update(['status' => 'active']);
+            }
         }
 
         return redirect()->route('owner.properties.index')
@@ -482,6 +494,19 @@ class PropertyController extends Controller
         }
 
         return false;
+    }
+
+    private function stripEmptyDiscountRows(Request $request): void
+    {
+        $clean = fn(array $rows, array $keys) => array_values(
+            array_filter($rows, fn($row) => collect($keys)->some(fn($k) => !empty($row[$k])))
+        );
+
+        $request->merge([
+            'day_discounts'     => $clean($request->input('day_discounts', []),     ['days', 'discount']),
+            'date_discounts'    => $clean($request->input('date_discounts', []),    ['date_from', 'date_to', 'discount']),
+            'weekday_discounts' => $clean($request->input('weekday_discounts', []), ['days', 'discount']),
+        ]);
     }
 
     private function filterDiscounts(array &$data): void

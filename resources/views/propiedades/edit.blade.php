@@ -61,12 +61,12 @@
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripcion corta</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripción corta</label>
                     <input type="text" name="short_description" value="{{ old('short_description', $propiedad->short_description) }}"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripcion completa *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripción completa *</label>
                     <textarea name="description" rows="5" required
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none">{{ old('description', $propiedad->description) }}</textarea>
                 </div>
@@ -526,257 +526,19 @@
     </form>
 </div>
 
-<style>
-.input-err { border: 2px solid #ef4444 !important; border-radius: 0.75rem; }
-.ts-wrapper.input-err { border: 2px solid #ef4444 !important; border-radius: 0.75rem; }
-.err-txt { display: block; color: #ef4444; font-size: 0.75rem; margin-top: 5px; font-weight: 500; }
-</style>
+@endsection
 
-<script>
-// ===================== REGLAS =====================
+@push('styles')
+@vite(['resources/css/pages/propiedades-edit.css'])
+@endpush
+
+@push('scripts')
 @php
     $rulesRaw = old('rules', $propiedad->rules ?? []);
     $rulesArr = is_array($rulesRaw) ? $rulesRaw : array_filter(explode("\n", (string) $rulesRaw));
 @endphp
-var reglas = {!! json_encode(array_values(array_filter(array_map('trim', $rulesArr)))) !!};
-
-document.getElementById('regla-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); addRegla(); }
-});
-
-function addRegla() {
-    var val = document.getElementById('regla-input').value.trim();
-    if (!val || reglas.includes(val)) return;
-    reglas.push(val);
-    document.getElementById('regla-input').value = '';
-    renderReglas();
-}
-
-function removeRegla(i) {
-    reglas.splice(i, 1);
-    renderReglas();
-}
-
-function renderReglas() {
-    var list = document.getElementById('reglas-list');
-    list.innerHTML = '';
-    reglas.forEach(function(r, i) {
-        var span = document.createElement('span');
-        span.className = 'inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium px-3 py-1.5 rounded-full';
-        span.innerHTML = '<span>' + r.replace(/</g, '&lt;') + '</span><button type="button" onclick="removeRegla(' + i + ')" class="text-indigo-400 hover:text-indigo-700 leading-none">&times;</button>';
-        list.appendChild(span);
-    });
-    document.getElementById('rules-hidden').value = reglas.join('\n');
-}
-
-renderReglas();
-
-// ===================== SUBMIT =====================
-function submitEdit() {
-document.querySelectorAll('.input-err').forEach(function(e){ e.classList.remove('input-err'); });
-    document.querySelectorAll('.err-txt').forEach(function(e){ e.remove(); });
-
-    var errores = [];
-
-    function chk(el, msg) {
-        if (!el) return;
-        var v = (el.value || '').trim();
-        if (!v || (el.type === 'number' && parseFloat(v) < 1)) {
-            el.classList.add('input-err');
-            var ex = el.parentElement.querySelector('.err-txt');
-            if (!ex) { var sp = document.createElement('span'); sp.className = 'err-txt'; sp.textContent = msg; el.parentElement.appendChild(sp); }
-            errores.push(el);
-        } else {
-            el.classList.remove('input-err');
-            var ex = el.parentElement.querySelector('.err-txt'); if (ex) ex.remove();
-        }
-    }
-
-    function chkNum(el, msg) {
-        if (!el) return;
-        if (el.value === '' || el.value === null) {
-            el.classList.add('input-err');
-            var ex = el.parentElement.querySelector('.err-txt');
-            if (!ex) { var sp = document.createElement('span'); sp.className = 'err-txt'; sp.textContent = msg; el.parentElement.appendChild(sp); }
-            errores.push(el);
-        } else {
-            el.classList.remove('input-err');
-            var ex = el.parentElement.querySelector('.err-txt'); if (ex) ex.remove();
-        }
-    }
-
-    var form = document.getElementById('edit-form');
-
-    chk(form.querySelector('[name="type"]'), 'El tipo de propiedad es obligatorio.');
-    chk(form.querySelector('[name="name"]'),           'El nombre es obligatorio.');
-    chk(form.querySelector('[name="description"]'),    'La descripción es obligatoria.');
-    chk(form.querySelector('[name="state"]'),          'Seleccioná una provincia.');
-    chk(form.querySelector('[name="partido"]'),        'El partido es obligatorio.');
-    chk(form.querySelector('[name="locality"]'),       'La localidad es obligatoria.');
-    chk(form.querySelector('[name="street_name"]'),    'La calle es obligatoria.');
-    chk(form.querySelector('[name="street_number"]'),  'El número es obligatorio.');
-    chk(form.querySelector('[name="capacity"]'),       'La capacidad es obligatoria.');
-    chkNum(form.querySelector('[name="bedrooms"]'),      'Las habitaciones son obligatorias.');
-    chkNum(form.querySelector('[name="bathrooms"]'),     'Los baños son obligatorios.');
-    chkNum(form.querySelector('[name="parking_spots"]'), 'Los estacionamientos son obligatorios.');
-    chk(form.querySelector('[name="price_per_hour"]'), 'El precio por hora es obligatorio.');
-
-    if (errores.length > 0) {
-        var scrollTarget = errores[0].closest('div') || errores[0];
-        if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-    }
-
-    // Sync fotos
-    if (typeof newFiles !== 'undefined' && newFiles.length) {
-        var dt = new DataTransfer();
-        newFiles.forEach(function(f){ dt.items.add(f); });
-        document.getElementById('photos-hidden-input').files = dt.files;
-    }
-    // IDs a eliminar
-    document.querySelectorAll('input[name="delete_images[]"]').forEach(function(el){ el.remove(); });
-    if (typeof toDelete !== 'undefined') {
-        toDelete.forEach(function(id) {
-            var inp = document.createElement('input');
-            inp.type = 'hidden'; inp.name = 'delete_images[]'; inp.value = id;
-            document.getElementById('edit-form').appendChild(inp);
-        });
-    }
-
-    document.getElementById('edit-form').submit();
-}
-
-document.getElementById('edit-form').addEventListener('input', function(e) {
-    e.target.classList.remove('input-err');
-    var ex = e.target.parentElement.querySelector('.err-txt'); if (ex) ex.remove();
-});
-document.getElementById('edit-form').addEventListener('change', function(e) {
-    e.target.classList.remove('input-err');
-    var wrap = e.target.closest('.ts-wrapper'); if (wrap) wrap.classList.remove('input-err');
-    var ex = (wrap || e.target).parentElement.querySelector('.err-txt'); if (ex) ex.remove();
-});
-</script>
-
-@endsection
-
-@push('styles')
-<style>
-.pcard {
-    position: relative; aspect-ratio: 4/3;
-    border-radius: 12px; overflow: hidden; background: #1f2937;
-    transition: opacity .2s;
-}
-.pcard img { max-width:100%; max-height:100%; width:auto; height:auto; display:block; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); transition: filter .2s; }
-.pcard-del {
-    position: absolute; top: 7px; right: 7px;
-    width: 28px; height: 28px;
-    background: rgba(239,68,68,0.88); border: none; border-radius: 50%;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    color: #fff; transition: background .15s, transform .15s;
-    box-shadow: 0 2px 6px rgba(0,0,0,.35); z-index: 2;
-}
-.pcard-del:hover { background: #dc2626; transform: scale(1.1); }
-.pcard-badge {
-    position: absolute; bottom: 6px; left: 6px;
-    font-size: 10px; color: #fff; padding: 2px 8px;
-    border-radius: 999px; pointer-events: none; z-index: 2;
-}
-
-.pcard-add {
-    aspect-ratio: 4/3; border-radius: 12px;
-    border: 2px dashed #d1d5db;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 6px; cursor: pointer; color: #9ca3af;
-    transition: border-color .15s, background .15s, color .15s;
-    font-size: 13px; font-weight: 500;
-}
-.pcard-add:hover { border-color: #6366f1; background: #eef2ff; color: #6366f1; }
-
-#drag-overlay {
-    display: none; position: fixed; inset: 0; z-index: 9999;
-    background: rgba(99,102,241,.3); backdrop-filter: blur(3px);
-    align-items: center; justify-content: center;
-    flex-direction: column; gap: 12px;
-    outline: 4px dashed #6366f1; outline-offset: -12px;
-    color: #fff; font-size: 22px; font-weight: 700;
-    pointer-events: none;
-}
-#drag-overlay.active { display: flex; }
-</style>
-@endpush
-
-@push('scripts')
 <script>
-(function () {
-    let newFiles = [];
-    const toDelete = new Set(); // IDs of existing photos to delete on save
-
-    // --- Remove existing photo from UI, queue for deletion on save ---
-    window.toggleDelete = function (btn) {
-        const card = btn.closest('.pcard');
-        const id = card.dataset.id;
-        toDelete.add(id);
-        card.style.transition = 'opacity .2s, transform .2s';
-        card.style.opacity = 0;
-        card.style.transform = 'scale(.9)';
-        setTimeout(() => card.remove(), 200);
-    };
-
-    // --- Drag & drop ---
-    let dragCounter = 0;
-    window.addEventListener('dragenter', function (e) {
-        if (!e.dataTransfer.types.includes('Files')) return;
-        dragCounter++;
-        document.getElementById('drag-overlay').classList.add('active');
-    });
-    window.addEventListener('dragleave', function () {
-        if (--dragCounter <= 0) {
-            dragCounter = 0;
-            document.getElementById('drag-overlay').classList.remove('active');
-        }
-    });
-    window.addEventListener('dragover', e => e.preventDefault());
-    window.addEventListener('drop', function (e) {
-        e.preventDefault();
-        dragCounter = 0;
-        document.getElementById('drag-overlay').classList.remove('active');
-        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-        if (files.length) addPhotos(files);
-    });
-
-    // --- File picker ---
-    document.getElementById('photo-file-input').addEventListener('change', function () {
-        addPhotos(Array.from(this.files));
-        this.value = '';
-    });
-
-    function addPhotos(files) {
-        newFiles = newFiles.concat(files);
-        renderNew();
-    }
-
-    function renderNew() {
-        document.querySelectorAll('.pcard.new').forEach(el => el.remove());
-        const addBtn = document.getElementById('photo-add-btn');
-        newFiles.forEach((file, i) => {
-            const url = URL.createObjectURL(file);
-            const card = document.createElement('div');
-            card.className = 'pcard new';
-            card.innerHTML =
-                '<img src="' + url + '" alt="" draggable="false">' +
-                '<button type="button" class="pcard-del" onclick="removeNew(' + i + ')" title="Quitar">' +
-                  '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
-                '</button>' +
-                '<span class="pcard-badge" style="background:rgba(99,102,241,.85)">Nueva</span>';
-            addBtn.parentNode.insertBefore(card, addBtn);
-        });
-    }
-
-    window.removeNew = function (index) {
-        newFiles.splice(index, 1);
-        renderNew();
-    };
-})();
+window.EDIT_REGLAS = {!! json_encode(array_values(array_filter(array_map('trim', $rulesArr)))) !!};
 </script>
+@vite(['resources/js/pages/propiedades-edit.js'])
 @endpush

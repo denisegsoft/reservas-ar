@@ -1,0 +1,7 @@
+@keyframes alertIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.alert-in { animation: alertIn .25s ease-out forwards; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-spinner { animation: spin .7s linear infinite; }

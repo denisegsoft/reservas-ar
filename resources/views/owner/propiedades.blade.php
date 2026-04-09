@@ -18,6 +18,17 @@
     </div>
     @endif
 
+    @if(session('warning'))
+    <div x-data="{ show: true }" x-show="show" x-transition.opacity
+         class="mb-6 bg-amber-50 border border-amber-200 text-amber-800 text-sm px-5 py-3.5 rounded-2xl flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        <span class="flex-1">{{ session('warning') }}</span>
+        <button @click="show = false" class="ml-auto text-amber-600 hover:text-amber-900 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+    @endif
+
     <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-black text-gray-900">Mis Propiedades</h1>
         <a href="{{ route('owner.properties.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
@@ -77,7 +88,7 @@
                     @endif
                 </div>
                 <div class="flex gap-2">
-                    <a href="{{ route('properties.show', $propiedad->slug) }}" class="flex-1 text-center bg-green-100 hover:bg-green-200 text-gray-700 text-sm font-medium py-2 rounded-xl transition-colors">
+                    <a href="{{ route('properties.show', $propiedad->slug) }}" target="_blank" class="flex-1 text-center bg-green-100 hover:bg-green-200 text-gray-700 text-sm font-medium py-2 rounded-xl transition-colors">
                         Ver
                     </a>
                     <a href="{{ route('owner.properties.edit', $propiedad) }}" class="flex-1 text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium py-2 rounded-xl transition-colors">
@@ -173,17 +184,7 @@
 </form>
 
 @push('scripts')
-<script src="{{ asset('js/reservas-calendar.js') }}"></script>
-<script>
-function confirmDelete(action, name) {
-    document.getElementById('deleteModalName').textContent = name;
-    document.getElementById('deleteForm').action = action;
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
-}
-function submitDelete() {
-    document.getElementById('deleteForm').submit();
-}
-</script>
+@vite(['resources/js/pages/owner-propiedades.js'])
 @endpush
 
 @endsection

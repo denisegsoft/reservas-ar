@@ -52,7 +52,7 @@
                     <span class="text-xl mt-0.5">💰</span>
                     <div>
                         <p class="text-white font-semibold text-sm">Concretá tus ventas</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Nombre, teléfono, mensajes y contacto directo con tus clientes</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Nombre, teléfono, mensajes y contacto directo con tus clientes y posibles clientes</p>
                     </div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">

@@ -7,20 +7,19 @@ use thiagoalessio\TesseractOCR\TesseractOCR;
 class ContactInfoDetector
 {
     /**
-     * Patterns that suggest contact information.
+     * Patterns that suggest contact information in text fields.
      */
     private const PATTERNS = [
-        // Email
-        '/\b[\w.+\-]+@[\w\-]+\.[a-z]{2,}\b/i',
+        // Email — cualquier @ es suficiente
+        '/@/',
         // URL / web
         '/https?:\/\//i',
-        '/\bwww\.\S+/i',
+        '/\bwww[\.\-]\S+/i',
         // WhatsApp
-        '/\bwa\.me\b/i',
+        '/\bwa[\.\-]me\b/i',
         '/\bwhatsapp\b/i',
-        // Argentine phone numbers: sequences of 7+ digits with common separators
-        // Covers: 011-4567-8901 | 15 4567 8901 | +54 9 11 1234 5678 | (011) 4567-8901
-        '/\(?\+?(?:54\s*)?\)?(?:\d[\s\-\.]?){7,}\d/i',
+        // Cualquier número de 7+ dígitos consecutivos
+        '/\d{7,}/',
     ];
 
     /**
@@ -37,12 +36,16 @@ class ContactInfoDetector
     }
 
     /**
-     * Runs OCR on the image file and checks for contact patterns.
-     * Returns false if OCR fails (don't block on error).
+     * Runs OCR on the image. Returns true if ANY text is detected
+     * (images with text are always flagged for manual review).
+     * Returns false only if OCR fails or image has no readable text.
      */
     public function foundInImage(string $absolutePath): bool
     {
         try {
+            // Normalize slashes — mixed paths break Tesseract on Windows
+            $absolutePath = str_replace('\\', '/', $absolutePath);
+
             $ocr = new TesseractOCR($absolutePath);
 
             $tesseractPath = env('TESSERACT_PATH');
@@ -50,10 +53,11 @@ class ContactInfoDetector
                 $ocr->executable($tesseractPath);
             }
 
-            // English is sufficient — emails, phones and URLs are language-agnostic
             $ocr->lang('eng');
+            // PSM 6: treat image as a single uniform block of text (better detection)
+            $ocr->psm(6);
 
-            $text = $ocr->run();
+            $text = trim($ocr->run());
 
             return $this->foundInText($text);
         } catch (\Throwable $e) {

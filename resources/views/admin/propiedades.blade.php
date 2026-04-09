@@ -59,7 +59,7 @@
                                 <button class="text-xs bg-red-50 hover:bg-red-100 text-red-600 font-medium px-3 py-1.5 rounded-lg transition-colors">Desactivar</button>
                             </form>
                             @endif
-                            <a href="{{ route('properties.show', $propiedad->slug) }}" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-3 py-1.5 rounded-lg transition-colors">Ver</a>
+                            <a href="{{ route('properties.show', $propiedad->slug) }}" target="_blank" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-3 py-1.5 rounded-lg transition-colors">Ver</a>
                         </div>
                     </td>
                 </tr>

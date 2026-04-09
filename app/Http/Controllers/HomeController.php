@@ -12,9 +12,9 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $featured = Property::where('status', 'active')
-            ->where('featured', true)
             ->with('images')
             ->withCount('reviews')
+            ->orderBy('views_count', 'desc')
             ->take(6)
             ->get();
 

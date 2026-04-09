@@ -143,58 +143,19 @@
 
 </div>
 
+@push('styles')
+@vite(['resources/css/pages/messages-conversation.css'])
+@endpush
+
 @push('scripts')
-<style>
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-</style>
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('chat', () => ({
-            body: '',
-            sending: false,
-            hasReservation: {{ $reservation ? 'true' : 'false' }},
-            reservationId: {{ $reservation?->id ?? 'null' }},
-            storeUrl: '{{ route('messages.store', $user) }}',
-            csrfToken: '{{ csrf_token() }}',
-            messages: @json($messagesData),
-
-            init() {
-                this.$nextTick(() => {
-                    this.$refs.container.scrollTop = this.$refs.container.scrollHeight;
-                });
-            },
-
-            async send() {
-                if (!this.body.trim() || this.sending) return;
-                this.sending = true;
-                const text = this.body;
-                this.body = '';
-                try {
-                    const res = await fetch(this.storeUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': this.csrfToken,
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({ body: text, reservation_id: this.reservationId }),
-                    });
-                    if (!res.ok) { this.body = text; return; }
-                    const msg = await res.json();
-                    this.messages.push({ ...msg, mine: true, read_at: null });
-                    this.$nextTick(() => {
-                        this.$refs.container.scrollTop = this.$refs.container.scrollHeight;
-                    });
-                } finally {
-                    this.sending = false;
-                }
-            },
-        }));
-    });
+window.CHAT_HAS_RESERVATION = {{ $reservation ? 'true' : 'false' }};
+window.CHAT_RESERVATION_ID  = {{ $reservation?->id ?? 'null' }};
+window.CHAT_STORE_URL        = '{{ route('messages.store', $user) }}';
+window.CHAT_CSRF_TOKEN       = '{{ csrf_token() }}';
+window.CHAT_MESSAGES         = @json($messagesData);
 </script>
+@vite(['resources/js/pages/messages-conversation.js'])
 @endpush
 
 @endsection

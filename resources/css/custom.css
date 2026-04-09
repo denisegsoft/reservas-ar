@@ -1,3 +1,98 @@
+/* ── Global typography & utilities ───────────────────────────── */
+body { font-family: 'Inter', sans-serif; }
+.text-nowrap { text-wrap: nowrap; }
+.card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-hover:hover { transform: translateY(-6px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.18); }
+.gradient-text { background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.btn-primary { @apply bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-indigo-200 hover:shadow-md; }
+.btn-secondary { @apply bg-white hover:bg-gray-50 text-gray-700 font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm border border-gray-200; }
+.input-field { @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white; }
+
+/* ── Tom Select ───────────────────────────────────────────────── */
+.ts-wrapper { width: 100%; }
+.ts-wrapper.single .ts-control,
+.ts-wrapper.multi .ts-control {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 0.625rem 2.5rem 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    background: #fff;
+    box-shadow: none;
+    min-height: 46px;
+}
+.ts-wrapper.single.focus .ts-control,
+.ts-wrapper.multi.focus .ts-control {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+}
+.ts-dropdown {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    font-size: 0.875rem;
+    z-index: 100;
+}
+.ts-dropdown .option { padding: 0.5rem 1rem; color: #374151; }
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active { background: #eef2ff; color: #4338ca; }
+.ts-control .placeholder { color: #9ca3af; }
+
+/* ── Bootstrap modal minimal ──────────────────────────────────── */
+.modal { display: none; position: fixed; inset: 0; z-index: 1055; overflow-x: hidden; overflow-y: auto; outline: 0; }
+.modal.fade .modal-dialog { transition: transform .3s ease-out; transform: translate(0,-50px); }
+.modal.show .modal-dialog { transform: none; }
+.modal-dialog { position: relative; width: auto; margin: 1rem; pointer-events: none; }
+.modal-dialog-centered { display: flex; align-items: center; min-height: calc(100% - 2rem); }
+.modal-dialog-scrollable { height: calc(100% - 2rem); }
+.modal-dialog-scrollable .modal-content { max-height: 100%; overflow: hidden; }
+.modal-dialog-scrollable .modal-body { overflow-y: auto; }
+.modal-content { position: relative; display: flex; flex-direction: column; width: 100%; pointer-events: auto; background-color: #fff; background-clip: padding-box; outline: 0; }
+.modal-header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; }
+.modal-body { position: relative; flex: 1 1 auto; }
+.modal-footer { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 1050; background-color: #000; }
+.modal-backdrop.fade { opacity: 0; }
+.modal-backdrop.show { opacity: .6; }
+@media (min-width: 576px) {
+    .modal-dialog { max-width: 500px; margin: 1.75rem auto; }
+    .modal-dialog-centered { min-height: calc(100% - 3.5rem); }
+    .modal-dialog-scrollable { height: calc(100% - 3.5rem); }
+}
+@keyframes floatHeart {
+    0%   { transform: translateY(0) scale(1);   opacity: 1; }
+    80%  { opacity: .7; }
+    100% { transform: translateY(-60px) scale(.4); opacity: 0; }
+}
+.float-heart { animation: floatHeart .9s ease-out forwards; pointer-events: none; position: absolute; }
+
+/* ── Sidebar layout ───────────────────────────────────────────── */
+#app-sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    z-index: 40;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: linear-gradient(160deg, #1e1b4b 0%, #312e81 55%, #4c1d95 100%);
+    transform: translateX(-260px);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    display: none;
+}
+#app-content, footer { transition: margin-left .28s cubic-bezier(.4,0,.2,1); }
+#app-content { min-height: 100vh; }
+#sb-open-tab { display: none; }
+@media (min-width: 1024px) {
+    #app-sidebar  { display: flex; flex-direction: column; }
+    #sb-open-tab  { display: flex; }
+    body.sb-open #app-sidebar  { transform: translateX(0); }
+    body.sb-open #app-content  { margin-left: 260px; }
+    body.sb-open footer        { margin-left: 260px; }
+    body.sb-open #sb-open-tab  { display: none !important; }
+}
+
 /* ── Sidebar scrollbar ─────────────────────────────────────────── */
 #app-sidebar nav {
     scrollbar-width: none;
@@ -46,3 +141,100 @@
         display: none !important;
     }
 }
+
+/* ── Phone input (intl-tel-input) ─────────────────────────────── */
+.iti { width: 100%; position: relative; }
+
+.iti__tel-input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #111827;
+    background: #fff;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    font-family: inherit;
+}
+.iti__tel-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+}
+.iti__tel-input::placeholder { color: #9ca3af; }
+
+.iti__country-container {
+    padding: 0;
+}
+.iti__selected-country {
+    background: #f9fafb;
+    border-right: 1px solid #d1d5db;
+    border-radius: 11px 0 0 11px;
+    padding: 0 10px 0 12px;
+    gap: 6px;
+    transition: background .15s;
+}
+.iti__selected-country:hover,
+.iti__selected-country[aria-expanded="true"] {
+    background: #f3f4f6;
+}
+.iti__selected-country-arrow {
+    color: #6b7280;
+    font-size: 10px;
+}
+.iti__selected-dial-code {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Dropdown — force absolute, not fixed */
+.iti__dropdown-content {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin-top: 4px !important;
+    width: 280px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px -4px rgba(0,0,0,.14), 0 2px 8px -2px rgba(0,0,0,.08);
+    overflow: hidden;
+    z-index: 9999;
+}
+.iti__search-input {
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #374151;
+    background: #f9fafb;
+    width: 100%;
+    outline: none;
+    transition: border-color .15s, background .15s;
+}
+.iti__search-input:focus {
+    border-color: #6366f1;
+    background: #fff;
+}
+.iti__country {
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #374151;
+    transition: background .1s;
+}
+.iti__country:hover,
+.iti__country.iti__highlight {
+    background: #eef2ff;
+    color: #4338ca;
+}
+.iti__country-name { font-size: 13px; }
+.iti__dial-code { color: #9ca3af; font-size: 12px; font-weight: 500; }
+
+/* ── Form validation helpers ──────────────────────────────────── */
+.input-err { border: 2px solid #ef4444 !important; border-radius: 0.75rem; }
+.ts-wrapper.input-err { border: 2px solid #ef4444 !important; border-radius: 0.75rem; }
+.err-txt { display: block; color: #ef4444; font-size: 0.75rem; margin-top: 5px; font-weight: 500; }

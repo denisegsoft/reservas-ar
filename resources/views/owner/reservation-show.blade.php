@@ -379,15 +379,11 @@
 <x-calendar-modal />
 
 @push('scripts')
-<script src="{{ asset('js/reservas-calendar.js') }}"></script>
 <script>
-function abrirCalendario() {
-    calendarModal.open(
-        @js($reservation->property->name),
-        @json($reservasPropiedad)
-    );
-}
+window.RS_PROPERTY_NAME = @js($reservation->property->name);
+window.RS_RESERVAS      = @json($reservasPropiedad);
 </script>
+@vite(['resources/js/pages/owner-reservation-show.js'])
 @endpush
 
 @endsection

@@ -288,28 +288,11 @@
 <x-calendar-modal />
 
 @push('scripts')
-<script src="{{ asset('js/reservas-calendar.js') }}"></script>
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('reservaForm', () => ({
-        existingClient: true,
-        selectedProperty: null,
-        properties: @json($propiedades->map(fn($p) => ['id' => $p->id, 'price_per_day' => (float) $p->price_per_day])->values()),
-
-        calcTotal() {},
-    }));
-});
-
-/* ── Calendario disponibilidad ── */
-const _dispReservas = @json($reservasPorPropiedad);
-
-function abrirCalendarioDisponibilidad() {
-    const propId   = document.querySelector('[name="property_id"]')?.value;
-    const propName = document.querySelector('[name="property_id"] option:checked')?.text ?? 'Propiedad';
-    if (!propId) { alert('Primero seleccioná una propiedad.'); return; }
-    calendarModal.open(propName, _dispReservas[propId] ?? []);
-}
+window.RC_PROPERTIES    = @json($propiedades->map(fn($p) => ['id' => $p->id, 'price_per_day' => (float) $p->price_per_day])->values());
+window.RC_DISP_RESERVAS = @json($reservasPorPropiedad);
 </script>
+@vite(['resources/js/pages/owner-reservation-create.js'])
 @endpush
 
 @endsection

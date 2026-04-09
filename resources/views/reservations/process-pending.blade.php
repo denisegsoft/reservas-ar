@@ -18,10 +18,8 @@
     @endforeach
 </form>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('pending-form').submit();
-    });
-</script>
+@push('scripts')
+@vite(['resources/js/pages/reservations-process-pending.js'])
+@endpush
 
 @endsection
