@@ -222,15 +222,21 @@ class SubscriptionController extends Controller
     // Activar suscripción (llamado desde success y webhook)
     public static function activateSubscription(int $userId): void
     {
-        User::withoutGlobalScope('active')->where('id', $userId)->update([
+        $user = User::withoutGlobalScope('active')->find($userId);
+        if (!$user) return;
+
+        $alreadyActive = $user->subscription_paid === true;
+
+        $user->update([
             'subscription_paid'    => true,
             'subscription_paid_at' => now(),
         ]);
 
         Log::info('[Subscription] Activated', ['user_id' => $userId]);
 
-        $user = User::find($userId);
-        if ($user) {
+        // Only send the activation email the first time — prevents duplicates
+        // when MercadoPago re-sends the same webhook notification.
+        if (!$alreadyActive) {
             MailHelper::send(
                 $user->email,
                 new \App\Mail\SubscriptionActivatedNotification($user),

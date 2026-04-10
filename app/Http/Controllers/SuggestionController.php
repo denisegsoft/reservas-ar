@@ -17,7 +17,7 @@ class SuggestionController extends Controller
         $data = $request->validate([
             'title'         => 'required|string|max:150',
             'description'   => 'required|string|min:10|max:2000',
-            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,zip',
+            'attachments.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,txt',
         ]);
 
         $paths = [];

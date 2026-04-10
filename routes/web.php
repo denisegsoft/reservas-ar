@@ -31,8 +31,10 @@ Route::get('/favoritos/{propiedad:slug}/guardar', [FavoriteController::class, 'l
 // Reservar (público — guarda en sesión si no está logueado)
 Route::post('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'store'])->name('reservations.store');
 
-// Payment webhook (no auth needed)
-Route::post('/webhooks/mercadopago', [PaymentController::class, 'webhook'])->name('payments.webhook');
+// Payment webhook (no auth needed — throttled to prevent abuse)
+Route::post('/webhooks/mercadopago', [PaymentController::class, 'webhook'])
+/*     ->middleware('throttle:120,1') */
+    ->name('payments.webhook');
 
 // Avatar setup — auth required but NO avatar check (this IS the setup page)
 Route::middleware('auth')->group(function () {

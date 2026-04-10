@@ -81,9 +81,10 @@ class MessageController extends Controller
             ->orderBy('created_at')
             ->get();
 
+        // Only load the reservation if it belongs to the authenticated user — never fall back
+        // to the other party's reservations (would expose another user's data).
         $reservation = $reservationId
             ? auth()->user()->reservations()->with('property')->find($reservationId)
-              ?? $user->reservations()->with('property')->find($reservationId)
             : null;
 
         $authId = auth()->id();

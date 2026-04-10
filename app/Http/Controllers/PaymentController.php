@@ -134,21 +134,27 @@ class PaymentController extends Controller
         $paymentRecord->amount = $reservation->total_amount;
 
         if ($status === 'approved') {
+            $alreadyConfirmed = $reservation->isConfirmed() && $reservation->isPaid();
+
             $paymentRecord->paid_at = now();
             $paymentRecord->save();
 
             $reservation->update([
-                'status' => 'confirmed',
+                'status'         => 'confirmed',
                 'payment_status' => 'paid',
             ]);
 
-            $reservation->load(['user', 'property']);
-            MailHelper::send(
-                $reservation->user->email,
-                new ReservationConfirmedNotification($reservation),
-                '[Payment]',
-                ['reservation_id' => $reservation->id]
-            );
+            // Only send the confirmation email the first time — prevents duplicate emails
+            // when MercadoPago re-sends the same webhook notification.
+            if (!$alreadyConfirmed) {
+                $reservation->load(['user', 'property']);
+                MailHelper::send(
+                    $reservation->user->email,
+                    new ReservationConfirmedNotification($reservation),
+                    '[Payment]',
+                    ['reservation_id' => $reservation->id]
+                );
+            }
         } else {
             $paymentRecord->save();
         }

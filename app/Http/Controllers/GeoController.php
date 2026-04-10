@@ -8,20 +8,18 @@ class GeoController extends Controller
 {
     public function partidos(Request $request)
     {
-        $provinceId = $request->query('province_id');
-        if (!$provinceId) return response()->json([]);
+        $request->validate(['province_id' => 'required|integer|min:1']);
 
-        return \App\Models\Partido::where('province_id', $provinceId)
+        return \App\Models\Partido::where('province_id', (int) $request->province_id)
             ->orderBy('name')
             ->get(['id', 'name']);
     }
 
     public function localidades(Request $request)
     {
-        $partidoId = $request->query('partido_id');
-        if (!$partidoId) return response()->json([]);
+        $request->validate(['partido_id' => 'required|integer|min:1']);
 
-        return \App\Models\Localidad::where('partido_id', $partidoId)
+        return \App\Models\Localidad::where('partido_id', (int) $request->partido_id)
             ->orderBy('name')
             ->pluck('name');
     }

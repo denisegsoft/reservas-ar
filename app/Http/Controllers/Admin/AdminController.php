@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Property;
+use App\Support\PropertyCache;
 use App\Models\Reservation;
 use App\Models\Review;
 use App\Models\Setting;
@@ -45,12 +46,14 @@ class AdminController extends Controller
     public function approvePropiedad(Property $propiedad)
     {
         $propiedad->update(['status' => 'active']);
+        PropertyCache::clear($propiedad);
         return back()->with('success', "Propiedad '{$propiedad->name}' aprobada y publicada.");
     }
 
     public function rejectPropiedad(Property $propiedad)
     {
         $propiedad->update(['status' => 'inactive']);
+        PropertyCache::clear($propiedad);
         return back()->with('success', "Propiedad '{$propiedad->name}' rechazada.");
     }
 
@@ -70,10 +73,12 @@ class AdminController extends Controller
     {
         $review->update(['approved' => true]);
 
-        $property = $review->property;
+        $property  = $review->property;
         $avgRating = $property->reviews()->avg('rating');
-        $count = $property->reviews()->count();
+        $count     = $property->reviews()->count();
         $property->update(['rating' => round($avgRating, 2), 'reviews_count' => $count]);
+
+        PropertyCache::clear($property);
 
         return back()->with('success', 'Reseña aprobada.');
     }

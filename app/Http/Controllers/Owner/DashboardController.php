@@ -12,6 +12,7 @@ use App\Models\ReservationService;
 use App\Models\User;
 use App\Services\PricingService;
 use App\Support\MailHelper;
+use App\Support\PropertyCache;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -330,6 +331,11 @@ class DashboardController extends Controller
             $this->storeInvoice($reservation, $request);
         }
 
+        // A status change (e.g. confirmed/cancelled) changes unavailable dates on the property page
+        if ($reservation->fresh()->status !== $previousStatus) {
+            PropertyCache::clear($reservation->property);
+        }
+
         return back()->with('success', 'Reserva actualizada.');
     }
 
@@ -459,7 +465,9 @@ class DashboardController extends Controller
             Storage::disk('public')->delete($reservation->invoice_path);
         }
 
-        $ext  = $request->file('invoice')->getClientOriginalExtension();
+        // Use extension derived from the detected MIME type, not the client-supplied filename
+        $allowedExts = ['application/pdf' => 'pdf', 'image/jpeg' => 'jpg', 'image/png' => 'png'];
+        $ext  = $allowedExts[$request->file('invoice')->getMimeType()] ?? 'pdf';
         $date = now()->format('Y-m-d');
         $path = $request->file('invoice')->storeAs(
             'invoices',
@@ -525,12 +533,16 @@ class DashboardController extends Controller
 
     private function syncReservationServices(Reservation $reservation, array $services): void
     {
+        // Whitelist valid service IDs for this property to prevent IDOR
+        $validServiceIds = $reservation->property->services()->pluck('id');
+
         $reservation->services()->delete();
         foreach ($services as $s) {
-            if (empty($s['property_service_id'])) continue;
+            $serviceId = (int) ($s['property_service_id'] ?? 0);
+            if (!$serviceId || !$validServiceIds->contains($serviceId)) continue;
             ReservationService::create([
                 'reservation_id'      => $reservation->id,
-                'property_service_id' => $s['property_service_id'],
+                'property_service_id' => $serviceId,
                 'quantity'            => (float) ($s['quantity'] ?? 1),
                 'price'               => (float) ($s['price'] ?? 0),
             ]);

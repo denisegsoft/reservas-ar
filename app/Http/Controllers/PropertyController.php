@@ -9,8 +9,10 @@ use App\Models\PropertyImage;
 use App\Models\PropertyService;
 use App\Models\Province;
 use App\Services\ContactInfoDetector;
+use App\Support\PropertyCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -118,37 +120,48 @@ class PropertyController extends Controller
         $isAdmin = auth()->check() && auth()->user()->role === 'admin';
         abort_if(!$isAdmin && $propiedad->status !== 'active', 404);
 
-        // Incrementar vistas (no contar al propietario mismo)
+        // Increment view count (not for the owner)
         if (!auth()->check() || auth()->id() !== $propiedad->user_id) {
             Property::withoutGlobalScope('active')->where('id', $propiedad->id)
                 ->increment('views_count');
         }
 
-        $propiedad->load(['images', 'owner', 'reviews.user', 'blockedDates', 'services']);
+        // Cache the expensive DB-heavy part (property data + unavailable dates + similar).
+        // reservaParaReseña is user-specific so it stays dynamic.
+        $cached = Cache::remember(PropertyCache::forShow($propiedad->slug), now()->addHour(), function () use ($propiedad) {
+            $propiedad->load(['images', 'owner', 'reviews.user', 'blockedDates', 'services']);
 
-        $blockedDates = $propiedad->blockedDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'));
-        $reservedDates = $propiedad->reservations()
-            ->where('status', 'confirmed')
-            ->get()
-            ->flatMap(function ($res) {
-                $dates = [];
-                $current = $res->check_in->copy();
-                while ($current->lte($res->check_out)) {
-                    $dates[] = $current->format('Y-m-d');
-                    $current->addDay();
-                }
-                return $dates;
-            });
+            $blockedDates  = $propiedad->blockedDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'));
+            $reservedDates = $propiedad->reservations()
+                ->where('status', 'confirmed')
+                ->get()
+                ->flatMap(function ($res) {
+                    $dates   = [];
+                    $current = $res->check_in->copy();
+                    while ($current->lte($res->check_out)) {
+                        $dates[] = $current->format('Y-m-d');
+                        $current->addDay();
+                    }
+                    return $dates;
+                });
 
-        $unavailableDates = $blockedDates->merge($reservedDates)->unique()->values();
-        $similarPropiedades = Property::active()
-            ->where('city', $propiedad->city)
-            ->where('id', '!=', $propiedad->id)
-            ->with('images')
-            ->take(4)
-            ->get();
+            return [
+                'propiedad'         => $propiedad,
+                'unavailableDates'  => $blockedDates->merge($reservedDates)->unique()->values(),
+                'similarPropiedades' => Property::active()
+                    ->where('city', $propiedad->city)
+                    ->where('id', '!=', $propiedad->id)
+                    ->with('images')
+                    ->take(4)
+                    ->get(),
+            ];
+        });
 
-        // Reserva completada del usuario autenticado sin reseña
+        $propiedad          = $cached['propiedad'];
+        $unavailableDates   = $cached['unavailableDates'];
+        $similarPropiedades = $cached['similarPropiedades'];
+
+        // Always fresh — depends on the authenticated user
         $reservaParaReseña = null;
         if (auth()->check()) {
             $reservaParaReseña = $propiedad->reservations()
@@ -216,7 +229,7 @@ class PropertyController extends Controller
             'type' => 'nullable|string|max:100',
             'available_from' => 'nullable|date_format:H:i',
             'available_to' => 'nullable|date_format:H:i',
-            'images.*' => 'nullable|image|max:5120',
+            'images.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $data['address'] = trim($data['street_name'] . ' ' . $data['street_number']);
@@ -229,6 +242,8 @@ class PropertyController extends Controller
         $this->filterDiscounts($data);
 
         $propiedad = Property::create($data);
+
+        PropertyCache::clearListings();
 
         // Services
         $this->syncServices($propiedad, $request->input('services', []));
@@ -330,7 +345,7 @@ class PropertyController extends Controller
             'type' => 'nullable|string|max:100',
             'available_from' => 'nullable|date_format:H:i',
             'available_to' => 'nullable|date_format:H:i',
-            'images.*' => 'nullable|image|max:5120',
+            'images.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         $data['address'] = trim($data['street_name'] . ' ' . $data['street_number']);
@@ -400,6 +415,8 @@ class PropertyController extends Controller
             }
         }
 
+        PropertyCache::clear($propiedad);
+
         return redirect()->route('owner.properties.index')
             ->with('success', 'Propiedad actualizada correctamente.');
     }
@@ -435,6 +452,7 @@ class PropertyController extends Controller
         $this->authorize('update', $propiedad);
         $propiedad->status = $propiedad->status === 'active' ? 'inactive' : 'active';
         $propiedad->save();
+        PropertyCache::clear($propiedad);
         $msg = $propiedad->status === 'active' ? 'Propiedad activada.' : 'Propiedad desactivada.';
         return back()->with('success', $msg);
     }
@@ -452,6 +470,7 @@ class PropertyController extends Controller
     {
         $this->authorize('delete', $propiedad);
         Property::withoutGlobalScope('active')->where('id', $propiedad->id)->update(['deleted' => true]);
+        PropertyCache::clear($propiedad);
         return redirect()->route('owner.properties.index')
             ->with('success', 'Propiedad eliminada.');
     }

@@ -144,12 +144,16 @@ class ReservationController extends Controller
     {
         abort_if($reservation->isCancelled(), 403);
 
+        // Whitelist valid service IDs for this property to prevent IDOR
+        $validServiceIds = $reservation->property->services()->pluck('id');
+
         $reservation->services()->delete();
         foreach ($request->input('reservation_services', []) as $s) {
-            if (empty($s['property_service_id'])) continue;
+            $serviceId = (int) ($s['property_service_id'] ?? 0);
+            if (!$serviceId || !$validServiceIds->contains($serviceId)) continue;
             ReservationService::create([
                 'reservation_id'      => $reservation->id,
-                'property_service_id' => $s['property_service_id'],
+                'property_service_id' => $serviceId,
                 'quantity'            => (float) ($s['quantity'] ?? 1),
                 'price'               => (float) ($s['price'] ?? 0),
             ]);
