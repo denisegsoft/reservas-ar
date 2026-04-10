@@ -129,7 +129,7 @@ document.getElementById('regla-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); addRegla(); }
 });
 
-function addRegla() {
+window.addRegla = function addRegla() {
     var val = document.getElementById('regla-input').value.trim();
     if (!val || reglas.includes(val)) return;
     reglas.push(val);
@@ -137,7 +137,7 @@ function addRegla() {
     renderReglas();
 }
 
-function removeRegla(i) {
+window.removeRegla = function removeRegla(i) {
     reglas.splice(i, 1);
     renderReglas();
 }
@@ -159,7 +159,7 @@ document.getElementById('custom-amenity-input').addEventListener('keydown', func
     if (e.key === 'Enter') { e.preventDefault(); addAmenity(); }
 });
 
-function addAmenity() {
+window.addAmenity = function addAmenity() {
     var val = document.getElementById('custom-amenity-input').value.trim();
     if (!val) return;
     var list = document.getElementById('custom-amenities-list');
@@ -200,7 +200,7 @@ function addPhotos(files) {
     renderPhotos();
 }
 
-function removeNew(i) {
+window.removeNew = function removeNew(i) {
     newFiles.splice(i, 1);
     renderPhotos();
 }

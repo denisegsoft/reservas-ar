@@ -278,7 +278,7 @@ $breadcrumbSchema = [
                     </div>
 
                     <form action="{{ route('reservations.store', $propiedad->slug) }}" method="POST"
-                          x-data="bookingForm()" @submit.prevent="submitForm" x-init="init()">
+                          x-data="bookingForm" @submit.prevent="submitForm">
                         @csrf
                         <div class="space-y-3 mb-4">
                             {{-- Fecha y hora de entrada --}}

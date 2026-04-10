@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function bookingForm() {
-    return {
+document.addEventListener('alpine:init', () => {
+    Alpine.data('bookingForm', () => ({
         checkIn: '',
         checkInTime: '14:00',
         checkOut: '',
@@ -196,8 +196,8 @@ function bookingForm() {
             if (this.errors.checkIn || this.errors.checkOut || this.errors.guests) return;
             this.$el.submit();
         }
-    }
-}
+    }));
+});
 
 (function() {
     var col          = document.getElementById('booking-col');

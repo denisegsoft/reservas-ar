@@ -100,11 +100,13 @@ Alpine.data('addressAutocomplete', (initProvinceId, initPartido, initLocality) =
     },
 }));
 
-Alpine.start();
+document.addEventListener('DOMContentLoaded', () => Alpine.start());
 
 // ── Sidebar ────────────────────────────────────────────────────
 (function () {
-    if (localStorage.getItem('sb') !== '0') document.body.classList.add('sb-open');
+    if (document.getElementById('app-sidebar') && localStorage.getItem('sb') !== '0') {
+        document.body.classList.add('sb-open');
+    }
 })();
 window.sidebarOpen  = () => { document.body.classList.add('sb-open');    localStorage.setItem('sb', '1'); };
 window.sidebarClose = () => { document.body.classList.remove('sb-open'); localStorage.setItem('sb', '0'); };
