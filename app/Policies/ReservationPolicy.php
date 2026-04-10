@@ -18,4 +18,13 @@ class ReservationPolicy
     {
         return $reservation->user_id === $user->id;
     }
+
+    /**
+     * Whether an owner (or admin) can manage a reservation via the owner dashboard.
+     */
+    public function manageAsOwner(User $user, Reservation $reservation): bool
+    {
+        if ($user->isAdmin()) return true;
+        return $user->propiedades()->where('id', $reservation->property_id)->exists();
+    }
 }

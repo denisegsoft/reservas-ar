@@ -18,15 +18,15 @@ class AdminController extends Controller
     public function dashboard()
     {
         $stats = [
-            'total_users' => User::count(),
-            'total_propiedades' => Property::count(),
-            'pending_propiedades' => Property::where('status', 'pending')->count(),
-            'total_reservations' => Reservation::count(),
-            'total_payments' => Reservation::where('payment_status', 'paid')->sum('total_amount'),
-            'pending_reviews' => Review::where('approved', false)->count(),
+            'total_users'         => User::count(),
+            'total_propiedades'   => Property::count(),
+            'pending_propiedades' => Property::pendingReview()->count(),
+            'total_reservations'  => Reservation::count(),
+            'total_payments'      => Reservation::paid()->sum('total_amount'),
+            'pending_reviews'     => Review::where('approved', false)->count(),
         ];
 
-        $pendingPropiedades = Property::where('status', 'pending')->with('owner')->latest()->take(10)->get();
+        $pendingPropiedades = Property::pendingReview()->with('owner')->latest()->take(10)->get();
         $recentReservations = Reservation::with(['property', 'user'])->latest()->take(10)->get();
 
         return view('admin.dashboard', compact('stats', 'pendingPropiedades', 'recentReservations'));

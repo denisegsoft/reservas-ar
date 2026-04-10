@@ -103,6 +103,12 @@ class Property extends Model
             ->exists();
     }
 
+    // ── Query scopes ───────────────────────────────────────────────────────────
+
+    public function scopeActive($query) { return $query->where('status', 'active'); }
+    public function scopePendingReview($query) { return $query->where('status', 'pending'); }
+    public function scopeForOwner($query, \App\Models\User $owner) { return $query->where('user_id', $owner->id); }
+
     public static function typesList(): array
     {
         return PropertyType::list();

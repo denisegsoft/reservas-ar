@@ -6,32 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Mail\InvoiceUploadedNotification;
 use App\Mail\ReservationCancelledClientNotification;
 use App\Mail\ReservationConfirmedNotification;
-use App\Models\Message;
 use App\Models\Property;
 use App\Models\Reservation;
 use App\Models\ReservationService;
 use App\Models\User;
+use App\Services\PricingService;
+use App\Support\MailHelper;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly PricingService $pricing) {}
+
+    // ── Dashboard ──────────────────────────────────────────────────────────────
+
     public function index()
     {
-        $user = Auth::user();
+        $user         = Auth::user();
         $propiedadIds = $user->propiedades()->pluck('id');
 
         $stats = [
-            'total_propiedades' => $user->propiedades()->count(),
-            'active_propiedades' => $user->propiedades()->where('status', 'active')->count(),
-            'total_reservations' => Reservation::whereIn('property_id', $propiedadIds)->count(),
-            'pending_reservations' => Reservation::whereIn('property_id', $propiedadIds)->where('status', 'pending')->count(),
-            'confirmed_reservations' => Reservation::whereIn('property_id', $propiedadIds)->where('status', 'confirmed')->count(),
-            'total_earnings' => Reservation::whereIn('property_id', $propiedadIds)->where('payment_status', 'paid')->sum('total_amount'),
+            'total_propiedades'      => $user->propiedades()->count(),
+            'active_propiedades'     => $user->propiedades()->active()->count(),
+            'total_reservations'     => Reservation::forOwner($user)->count(),
+            'pending_reservations'   => Reservation::forOwner($user)->pending()->count(),
+            'confirmed_reservations' => Reservation::forOwner($user)->confirmed()->count(),
+            'total_earnings'         => Reservation::forOwner($user)->paid()->sum('total_amount'),
         ];
 
-        $recentReservations = Reservation::whereIn('property_id', $propiedadIds)
+        $recentReservations = Reservation::forOwner($user)
             ->with(['property', 'user'])
             ->orderBy('created_at', 'desc')
             ->take(10)
@@ -39,12 +46,11 @@ class DashboardController extends Controller
 
         $propiedades = $user->propiedades()->with('images')->get();
 
-        // Datos para la alerta de suscripción (solo si no tiene suscripción)
         $lockedStats = [];
-        if (!$user->hasSubscription() && !$user->isAdmin()) {
+        if ($user->needsSubscription()) {
             $lockedStats = [
-                'messages'     => Message::where('receiver_id', $user->id)->count(),
-                'reservations' => Reservation::whereIn('property_id', $propiedadIds)->count(),
+                'messages'     => \App\Models\Message::where('receiver_id', $user->id)->count(),
+                'reservations' => Reservation::forOwner($user)->count(),
                 'views'        => max((int) $user->propiedades()->sum('views_count'), 10),
             ];
         }
@@ -52,42 +58,27 @@ class DashboardController extends Controller
         return view('owner.dashboard', compact('stats', 'recentReservations', 'propiedades', 'lockedStats'));
     }
 
-    private function requiresSubscription(): bool
-    {
-        $user = Auth::user();
-        return !$user->isAdmin() && !$user->hasSubscription();
-    }
+    // ── Reservations list ─────────────────────────────────────────────────────
 
     public function reservations(Request $request)
     {
-        if ($this->requiresSubscription()) {
+        if (Auth::user()->needsSubscription()) {
             return redirect()->route('subscription.payment')
                 ->with('info', 'Necesitás activar tu suscripción para ver las reservas recibidas.');
         }
 
-        $user         = Auth::user();
-        $propiedadIds = $user->propiedades()->pluck('id');
-        $propiedades  = $user->propiedades()->orderBy('name')->get(['id', 'name']);
+        $user        = Auth::user();
+        $propiedades = $user->propiedades()->orderBy('name')->get(['id', 'name']);
 
-        $query = Reservation::whereIn('property_id', $propiedadIds)
+        $query = Reservation::forOwner($user)
             ->with(['property', 'user', 'payment'])
             ->orderBy('created_at', 'desc');
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('payment_status')) {
-            $query->where('payment_status', $request->payment_status);
-        }
-        if ($request->filled('property_id')) {
-            $query->where('property_id', $request->property_id);
-        }
-        if ($request->filled('date_from')) {
-            $query->where('check_in', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->where('check_out', '<=', $request->date_to);
-        }
+        if ($request->filled('status'))         $query->where('status', $request->status);
+        if ($request->filled('payment_status')) $query->where('payment_status', $request->payment_status);
+        if ($request->filled('property_id'))    $query->where('property_id', $request->property_id);
+        if ($request->filled('date_from'))      $query->where('check_in', '>=', $request->date_from);
+        if ($request->filled('date_to'))        $query->where('check_out', '<=', $request->date_to);
 
         $reservations = $query->paginate(15)->withQueryString();
 
@@ -96,14 +87,11 @@ class DashboardController extends Controller
 
     public function exportReservations(Request $request)
     {
-        if ($this->requiresSubscription()) {
+        if (Auth::user()->needsSubscription()) {
             return redirect()->route('subscription.payment');
         }
 
-        $user         = Auth::user();
-        $propiedadIds = $user->propiedades()->pluck('id');
-
-        $query = Reservation::whereIn('property_id', $propiedadIds)
+        $query = Reservation::forOwner(Auth::user())
             ->with(['property', 'user'])
             ->orderBy('created_at', 'desc');
 
@@ -114,27 +102,17 @@ class DashboardController extends Controller
         if ($request->filled('date_to'))        $query->where('check_out', '<=', $request->date_to);
 
         $reservations = $query->get();
+        $filename     = 'reservas-' . now()->format('Y-m-d') . '.csv';
 
-        $filename = 'reservas-' . now()->format('Y-m-d') . '.csv';
-
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
-        $callback = function () use ($reservations) {
+        return response()->stream(function () use ($reservations) {
             $handle = fopen('php://output', 'w');
-            // BOM para que Excel abra bien los acentos
-            fwrite($handle, "\xEF\xBB\xBF");
+            fwrite($handle, "\xEF\xBB\xBF"); // BOM for Excel
 
             fputcsv($handle, [
                 'ID', 'Cliente', 'Email', 'Teléfono', 'Propiedad',
                 'Check-in', 'Check-out', 'Días', 'Huéspedes',
                 'Total', 'Estado', 'Pago', 'Fecha de reserva', 'Notas',
             ], ';');
-
-            $statusMap  = ['pending' => 'Pendiente', 'confirmed' => 'Confirmada', 'cancelled' => 'Cancelada', 'completed' => 'Completada'];
-            $paymentMap = ['unpaid' => 'Pendiente', 'paid' => 'Pagado', 'refunded' => 'Reembolsado'];
 
             foreach ($reservations as $r) {
                 fputcsv($handle, [
@@ -148,45 +126,38 @@ class DashboardController extends Controller
                     $r->total_days,
                     $r->guests,
                     number_format($r->total_amount, 2, '.', ''),
-                    $statusMap[$r->status] ?? $r->status,
-                    $paymentMap[$r->payment_status] ?? $r->payment_status,
+                    Reservation::STATUS_LABELS[$r->status]          ?? $r->status,
+                    Reservation::PAYMENT_LABELS[$r->payment_status] ?? $r->payment_status,
                     $r->created_at->format('d/m/Y H:i'),
                     $r->notes ?? '',
                 ], ';');
             }
 
             fclose($handle);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        }, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
+
+    // ── Create reservation ─────────────────────────────────────────────────────
 
     public function createReservation()
     {
-        if ($this->requiresSubscription()) {
+        if (Auth::user()->needsSubscription()) {
             return redirect()->route('subscription.payment')
                 ->with('info', 'Necesitás activar tu suscripción para crear reservas.');
         }
 
-        $propiedades = Auth::user()->propiedades()->where('status', 'active')->with('services')->get();
-        $clientes = User::where('role', 'user')->orderBy('name')->get();
+        $propiedades = Auth::user()->propiedades()->active()->with('services')->get();
+        $clientes    = User::where('role', 'user')->orderBy('name')->get();
 
-        // Reservas confirmadas por propiedad para el calendario
         $reservasPorPropiedad = [];
         foreach ($propiedades as $p) {
-            $reservasPorPropiedad[$p->id] = $p->reservations()
-                ->whereIn('status', ['confirmed', 'pending'])
-                ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
-                ->map(fn($r) => [
-                    'id'       => $r->id,
-                    'check_in' => $r->check_in->format('Y-m-d'),
-                    'check_out'=> $r->check_out->format('Y-m-d'),
-                    'status'   => $r->status,
-                    'guests'   => $r->guests,
-                    'total'    => number_format($r->total_amount, 0, ',', '.'),
-                    'guest'    => $r->user?->full_name ?? 'Cliente',
-                ])
-                ->values();
+            $reservasPorPropiedad[$p->id] = $this->formatReservationsForCalendar(
+                $p->reservations()->active()
+                    ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
+            );
         }
 
         return view('owner.reservation-create', compact('propiedades', 'clientes', 'reservasPorPropiedad'));
@@ -194,28 +165,28 @@ class DashboardController extends Controller
 
     public function storeReservation(Request $request)
     {
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
+        $user         = Auth::user();
+        $propiedadIds = $user->propiedades()->pluck('id');
 
         $request->validate([
-            'property_id'    => 'required|integer|in:' . $propiedadIds->join(','),
-            'user_id'        => 'nullable|exists:users,id',
+            'property_id'      => ['required', 'integer', Rule::in($propiedadIds)],
+            'user_id'          => 'nullable|exists:users,id',
             'client_name'      => 'required_without:user_id|nullable|string|max:255',
             'client_last_name' => 'nullable|string|max:255',
             'client_email'     => 'nullable|email|max:255',
             'client_phone'     => 'nullable|string|max:30',
             'client_dni'       => 'nullable|string|max:20',
-            'check_in'       => 'required|date',
-            'check_out'      => 'required|date|after:check_in',
-            'check_in_time'  => 'nullable',
-            'check_out_time' => 'nullable',
-            'guests'         => 'required|integer|min:1',
-            'total_amount'   => 'required|numeric|min:0',
-            'status'         => 'required|in:pending,confirmed,completed,cancelled',
-            'payment_status' => 'required|in:unpaid,paid,refunded',
-            'notes'          => 'nullable|string|max:1000',
+            'check_in'         => 'required|date',
+            'check_out'        => 'required|date|after:check_in',
+            'check_in_time'    => 'nullable',
+            'check_out_time'   => 'nullable',
+            'guests'           => 'required|integer|min:1',
+            'total_amount'     => 'required|numeric|min:0',
+            'status'           => 'required|in:pending,confirmed,completed,cancelled',
+            'payment_status'   => 'required|in:unpaid,paid,refunded',
+            'notes'            => 'nullable|string|max:1000',
         ]);
 
-        // Si no hay user_id pero hay nombre, buscar o crear usuario
         $userId = $request->user_id;
         if (!$userId && $request->client_name) {
             $client = User::firstOrCreate(
@@ -233,9 +204,7 @@ class DashboardController extends Controller
         }
 
         $property  = Property::find($request->property_id);
-        $checkIn   = \Carbon\Carbon::parse($request->check_in);
-        $checkOut  = \Carbon\Carbon::parse($request->check_out);
-        $totalDays = $checkIn->diffInDays($checkOut);
+        $totalDays = Carbon::parse($request->check_in)->diffInDays(Carbon::parse($request->check_out));
 
         $reservation = Reservation::create([
             'property_id'    => $request->property_id,
@@ -256,43 +225,37 @@ class DashboardController extends Controller
 
         $this->syncReservationServices($reservation, $request->input('reservation_services', []));
 
-        return redirect()->route('owner.reservations.show', $reservation)->with('success', 'Reserva creada correctamente.');
+        return redirect()->route('owner.reservations.show', $reservation)
+            ->with('success', 'Reserva creada correctamente.');
     }
+
+    // ── Show / edit reservation ────────────────────────────────────────────────
 
     public function showReservation(Reservation $reservation)
     {
-        if ($this->requiresSubscription()) {
+        if (Auth::user()->needsSubscription()) {
             return redirect()->route('subscription.payment')
                 ->with('info', 'Necesitás activar tu suscripción para ver los datos de la reserva.');
         }
 
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
-        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+        $this->authorizeOwnerReservation($reservation);
 
-        $reservation->load(['property.services', 'user', 'payment', 'services.propertyService', 'property', 'extraCosts', 'discounts']);
-        \App\Http\Controllers\ReservationController::ensureBreakdown($reservation);
+        $reservation->load(['property.services', 'user', 'payment', 'services.propertyService', 'extraCosts', 'discounts']);
+        $this->pricing->recalculate($reservation);
 
-        $reservasPropiedad = $reservation->property->reservations()
-            ->whereIn('status', ['confirmed', 'pending'])
-            ->where('id', '!=', $reservation->id)
-            ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
-            ->map(fn($r) => [
-                'id'       => $r->id,
-                'check_in' => $r->check_in->format('Y-m-d'),
-                'check_out'=> $r->check_out->format('Y-m-d'),
-                'status'   => $r->status,
-                'guests'   => $r->guests,
-                'total'    => number_format($r->total_amount, 0, ',', '.'),
-                'guest'    => $r->user?->full_name ?? 'Cliente',
-            ])->values();
+        $reservasPropiedad = $this->formatReservationsForCalendar(
+            $reservation->property->reservations()
+                ->active()
+                ->where('id', '!=', $reservation->id)
+                ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
+        );
 
         return view('owner.reservation-show', compact('reservation', 'reservasPropiedad'));
     }
 
     public function updateReservation(Reservation $reservation, Request $request)
     {
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
-        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+        $this->authorizeOwnerReservation($reservation);
 
         $request->validate([
             'status'              => 'sometimes|in:pending,confirmed,cancelled,completed',
@@ -305,18 +268,18 @@ class DashboardController extends Controller
             'guests'              => 'sometimes|integer|min:1',
             'notes'               => 'sometimes|nullable|string|max:1000',
             'cancellation_reason' => 'sometimes|nullable|string|max:1000',
-            'invoice'              => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'extra_costs.*.name'   => 'required|string|max:255',
-            'extra_costs.*.price'  => 'required|numeric|min:0',
-            'discounts.*.name'     => 'required|string|max:255',
-            'discounts.*.price'    => 'required|numeric|min:0',
+            'invoice'             => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'extra_costs.*.name'  => 'required|string|max:255',
+            'extra_costs.*.price' => 'required|numeric|min:0',
+            'discounts.*.name'    => 'required|string|max:255',
+            'discounts.*.price'   => 'required|numeric|min:0',
         ], [
-            'invoice.mimes'               => 'Solo se permiten PDF, JPG o PNG.',
-            'invoice.max'                 => 'El archivo no puede superar 5 MB.',
-            'extra_costs.*.name.required' => 'El nombre del costo es requerido.',
-            'extra_costs.*.price.required'=> 'El precio del costo es requerido.',
-            'discounts.*.name.required'   => 'El nombre del descuento es requerido.',
-            'discounts.*.price.required'  => 'El monto del descuento es requerido.',
+            'invoice.mimes'                => 'Solo se permiten PDF, JPG o PNG.',
+            'invoice.max'                  => 'El archivo no puede superar 5 MB.',
+            'extra_costs.*.name.required'  => 'El nombre del costo es requerido.',
+            'extra_costs.*.price.required' => 'El precio del costo es requerido.',
+            'discounts.*.name.required'    => 'El nombre del descuento es requerido.',
+            'discounts.*.price.required'   => 'El monto del descuento es requerido.',
         ]);
 
         $previousStatus = $reservation->status;
@@ -334,9 +297,9 @@ class DashboardController extends Controller
         $this->syncExtraCosts($reservation, $request->input('extra_costs', []));
         $this->syncDiscounts($reservation, $request->input('discounts', []));
 
-        // Recalcular precio
+        // Recalculate price using PricingService
         $reservation->refresh()->load(['property', 'services', 'extraCosts', 'discounts']);
-        $calc = \App\Http\Controllers\ReservationController::calculateBreakdown([
+        $calc = $this->pricing->calculate([
             'check_in'       => $reservation->check_in->format('Y-m-d'),
             'check_out'      => $reservation->check_out->format('Y-m-d'),
             'check_in_time'  => $reservation->check_in_time,
@@ -344,10 +307,11 @@ class DashboardController extends Controller
         ], $reservation->property);
 
         if (!isset($calc['error'])) {
-            $serviciosTotal   = $reservation->services->sum(fn($s) => $s->price * $s->quantity);
-            $extraCostsTotal  = $reservation->extraCosts->sum('price');
-            $discountsTotal   = $reservation->discounts->sum('price');
+            $serviciosTotal  = $reservation->services->sum(fn($s) => $s->price * $s->quantity);
+            $extraCostsTotal = $reservation->extraCosts->sum('price');
+            $discountsTotal  = $reservation->discounts->sum('price');
             $total = round($calc['subtotal'] + ($reservation->service_fee ?? 0) + $serviciosTotal + $extraCostsTotal - $discountsTotal, 2);
+
             $reservation->update([
                 'price_breakdown' => $calc['breakdown'],
                 'subtotal'        => $calc['subtotal'],
@@ -357,45 +321,25 @@ class DashboardController extends Controller
             ]);
         }
 
-        $newStatus = $reservation->fresh()->status;
-        if ($newStatus !== $previousStatus) {
+        if ($reservation->fresh()->status !== $previousStatus) {
             $reservation->load(['user', 'property.owner']);
-            $this->sendStatusChangeMail($reservation, $newStatus);
+            $this->sendStatusChangeMail($reservation, $reservation->status);
         }
 
-        // Factura
         if ($request->hasFile('invoice')) {
-            if ($reservation->invoice_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($reservation->invoice_path);
-            }
-            $ext  = $request->file('invoice')->getClientOriginalExtension();
-            $date = now()->format('Y-m-d');
-            $path = $request->file('invoice')->storeAs('invoices', "factura-reserva-{$reservation->id}-{$date}.{$ext}", 'public');
-            $reservation->update([
-                'invoice_path'        => $path,
-                'invoice_uploaded_at' => now(),
-            ]);
-            try {
-                $reservation->load(['user', 'property']);
-                Mail::to($reservation->user->email)->send(new InvoiceUploadedNotification($reservation));
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('[Invoice] Mail failed', [
-                    'reservation_id' => $reservation->id,
-                    'error'          => $e->getMessage(),
-                ]);
-            }
+            $this->storeInvoice($reservation, $request);
         }
 
         return back()->with('success', 'Reserva actualizada.');
     }
 
+    // ── PDF / Invoice ──────────────────────────────────────────────────────────
+
     public function downloadPdf(Reservation $reservation)
     {
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
-        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+        $this->authorizeOwnerReservation($reservation);
 
         $reservation->load(['property', 'user', 'services.propertyService', 'extraCosts', 'discounts']);
-
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('owner.reservation-pdf', compact('reservation'));
         $pdf->setPaper('a4', 'portrait');
 
@@ -404,8 +348,7 @@ class DashboardController extends Controller
 
     public function uploadInvoice(Reservation $reservation, Request $request)
     {
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
-        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+        $this->authorizeOwnerReservation($reservation);
 
         $request->validate([
             'invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
@@ -415,57 +358,31 @@ class DashboardController extends Controller
             'invoice.max'      => 'El archivo no puede superar 5 MB.',
         ]);
 
-        // Eliminar factura anterior si existe
-        if ($reservation->invoice_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($reservation->invoice_path);
-        }
-
-        $ext  = $request->file('invoice')->getClientOriginalExtension();
-        $path = $request->file('invoice')->storeAs('invoices', "factura-reserva-{$reservation->id}.{$ext}", 'public');
-
-        $reservation->update([
-            'invoice_path'        => $path,
-            'invoice_uploaded_at' => now(),
-        ]);
-
-        try {
-            $reservation->load(['user', 'property']);
-            Mail::to($reservation->user->email)->send(new InvoiceUploadedNotification($reservation));
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[Invoice] Mail failed', [
-                'reservation_id' => $reservation->id,
-                'error'          => $e->getMessage(),
-            ]);
-        }
+        $this->storeInvoice($reservation, $request);
 
         return back()->with('success', 'Factura subida y notificación enviada al cliente.');
     }
 
     public function deleteInvoice(Reservation $reservation)
     {
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
-        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+        $this->authorizeOwnerReservation($reservation);
 
         if ($reservation->invoice_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($reservation->invoice_path);
+            Storage::disk('public')->delete($reservation->invoice_path);
         }
 
-        $reservation->update([
-            'invoice_path'        => null,
-            'invoice_uploaded_at' => null,
-        ]);
+        $reservation->update(['invoice_path' => null, 'invoice_uploaded_at' => null]);
 
         return back()->with('success', 'Factura eliminada.');
     }
 
     public function previewPrice(Reservation $reservation, Request $request)
     {
-        $propiedadIds = Auth::user()->propiedades()->pluck('id');
-        abort_unless($propiedadIds->contains($reservation->property_id), 403);
+        $this->authorizeOwnerReservation($reservation);
 
         $reservation->load(['property', 'services.propertyService']);
 
-        $calc = \App\Http\Controllers\ReservationController::calculateBreakdown([
+        $calc = $this->pricing->calculate([
             'check_in'       => $request->input('check_in',       $reservation->check_in->format('Y-m-d')),
             'check_out'      => $request->input('check_out',      $reservation->check_out->format('Y-m-d')),
             'check_in_time'  => $request->input('check_in_time',  $reservation->check_in_time),
@@ -476,21 +393,14 @@ class DashboardController extends Controller
             return response()->json(['error' => array_values($calc['error'])[0]], 422);
         }
 
-        // Calcular servicios con las cantidades que vienen del form
-        $services      = $request->input('reservation_services', []);
-        $serviciosTotal = 0;
-        foreach ($services as $s) {
-            $serviciosTotal += (float)($s['price'] ?? 0) * (float)($s['quantity'] ?? 1);
-        }
-        // Si no vienen servicios en el request, usar los actuales de la reserva
-        if (empty($services)) {
-            $serviciosTotal = $reservation->services->sum(fn($s) => $s->price * $s->quantity);
-        }
+        $services       = $request->input('reservation_services', []);
+        $serviciosTotal = empty($services)
+            ? $reservation->services->sum(fn($s) => $s->price * $s->quantity)
+            : array_sum(array_map(fn($s) => (float)($s['price'] ?? 0) * (float)($s['quantity'] ?? 1), $services));
 
         $total = round($calc['subtotal'] + ($reservation->service_fee ?? 0) + $serviciosTotal, 2);
 
-        // Clonar reserva en memoria con los valores recalculados para renderizar el componente
-        $preview = clone $reservation;
+        $preview                = clone $reservation;
         $preview->price_breakdown = $calc['breakdown'];
         $preview->subtotal        = $calc['subtotal'];
         $preview->total_days      = $calc['totalDays'];
@@ -506,20 +416,84 @@ class DashboardController extends Controller
         return response()->json(['html' => $html]);
     }
 
+    // ── Properties list ────────────────────────────────────────────────────────
+
+    public function propiedadesList()
+    {
+        $propiedades = Auth::user()->propiedades()
+            ->with(['images', 'reservations' => function ($q) {
+                $q->active()->with('user')->orderBy('check_in');
+            }])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('owner.propiedades', compact('propiedades'));
+    }
+
+    // ── Private helpers ────────────────────────────────────────────────────────
+
+    private function authorizeOwnerReservation(Reservation $reservation): void
+    {
+        abort_unless(
+            Auth::user()->isAdmin() || Auth::user()->propiedades()->where('id', $reservation->property_id)->exists(),
+            403
+        );
+    }
+
+    private function formatReservationsForCalendar($reservations): \Illuminate\Support\Collection
+    {
+        return $reservations->map(fn($r) => [
+            'id'        => $r->id,
+            'check_in'  => $r->check_in->format('Y-m-d'),
+            'check_out' => $r->check_out->format('Y-m-d'),
+            'status'    => $r->status,
+            'guests'    => $r->guests,
+            'total'     => number_format($r->total_amount, 0, ',', '.'),
+            'guest'     => $r->user?->full_name ?? 'Cliente',
+        ])->values();
+    }
+
+    private function storeInvoice(Reservation $reservation, Request $request): void
+    {
+        if ($reservation->invoice_path) {
+            Storage::disk('public')->delete($reservation->invoice_path);
+        }
+
+        $ext  = $request->file('invoice')->getClientOriginalExtension();
+        $date = now()->format('Y-m-d');
+        $path = $request->file('invoice')->storeAs(
+            'invoices',
+            "factura-reserva-{$reservation->id}-{$date}.{$ext}",
+            'public'
+        );
+
+        $reservation->update(['invoice_path' => $path, 'invoice_uploaded_at' => now()]);
+
+        $reservation->load(['user', 'property']);
+        MailHelper::send(
+            $reservation->user->email,
+            new InvoiceUploadedNotification($reservation),
+            '[Invoice]',
+            ['reservation_id' => $reservation->id]
+        );
+    }
+
     private function sendStatusChangeMail(Reservation $reservation, string $newStatus): void
     {
-        try {
-            if ($newStatus === 'confirmed') {
-                Mail::to($reservation->user->email)->send(new ReservationConfirmedNotification($reservation));
-            } elseif ($newStatus === 'cancelled') {
-                Mail::to($reservation->user->email)->send(new ReservationCancelledClientNotification($reservation));
-            }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[DashboardController] Status change mail failed', [
-                'reservation_id' => $reservation->id,
-                'new_status' => $newStatus,
-                'error' => $e->getMessage(),
-            ]);
+        if ($newStatus === 'confirmed') {
+            MailHelper::send(
+                $reservation->user->email,
+                new ReservationConfirmedNotification($reservation),
+                '[DashboardController]',
+                ['reservation_id' => $reservation->id]
+            );
+        } elseif ($newStatus === 'cancelled') {
+            MailHelper::send(
+                $reservation->user->email,
+                new ReservationCancelledClientNotification($reservation),
+                '[DashboardController]',
+                ['reservation_id' => $reservation->id]
+            );
         }
     }
 
@@ -561,18 +535,5 @@ class DashboardController extends Controller
                 'price'               => (float) ($s['price'] ?? 0),
             ]);
         }
-    }
-
-    public function propiedadesList()
-    {
-        $propiedades = Auth::user()->propiedades()
-            ->with(['images', 'reservations' => function ($q) {
-                $q->whereIn('status', ['pending', 'confirmed'])
-                  ->with('user')
-                  ->orderBy('check_in');
-            }])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        return view('owner.propiedades', compact('propiedades'));
     }
 }

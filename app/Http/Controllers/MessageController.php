@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use App\Mail\NewMessageNotification;
 use App\Models\Message;
 use App\Models\User;
+use App\Support\MailHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
 {
     private function ownerRequiresSubscription(): bool
     {
         $user = auth()->user();
-        return $user->isOwner() && !$user->isAdmin() && !$user->hasSubscription();
+        return $user->isOwner() && $user->needsSubscription();
     }
 
     // Inbox: lista de conversaciones
@@ -105,9 +105,8 @@ class MessageController extends Controller
     {
         $request->validate(['body' => 'required|string|max:1000']);
 
-        // Propietarios sin suscripción no pueden enviar mensajes
         $authUser = auth()->user();
-        if ($authUser->isOwner() && !$authUser->isAdmin() && !$authUser->hasSubscription()) {
+        if ($authUser->isOwner() && $authUser->needsSubscription()) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Suscripción requerida para enviar mensajes.'], 403);
             }
@@ -121,11 +120,7 @@ class MessageController extends Controller
             'body'           => $request->body,
         ]);
 
-        try {
-            Mail::to($user->email)->send(new NewMessageNotification($user, auth()->user()));
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[Message] Mail failed', ['error' => $e->getMessage()]);
-        }
+        MailHelper::send($user->email, new NewMessageNotification($user, auth()->user()), '[Message]');
 
         if ($request->expectsJson()) {
             return response()->json([

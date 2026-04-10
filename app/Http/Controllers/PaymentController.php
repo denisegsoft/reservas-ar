@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\ReservationConfirmedNotification;
 use App\Models\Reservation;
 use App\Models\Payment;
+use App\Support\MailHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Payment\PaymentClient;
@@ -109,16 +109,10 @@ class PaymentController extends Controller
                 if ($payment && $payment->external_reference) {
                     $ref = $payment->external_reference;
 
-                    if (str_starts_with($ref, 'subscription-')) {
-                        // Pago de suscripción de propietario
-                        $userId = (int) str_replace('subscription-', '', $ref);
-                        if ($userId) {
-                            \App\Http\Controllers\SubscriptionController::processWebhookPayment($userId, (string) $id, $payment);
-                        }
-                    } elseif (str_starts_with($ref, 'reservation-')) {
-                        // Pago de reserva
-                        $reservationId = str_replace('reservation-', '', $ref);
-                        $reservation = Reservation::find($reservationId);
+                    if (preg_match('/^subscription-(\d+)$/', $ref, $m)) {
+                        \App\Http\Controllers\SubscriptionController::processWebhookPayment((int) $m[1], (string) $id, $payment);
+                    } elseif (preg_match('/^reservation-(\d+)$/', $ref, $m)) {
+                        $reservation = Reservation::find((int) $m[1]);
                         if ($reservation) {
                             $this->processPayment($reservation, $id, $payment->status);
                         }
@@ -148,15 +142,13 @@ class PaymentController extends Controller
                 'payment_status' => 'paid',
             ]);
 
-            try {
-                $reservation->load(['user', 'property']);
-                Mail::to($reservation->user->email)->send(new ReservationConfirmedNotification($reservation));
-            } catch (\Throwable $e) {
-                Log::error('[Payment] Confirmed mail failed', [
-                    'reservation_id' => $reservation->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
+            $reservation->load(['user', 'property']);
+            MailHelper::send(
+                $reservation->user->email,
+                new ReservationConfirmedNotification($reservation),
+                '[Payment]',
+                ['reservation_id' => $reservation->id]
+            );
         } else {
             $paymentRecord->save();
         }

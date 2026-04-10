@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Models\SubscriptionPayment;
 use App\Models\User;
+use App\Support\MailHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use MercadoPago\Client\Preference\PreferenceClient;
@@ -230,12 +231,12 @@ class SubscriptionController extends Controller
 
         $user = User::find($userId);
         if ($user) {
-            try {
-                \Illuminate\Support\Facades\Mail::to($user->email)
-                    ->send(new \App\Mail\SubscriptionActivatedNotification($user));
-            } catch (\Throwable $e) {
-                Log::error('[Subscription] Mail failed', ['user_id' => $userId, 'error' => $e->getMessage()]);
-            }
+            MailHelper::send(
+                $user->email,
+                new \App\Mail\SubscriptionActivatedNotification($user),
+                '[Subscription]',
+                ['user_id' => $userId]
+            );
         }
     }
 

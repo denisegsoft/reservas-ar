@@ -10,6 +10,19 @@ class Reservation extends Model
 {
     use HasFactory;
 
+    public const STATUS_LABELS = [
+        'pending'   => 'Pendiente',
+        'confirmed' => 'Confirmada',
+        'cancelled' => 'Cancelada',
+        'completed' => 'Completada',
+    ];
+
+    public const PAYMENT_LABELS = [
+        'unpaid'   => 'Pendiente',
+        'paid'     => 'Pagado',
+        'refunded' => 'Reembolsado',
+    ];
+
     protected $fillable = [
         'property_id', 'user_id', 'check_in', 'check_in_time', 'check_out', 'check_out_time', 'guests',
         'price_per_day', 'total_days', 'subtotal', 'price_breakdown', 'service_fee', 'total_amount',
@@ -69,4 +82,21 @@ class Reservation extends Model
     public function isConfirmed(): bool { return $this->status === 'confirmed'; }
     public function isCancelled(): bool { return $this->status === 'cancelled'; }
     public function isPaid(): bool { return $this->payment_status === 'paid'; }
+
+    // ── Query scopes ───────────────────────────────────────────────────────────
+
+    public function scopePending($query) { return $query->where('status', 'pending'); }
+    public function scopeConfirmed($query) { return $query->where('status', 'confirmed'); }
+    public function scopeCancelled($query) { return $query->where('status', 'cancelled'); }
+    public function scopeCompleted($query) { return $query->where('status', 'completed'); }
+    public function scopePaid($query) { return $query->where('payment_status', 'paid'); }
+
+    /** Active = pending or confirmed (not yet done or cancelled). */
+    public function scopeActive($query) { return $query->whereIn('status', ['pending', 'confirmed']); }
+
+    /** Scope to reservations belonging to a given owner (via their properties). */
+    public function scopeForOwner($query, \App\Models\User $owner)
+    {
+        return $query->whereIn('property_id', $owner->propiedades()->select('id'));
+    }
 }

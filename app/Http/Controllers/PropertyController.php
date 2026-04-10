@@ -18,7 +18,7 @@ class PropertyController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Property::where('status', 'active')->with('images');
+        $query = Property::active()->with('images');
 
         if ($request->filled('state')) {
             $query->where('state', $request->state);
@@ -141,7 +141,7 @@ class PropertyController extends Controller
             });
 
         $unavailableDates = $blockedDates->merge($reservedDates)->unique()->values();
-        $similarPropiedades = Property::where('status', 'active')
+        $similarPropiedades = Property::active()
             ->where('city', $propiedad->city)
             ->where('id', '!=', $propiedad->id)
             ->with('images')
@@ -258,12 +258,12 @@ class PropertyController extends Controller
 
         // Si no tiene suscripción, verificar si hay datos de contacto
         $pendingByContact = false;
-        if (!Auth::user()->hasSubscription() && $this->hasContactInfo($request, $data, $uploadedPaths)) {
+        if (Auth::user()->needsSubscription() && $this->hasContactInfo($request, $data, $uploadedPaths)) {
             $propiedad->update(['status' => 'pending']);
             $pendingByContact = true;
         }
 
-        if (!Auth::user()->hasSubscription()) {
+        if (Auth::user()->needsSubscription()) {
             return redirect()->route('subscription.payment')
                 ->with('success', $pendingByContact
                     ? 'Tu propiedad está pendiente de revisión. Te avisaremos cuando sea aprobada.'
@@ -387,7 +387,7 @@ class PropertyController extends Controller
         $this->syncServices($propiedad, $request->input('services', []));
 
         // Si no tiene suscripción, verificar datos de contacto en textos y todas las imágenes
-        if (!Auth::user()->hasSubscription()) {
+        if (Auth::user()->needsSubscription()) {
             $allImagePaths = $propiedad->images()->pluck('path')->toArray();
             if ($this->hasContactInfo($request, $data, $allImagePaths)) {
                 $propiedad->update(['status' => 'pending']);

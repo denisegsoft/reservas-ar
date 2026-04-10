@@ -49,11 +49,17 @@ class User extends Authenticatable
 
     public function hasSubscription(): bool
     {
-        if ($this->subscription_paid === true && $this->subscriptionPayments()->where('status', 'approved')->exists()) {
-            return true;
-        }
+        return $this->subscription_paid === true
+            && $this->subscriptionPayments()->where('status', 'approved')->exists();
+    }
 
-        return false;
+    /**
+     * Returns true when this owner must activate their subscription to access gated features.
+     * Admins are always exempt.
+     */
+    public function needsSubscription(): bool
+    {
+        return !$this->isAdmin() && !$this->hasSubscription();
     }
 
     public function propiedades() { return $this->hasMany(Property::class); }
