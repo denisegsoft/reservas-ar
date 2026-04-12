@@ -60,7 +60,7 @@
             <div class="flex items-center gap-3">
                 @guest
                     <a href="{{ route('login') }}" class="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">Ingresar</a>
-                    <a href="{{ route('register') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all shadow-sm hover:shadow-indigo-200">Registrarse</a>
+                    <a href="{{ route('register') }}" class="hidden-sm bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all shadow-sm hover:shadow-indigo-200">Registrarse</a>
                 @endguest
                 @auth
                 @php
