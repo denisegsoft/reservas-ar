@@ -49,6 +49,11 @@ class User extends Authenticatable
 
     public function hasSubscription(): bool
     {
+        // If the subscription module is globally disabled, treat everyone as subscribed
+        if (Setting::get('subscription_enabled', '1') === '0') {
+            return true;
+        }
+
         return $this->subscription_paid === true
             && $this->subscriptionPayments()->where('status', 'approved')->exists();
     }

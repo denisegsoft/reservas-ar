@@ -51,6 +51,25 @@
                 </div>
             </div>
 
+            {{-- Módulo de suscripción --}}
+            <div class="flex items-center justify-between p-6">
+                <div class="flex-1 pr-8">
+                    <p class="font-semibold text-gray-900 text-sm">Módulo de suscripción</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Cuando está desactivado, todos los propietarios tienen acceso completo sin necesidad de pagar. Los bloqueos, banners y restricciones de contacto no se muestran.
+                    </p>
+                </div>
+                <div x-data="{ on: {{ $settings['subscription_enabled'] === '1' ? 'true' : 'false' }} }">
+                    <input type="hidden" name="subscription_enabled" :value="on ? '1' : '0'">
+                    <button type="button" @click="on = !on"
+                            :class="on ? 'bg-indigo-600' : 'bg-gray-200'"
+                            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <span :class="on ? 'translate-x-6' : 'translate-x-1'"
+                              class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"></span>
+                    </button>
+                </div>
+            </div>
+
             {{-- Precio suscripción propietario --}}
             <div class="flex items-center justify-between p-6">
                 <div class="flex-1 pr-8">

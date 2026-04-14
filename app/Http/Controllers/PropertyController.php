@@ -239,6 +239,7 @@ class PropertyController extends Controller
         $data['slug'] = Str::slug($data['name']);
         $data['rules'] = $request->filled('rules') ? explode("\n", $request->rules) : null;
         $data['status'] = 'active';
+        $data['min_days'] = $data['min_days'] ?? 1;
         $this->filterDiscounts($data);
 
         $propiedad = Property::create($data);
@@ -352,6 +353,7 @@ class PropertyController extends Controller
         $data['city'] = $data['locality'];
         $data['country'] = $data['country'] ?? 'Argentina';
         $data['rules'] = $request->filled('rules') ? explode("\n", $request->rules) : null;
+        $data['min_days'] = $data['min_days'] ?? 1;
         $this->filterDiscounts($data);
 
         // Log newly added custom amenities

@@ -100,6 +100,10 @@ class SubscriptionController extends Controller
     // Muestra la página de pago
     public function show()
     {
+        if (Setting::get('subscription_enabled', '1') === '0') {
+            return redirect()->route('owner.dashboard');
+        }
+
         $user = auth()->user();
 
         if ($user->hasSubscription()) {
@@ -117,6 +121,10 @@ class SubscriptionController extends Controller
     // Redirige directo a MercadoPago (desde alertas/banners)
     public function redirectToMP()
     {
+        if (Setting::get('subscription_enabled', '1') === '0') {
+            return redirect()->route('owner.dashboard');
+        }
+
         $user = auth()->user();
 
         if ($user->hasSubscription()) {

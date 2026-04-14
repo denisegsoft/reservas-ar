@@ -100,9 +100,10 @@ class AdminController extends Controller
     public function settings()
     {
         $settings = [
-            'avatar_required'    => Setting::get('avatar_required', '1'),
-            'reviews_enabled'    => Setting::get('reviews_enabled', '1'),
-            'subscription_price' => Setting::get('subscription_price', '3000'),
+            'avatar_required'       => Setting::get('avatar_required', '1'),
+            'reviews_enabled'       => Setting::get('reviews_enabled', '1'),
+            'subscription_enabled'  => Setting::get('subscription_enabled', '1'),
+            'subscription_price'    => Setting::get('subscription_price', '3000'),
         ];
 
         return view('admin.settings', compact('settings'));
@@ -110,9 +111,10 @@ class AdminController extends Controller
 
     public function updateSettings(Request $request)
     {
-        Setting::set('avatar_required',    $request->boolean('avatar_required') ? '1' : '0');
-        Setting::set('reviews_enabled',    $request->boolean('reviews_enabled')  ? '1' : '0');
-        Setting::set('subscription_price', (string) max(1, (int) $request->input('subscription_price', 3000)));
+        Setting::set('avatar_required',      $request->boolean('avatar_required')     ? '1' : '0');
+        Setting::set('reviews_enabled',      $request->boolean('reviews_enabled')      ? '1' : '0');
+        Setting::set('subscription_enabled', $request->boolean('subscription_enabled') ? '1' : '0');
+        Setting::set('subscription_price',   (string) max(1, (int) $request->input('subscription_price', 3000)));
 
         return back()->with('success', 'Configuración guardada.');
     }

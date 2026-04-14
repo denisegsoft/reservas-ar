@@ -42,7 +42,7 @@ if ($propiedad->latitude && $propiedad->longitude) {
     ];
 }
 @endphp
-<script type="application/ld+json">{{ json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) }}</script>
+<script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}</script>
 
 @php
 $breadcrumbSchema = [
@@ -55,7 +55,7 @@ $breadcrumbSchema = [
     ],
 ];
 @endphp
-<script type="application/ld+json">{{ json_encode($breadcrumbSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) }}</script>
+<script type="application/ld+json">{!! json_encode($breadcrumbSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}</script>
 @endpush
 
 @section('content')
@@ -183,20 +183,29 @@ $breadcrumbSchema = [
             </div>
 
             {{-- Stats row --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
                 <div class="bg-indigo-50 rounded-2xl p-4 text-center">
+                    <div class="text-2xl mb-1">👥</div>
                     <div class="text-2xl font-bold text-indigo-700">{{ $propiedad->capacity }}</div>
                     <div class="text-xs text-indigo-500 mt-0.5">Personas</div>
                 </div>
                 <div class="bg-purple-50 rounded-2xl p-4 text-center">
+                    <div class="text-2xl mb-1">🏠</div>
                     <div class="text-2xl font-bold text-purple-700">{{ $propiedad->rooms }}</div>
-<div class="text-xs text-purple-500 mt-0.5">Ambientes</div>
+                    <div class="text-xs text-purple-500 mt-0.5">Ambientes</div>
+                </div>
+                <div class="bg-sky-50 rounded-2xl p-4 text-center">
+                    <div class="text-2xl mb-1">🛏️</div>
+                    <div class="text-2xl font-bold text-sky-700">{{ $propiedad->beds }}</div>
+                    <div class="text-xs text-sky-500 mt-0.5">Camas</div>
                 </div>
                 <div class="bg-pink-50 rounded-2xl p-4 text-center">
+                    <div class="text-2xl mb-1">🚿</div>
                     <div class="text-2xl font-bold text-pink-700">{{ $propiedad->bathrooms }}</div>
                     <div class="text-xs text-pink-500 mt-0.5">Baños</div>
                 </div>
                 <div class="bg-orange-50 rounded-2xl p-4 text-center">
+                    <div class="text-2xl mb-1">🚗</div>
                     <div class="text-2xl font-bold text-orange-700">{{ $propiedad->parking_spots }}</div>
                     <div class="text-xs text-orange-500 mt-0.5">Estacionamientos</div>
                 </div>
