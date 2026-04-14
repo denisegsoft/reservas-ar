@@ -20,19 +20,15 @@
     <meta property="og:title" content="ReservaTuEspacio | @yield('title', 'Inicio')">
     <meta property="og:description" content="@yield('description', 'Encontrá y reservá quintas, salones y espacios para eventos en Argentina. Más de 500 propiedades verificadas.')">
     <meta property="og:url" content="{{ url()->current() }}">
-    @if($__env->hasSection('og_image'))
-    <meta property="og:image" content="@yield('og_image')">
+    <meta property="og:image" content="@yield('og_image', asset('images/propiedad-placeholder.jpg'))">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    @endif
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ReservaTuEspacio | @yield('title', 'Inicio')">
     <meta name="twitter:description" content="@yield('description', 'Encontrá y reservá quintas, salones y espacios para eventos en Argentina.')">
-    @if($__env->hasSection('og_image'))
-    <meta name="twitter:image" content="@yield('og_image')">
-    @endif
+    <meta name="twitter:image" content="@yield('og_image', asset('images/propiedad-placeholder.jpg'))">
 
     @stack('head')
     @vite(['resources/css/app.css', 'resources/js/app.js'])

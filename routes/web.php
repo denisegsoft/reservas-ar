@@ -15,11 +15,15 @@ use App\Http\Controllers\SuggestionController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\GeoController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 // Geo API (public)
 Route::get('/geo/partidos', [GeoController::class, 'partidos'])->name('geo.partidos');
 Route::get('/geo/localidades', [GeoController::class, 'localidades'])->name('geo.localidades');
+
+// Sitemap
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');

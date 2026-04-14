@@ -1,5 +1,5 @@
 @extends('layouts.main')
-@section('title', $propiedad->name)
+@section('title', $propiedad->name . ' - ' . $propiedad->city . ', ' . $propiedad->state)
 @section('description', $propiedad->short_description ?? \Illuminate\Support\Str::limit(strip_tags($propiedad->description), 160))
 @section('keywords', $propiedad->name . ', quintas ' . $propiedad->city . ', espacios para eventos ' . $propiedad->city . ', alquiler quintas ' . $propiedad->state)
 @section('og_type', 'article')
@@ -56,6 +56,35 @@ $breadcrumbSchema = [
 ];
 @endphp
 <script type="application/ld+json">{!! json_encode($breadcrumbSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}</script>
+
+@if($propiedad->reviews->count())
+@php
+$reviewsSchema = [
+    '@context' => 'https://schema.org',
+    '@type'    => 'ItemList',
+    'itemListElement' => $propiedad->reviews->map(function ($review, $i) use ($propiedad) {
+        return [
+            '@type'    => 'ListItem',
+            'position' => $i + 1,
+            'item'     => [
+                '@type'         => 'Review',
+                'author'        => ['@type' => 'Person', 'name' => $review->user->full_name],
+                'datePublished' => $review->created_at->toDateString(),
+                'reviewRating'  => [
+                    '@type'       => 'Rating',
+                    'ratingValue' => (string) $review->rating,
+                    'bestRating'  => '5',
+                    'worstRating' => '1',
+                ],
+                'reviewBody'    => $review->comment,
+                'itemReviewed'  => ['@type' => 'LocalBusiness', 'name' => $propiedad->name],
+            ],
+        ];
+    })->values()->all(),
+];
+@endphp
+<script type="application/ld+json">{!! json_encode($reviewsSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}</script>
+@endif
 @endpush
 
 @section('content')
@@ -82,6 +111,7 @@ $breadcrumbSchema = [
                     @foreach($propiedad->images as $i => $image)
                     <img x-show="active === {{ $i }}" src="{{ $image->url }}" alt="{{ $propiedad->name }}"
                          style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;"
+                         loading="{{ $i === 0 ? 'eager' : 'lazy' }}"
                          onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80'">
                     @endforeach
                     @if($propiedad->images->count() > 1)

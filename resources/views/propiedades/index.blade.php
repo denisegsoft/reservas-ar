@@ -1,7 +1,8 @@
 @extends('layouts.main')
-@section('title', 'Buscar Propiedades')
+@section('title', 'Buscar Propiedades' . (request('state') ? ' en ' . request('state') : ''))
 @section('description', 'Buscá y reservá quintas, salones y espacios para eventos en Argentina. Filtrá por provincia, ciudad, capacidad y precio. Encontrá el lugar perfecto para tu evento.')
 @section('keywords', 'quintas para eventos Argentina, salones de fiestas, alquiler quintas, buscar quintas' . (request('state') ? ', quintas ' . request('state') : ''))
+@section('canonical', route('properties.index', array_filter(['state' => request('state'), 'city' => request('city'), 'type' => request('type'), 'guests' => request('guests')])))
 @section('content')
 
 @php
@@ -468,10 +469,10 @@
 
                 {{-- Desktop top bar --}}
                 <div class="hidden lg:flex items-center justify-between mb-6 gap-4 flex-wrap">
-                    <p class="text-gray-600 text-sm">
+                    <h1 class="text-gray-600 text-sm font-normal">
                         <span class="font-semibold text-gray-900">{{ $propiedades->total() }}</span> propiedades encontradas
                         @if(request('state')) en <span class="font-semibold">{{ request('state') }}</span>@endif
-                    </p>
+                    </h1>
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-medium text-gray-500 whitespace-nowrap">Ordenar</span>
                         <select id="sort-select" class="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
