@@ -111,6 +111,40 @@
                     <p class="mt-1 text-xs text-gray-400">Ej: https://wa.me/5491112345678 (código de país sin el +)</p>
                     <p id="err_whatsapp_link" class="mt-1 text-sm text-red-600 hidden"></p>
                 </div>
+
+                @if(!$hasWaRequest)
+                <div x-data="{ sent: false, loading: false,
+                    async send() {
+                        if (this.sent || this.loading) return;
+                        this.loading = true;
+                        try {
+                            await fetch('{{ route('profile.request-whatsapp') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                    'Accept': 'application/json',
+                                },
+                            });
+                            this.sent = true;
+                        } catch(e) {}
+                        this.loading = false;
+                    }
+                }">
+                    <p class="text-xs text-gray-400">
+                        ¿Necesitas automatizar las respuestas en tu número de WhatsApp Business?
+                        <button type="button" @click="send"
+                            :disabled="sent || loading"
+                            class="font-medium underline text-green-600 hover:text-green-800 disabled:opacity-50 disabled:no-underline disabled:cursor-default transition-colors">
+                            <span x-show="!sent && !loading">Haz clic aquí y te ayudamos</span>
+                            <span x-show="loading" class="inline-flex items-center gap-1">
+                                <svg class="btn-spinner w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0110 10" /></svg>
+                                Enviando...
+                            </span>
+                            <span x-show="sent">¡Solicitud enviada! Te contactaremos pronto.</span>
+                        </button>
+                    </p>
+                </div>
+                @endif
             </div>
 
 

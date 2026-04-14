@@ -18,7 +18,7 @@ class Property extends Model
         'address', 'street_name', 'street_number', 'locality', 'partido', 'city', 'state', 'country', 'zip_code', 'latitude', 'longitude', 'map_url',
         'price_per_hour', 'price_per_day', 'price_per_week', 'price_per_month', 'price_weekend',
         'hour_day_threshold', 'day_discounts', 'date_discounts', 'weekday_discounts',
-        'capacity', 'bedrooms', 'beds', 'bathrooms',
+        'capacity', 'bedrooms', 'beds', 'rooms', 'bathrooms',
         'parking_spots', 'amenities', 'cover_image', 'status', 'rating',
         'reviews_count', 'featured', 'rules', 'min_days', 'max_days', 'type', 'available_from', 'available_to', 'deleted', 'views_count',
     ];

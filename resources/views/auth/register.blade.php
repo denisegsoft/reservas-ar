@@ -95,8 +95,8 @@
         </div>
 
         {{-- Newsletter --}}
-        <div class="flex items-start gap-3 bg-indigo-50 border border-indigo-100 rounded-xl p-3.5">
-            <input id="newsletter" type="checkbox" name="newsletter" value="1"
+        <div  style="display:none" class="flex items-start gap-3 bg-indigo-50 border border-indigo-100 rounded-xl p-3.5">
+            <input id="newsletter" type="checkbox" checked name="newsletter" value="1"
                    {{ old('newsletter') ? 'checked' : '' }}
                    class="w-4 h-4 mt-0.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer flex-shrink-0">
             <label for="newsletter" class="text-sm text-indigo-800 cursor-pointer leading-snug">

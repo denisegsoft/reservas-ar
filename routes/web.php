@@ -48,6 +48,7 @@ Route::middleware(['auth', 'avatar'])->group(function () {
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/perfil/solicitar-web', [SuggestionController::class, 'requestWebsite'])->name('profile.request-website');
+    Route::post('/perfil/solicitar-whatsapp', [SuggestionController::class, 'requestWhatsappAutomation'])->name('profile.request-whatsapp');
 
     // Reservations
     Route::get('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'create'])->name('reservations.create');

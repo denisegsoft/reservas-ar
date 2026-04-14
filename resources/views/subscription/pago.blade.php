@@ -8,7 +8,11 @@
     @if(session('success'))
     <div class="mb-6 bg-green-50 border border-green-200 text-green-800 text-sm px-5 py-3.5 rounded-2xl flex items-center gap-2">
         <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-        <span>{{ session('success') }}</span>
+        <span>{{ session('success') }}
+            @if(session('success_property_slug'))
+                <a href="{{ route('properties.show', session('success_property_slug')) }}" class="ml-2 font-semibold underline hover:text-green-900 whitespace-nowrap">Ver propiedad →</a>
+            @endif
+        </span>
     </div>
     @endif
 
@@ -52,7 +56,7 @@
                     <span class="text-xl mt-0.5">💰</span>
                     <div>
                         <p class="text-white font-semibold text-sm">Concretá tus ventas</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Nombre, teléfono, mensajes y contacto directo con tus clientes y posibles clientes</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Contacto directo con tus clientes y posibles clientes, marketing, posicionamiento, asesoría de ventas</p>
                     </div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
@@ -120,7 +124,7 @@
                 <ul class="text-amber-700 text-sm space-y-1">
                     <li>• Los clientes no ven tu información de contacto</li>
                     <li>• No podés ver quién solicitó una reserva</li>
-                    <li>• No podés leer ni responder mensajes</li>
+                    <li>• Acceso limitado a la plataforma</li>
                 </ul>
             </div>
         </div>

@@ -40,3 +40,4 @@
     pointer-events: none;
 }
 #drag-overlay.active { display: flex; }
+@media (min-width: 640px) { .sm\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }

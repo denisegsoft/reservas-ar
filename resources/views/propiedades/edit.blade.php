@@ -191,11 +191,16 @@
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Precio y Capacidad</h2>
             {{-- Fila de precios --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4" x-data="{ rentsByHour: {{ old('price_per_hour', $propiedad->price_per_hour) ? 'true' : 'false' }} }">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Precio/hora (ARS) *</label>
-                    <input type="number" name="price_per_hour" value="{{ old('price_per_hour', $propiedad->price_per_hour ?? '') }}" required min="1" step="100"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5" :class="!rentsByHour && 'text-gray-400'">Precio/hora (ARS) <span x-show="rentsByHour">*</span></label>
+                    <input type="number" name="price_per_hour" value="{{ old('price_per_hour', $propiedad->price_per_hour ?? '') }}" min="1" step="100"
+                        :disabled="!rentsByHour"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-50 disabled:text-gray-300">
+                    <label class="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                        <input type="checkbox" x-model="rentsByHour" class="w-4 h-4 rounded accent-indigo-600">
+                        <span class="text-sm text-gray-600">¿Alquila por hora?</span>
+                    </label>
                     @error('price_per_hour')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
@@ -207,15 +212,20 @@
             </div>
 
             {{-- Resto de campos --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Capacidad *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Huéspedes *</label>
                     <input type="number" name="capacity" value="{{ old('capacity', $propiedad->capacity) }}" required min="1"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Habitaciones *</label>
-                    <input type="number" name="bedrooms" value="{{ old('bedrooms', $propiedad->bedrooms) }}" min="0" placeholder="0"
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Ambientes *</label>
+                    <input type="number" name="rooms" value="{{ old('rooms', $propiedad->rooms) }}" min="0" placeholder="0"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Camas *</label>
+                    <input type="number" name="beds" value="{{ old('beds', $propiedad->beds) }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
@@ -228,23 +238,26 @@
                     <input type="number" name="parking_spots" value="{{ old('parking_spots', $propiedad->parking_spots) }}" min="0" placeholder="0"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estadía mínima (días)</label>
-                    <input type="number" name="min_days" value="{{ old('min_days', $propiedad->min_days ?? 1) }}" min="1"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estadía mínima (noches) <small class="text-gray-400 font-normal">opcional</small></label>
+                    <input type="number" name="min_days" value="{{ old('min_days', $propiedad->min_days) }}" min="1"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Sin límite">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estadía máxima (días)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Estadía máxima (noches) <small class="text-gray-400 font-normal">opcional</small></label>
                     <input type="number" name="max_days" value="{{ old('max_days', $propiedad->max_days) }}" min="1"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Sin límite">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Disponible desde (hora)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Disponible desde (hora) <small class="text-gray-400 font-normal">opcional</small></label>
                     <input type="time" name="available_from" value="{{ old('available_from', $propiedad->available_from) }}"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Disponible hasta (hora)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Disponible hasta (hora) <small class="text-gray-400 font-normal">opcional</small></label>
                     <input type="time" name="available_to" value="{{ old('available_to', $propiedad->available_to) }}"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
@@ -280,7 +293,7 @@
                         <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-xl">
                             <div class="flex flex-wrap items-end gap-3">
                                 <div>
-                                    <label class="block text-xs text-gray-500 mb-1">A partir de (días)</label>
+                                    <label class="block text-xs text-gray-500 mb-1">A partir de (noches)</label>
                                     <input type="number" :name="`day_discounts[${i}][days]`" x-model="row.days"
                                         min="1" placeholder="Ej: 7"
                                         class="w-32 px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">

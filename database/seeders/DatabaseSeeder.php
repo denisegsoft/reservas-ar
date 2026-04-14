@@ -85,7 +85,7 @@ class DatabaseSeeder extends Seeder
                 'reviews_count' => 23,
                 'featured' => true,
                 'min_days' => 1,
-                'rules' => ['No se permiten mascotas', 'Horario de ingreso: 10hs', 'Capacidad maxima estricta'],
+                'rules' => ['No se permiten mascotas', 'Horario de ingreso: 10hs', 'Capacidad huéspedes estricta'],
             ],
             [
                 'user_id' => $owner1->id,

@@ -68,6 +68,19 @@ class ReservationController extends Controller
             return ['error' => ['check_in' => 'Las fechas seleccionadas no están disponibles.']];
         }
 
+        // Validar estadía mínima/máxima
+        $checkIn  = new \Carbon\Carbon($data['check_in']);
+        $checkOut = new \Carbon\Carbon($data['check_out']);
+        $days = $checkIn->diffInDays($checkOut);
+        if ($days > 0) {
+            if ($propiedad->min_days && $days < $propiedad->min_days) {
+                return ['error' => ['check_out' => "La estadía mínima es de {$propiedad->min_days} día(s)."]];
+            }
+            if ($propiedad->max_days && $days > $propiedad->max_days) {
+                return ['error' => ['check_out' => "La estadía máxima es de {$propiedad->max_days} día(s)."]];
+            }
+        }
+
         $calc = $this->pricing->calculate($data, $propiedad);
         if (isset($calc['error'])) {
             return $calc;

@@ -189,8 +189,8 @@ $breadcrumbSchema = [
                     <div class="text-xs text-indigo-500 mt-0.5">Personas</div>
                 </div>
                 <div class="bg-purple-50 rounded-2xl p-4 text-center">
-                    <div class="text-2xl font-bold text-purple-700">{{ $propiedad->bedrooms }}</div>
-                    <div class="text-xs text-purple-500 mt-0.5">Habitaciones</div>
+                    <div class="text-2xl font-bold text-purple-700">{{ $propiedad->rooms }}</div>
+<div class="text-xs text-purple-500 mt-0.5">Ambientes</div>
                 </div>
                 <div class="bg-pink-50 rounded-2xl p-4 text-center">
                     <div class="text-2xl font-bold text-pink-700">{{ $propiedad->bathrooms }}</div>
@@ -355,6 +355,18 @@ $breadcrumbSchema = [
                                 </div>
                             </div>
                         </template>
+
+                        @if($propiedad->min_days || $propiedad->max_days)
+                        <p class="text-xs text-gray-400 mb-3 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Estadía:
+                            @if($propiedad->min_days) mínimo {{ $propiedad->min_days }} día{{ $propiedad->min_days > 1 ? 's' : '' }}@endif
+                            @if($propiedad->min_days && $propiedad->max_days) · @endif
+                            @if($propiedad->max_days) máximo {{ $propiedad->max_days }} día{{ $propiedad->max_days > 1 ? 's' : '' }}@endif
+                        </p>
+                        @endif
+
+                        <p x-show="errors.days" x-text="errors.days" class="text-red-500 text-xs mb-3"></p>
 
                         @if($errors->any())
                         <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
@@ -542,6 +554,8 @@ $breadcrumbSchema = [
 window.SHOW_UNAVAILABLE_DATES  = @json($unavailableDates);
 window.SHOW_PRICE_PER_HOUR     = {{ $propiedad->price_per_hour ?? 0 }};
 window.SHOW_PRICE_PER_DAY      = {{ $propiedad->price_per_day ?? 0 }};
+window.SHOW_MIN_DAYS           = {{ $propiedad->min_days ?? 'null' }};
+window.SHOW_MAX_DAYS           = {{ $propiedad->max_days ?? 'null' }};
 window.SHOW_DAY_DISCOUNTS      = {!! json_encode($propiedad->day_discounts    ?? []) !!};
 window.SHOW_DATE_DISCOUNTS     = {!! json_encode($propiedad->date_discounts   ?? []) !!};
 window.SHOW_WEEKDAY_DISCOUNTS  = {!! json_encode($propiedad->weekday_discounts ?? []) !!};

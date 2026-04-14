@@ -19,13 +19,20 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        $hasWebRequest = Suggestion::where('user_id', $request->user()->id)
+        $userId = $request->user()->id;
+
+        $hasWebRequest = Suggestion::where('user_id', $userId)
             ->where('title', 'Solicitud: necesito web/redes profesionales')
+            ->exists();
+
+        $hasWaRequest = Suggestion::where('user_id', $userId)
+            ->where('title', 'Solicitud: automatización de WhatsApp Business')
             ->exists();
 
         return view('profile.edit', [
             'user'          => $request->user(),
             'hasWebRequest' => $hasWebRequest,
+            'hasWaRequest'  => $hasWaRequest,
         ]);
     }
 

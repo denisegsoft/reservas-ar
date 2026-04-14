@@ -59,4 +59,26 @@ class SuggestionController extends Controller
 
         return response()->json(['message' => '¡Solicitud enviada! Nos pondremos en contacto con vos pronto.']);
     }
+
+    public function requestWhatsappAutomation(Request $request)
+    {
+        $user = auth()->user();
+
+        $alreadyRequested = Suggestion::where('user_id', $user->id)
+            ->where('title', 'Solicitud: automatización de WhatsApp Business')
+            ->exists();
+
+        if ($alreadyRequested) {
+            return response()->json(['message' => 'Ya enviaste esta solicitud anteriormente.'], 409);
+        }
+
+        Suggestion::create([
+            'user_id'     => $user->id,
+            'title'       => 'Solicitud: automatización de WhatsApp Business',
+            'description' => "El usuario {$user->full_name} ({$user->email}) está interesado en automatizar las respuestas de su número de WhatsApp Business.",
+            'attachments' => null,
+        ]);
+
+        return response()->json(['message' => '¡Solicitud enviada! Te contactaremos pronto para ayudarte.']);
+    }
 }

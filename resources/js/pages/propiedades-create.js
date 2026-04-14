@@ -302,10 +302,13 @@ function validateForm() {
     req('street_name',    'La calle es obligatoria.');
     req('street_number',  'El número es obligatorio.');
     req('capacity',       'La capacidad es obligatoria.');
-    reqNum('bedrooms',     'Las habitaciones son obligatorias (podés ingresar 0).');
+    reqNum('beds',         'Las camas son obligatorias (podés ingresar 0).');
+    reqNum('rooms',        'Los ambientes son obligatorios (podés ingresar 0).');
     reqNum('bathrooms',    'Los baños son obligatorios (podés ingresar 0).');
     reqNum('parking_spots','Los estacionamientos son obligatorios (podés ingresar 0).');
-    req('price_per_hour', 'El precio por hora es obligatorio.');
+    if (document.getElementById('chk-rents-by-hour') && document.getElementById('chk-rents-by-hour').checked) {
+        req('price_per_hour', 'El precio por hora es obligatorio.');
+    }
     req('price_per_day',  'El precio por día es obligatorio.');
 
     console.log('[validateForm] campos con error:', errores.length, errores.map(function(e){ return e.getAttribute ? e.getAttribute('name') || e.className : '?'; }));

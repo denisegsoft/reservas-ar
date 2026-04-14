@@ -61,7 +61,9 @@ document.addEventListener('alpine:init', () => {
         baseTotal: 0,
         total: 0,
         breakdown: [],
-        errors: { checkIn: '', checkOut: '', guests: '' },
+        minDays: window.SHOW_MIN_DAYS || null,
+        maxDays: window.SHOW_MAX_DAYS || null,
+        errors: { checkIn: '', checkOut: '', guests: '', days: '' },
         isLoggedIn: window.SHOW_IS_LOGGED_IN || false,
         pendingData: window.SHOW_PENDING_RESERVATION || null,
 
@@ -193,7 +195,18 @@ document.addEventListener('alpine:init', () => {
             this.errors.checkIn  = this.checkIn  ? '' : 'Seleccioná la fecha de entrada';
             this.errors.checkOut = this.checkOut ? '' : 'Seleccioná la fecha de salida';
             this.errors.guests   = guestsVal     ? '' : 'Ingresá la cantidad de personas';
-            if (this.errors.checkIn || this.errors.checkOut || this.errors.guests) return;
+            this.errors.days     = '';
+
+            // Validar estadía mínima/máxima (solo aplica a reservas por días, no por horas)
+            if (this.checkIn && this.checkOut && this.checkIn !== this.checkOut) {
+                if (this.minDays && this.totalDays < this.minDays) {
+                    this.errors.days = `La estadía mínima es de ${this.minDays} día${this.minDays > 1 ? 's' : ''}.`;
+                } else if (this.maxDays && this.totalDays > this.maxDays) {
+                    this.errors.days = `La estadía máxima es de ${this.maxDays} día${this.maxDays > 1 ? 's' : ''}.`;
+                }
+            }
+
+            if (this.errors.checkIn || this.errors.checkOut || this.errors.guests || this.errors.days) return;
             this.$el.submit();
         }
     }));

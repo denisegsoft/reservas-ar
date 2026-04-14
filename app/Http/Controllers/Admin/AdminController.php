@@ -85,7 +85,15 @@ class AdminController extends Controller
 
     public function destroyReview(Review $review)
     {
+        $property = $review->property;
         $review->delete();
+
+        $avgRating = $property->reviews()->avg('rating') ?? 0;
+        $count     = $property->reviews()->count();
+        $property->update(['rating' => round($avgRating, 2), 'reviews_count' => $count]);
+
+        PropertyCache::clear($property);
+
         return back()->with('success', 'Reseña eliminada.');
     }
 
