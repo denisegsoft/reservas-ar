@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlockedDate;
 use App\Models\City;
 use App\Models\Property;
 use App\Models\PropertyAmenityLog;
@@ -10,6 +11,7 @@ use App\Models\PropertyService;
 use App\Models\Province;
 use App\Services\ContactInfoDetector;
 use App\Support\PropertyCache;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -246,6 +248,9 @@ class PropertyController extends Controller
 
         PropertyCache::clearListings();
 
+        // Blocked dates
+        $this->syncBlockedDates($propiedad, $request->input('blocked_ranges', []));
+
         // Services
         $this->syncServices($propiedad, $request->input('services', []));
 
@@ -297,8 +302,11 @@ class PropertyController extends Controller
         $amenitiesList = Property::amenitiesList();
         $typesList = Property::typesList();
         $provinces = Province::where('active', true)->orderBy('order')->get(['id', 'name']);
-        $propiedad->load('images', 'services');
-        return view('propiedades.edit', compact('propiedad', 'amenitiesList', 'typesList', 'provinces'));
+        $propiedad->load('images', 'services', 'blockedDates');
+        $blockedRanges = $this->groupDateRanges(
+            $propiedad->blockedDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->sort()->values()->all()
+        );
+        return view('propiedades.edit', compact('propiedad', 'amenitiesList', 'typesList', 'provinces', 'blockedRanges'));
     }
 
     public function update(Request $request, Property $propiedad)
@@ -366,6 +374,9 @@ class PropertyController extends Controller
 
         $propiedad->update($data);
 
+        // Blocked dates
+        $this->syncBlockedDates($propiedad, $request->input('blocked_ranges', []));
+
         // Delete marked images
         if ($request->filled('delete_images')) {
             $deleteIds = array_map('intval', (array) $request->delete_images);
@@ -421,6 +432,52 @@ class PropertyController extends Controller
 
         return redirect()->route('owner.properties.index')
             ->with('success', 'Propiedad actualizada correctamente.');
+    }
+
+    private function syncBlockedDates(Property $propiedad, array $blockedRanges): void
+    {
+        $propiedad->blockedDates()->delete();
+        $toInsert = [];
+        foreach ($blockedRanges as $range) {
+            if (empty($range['from']) || empty($range['to'])) continue;
+            $from = Carbon::parse($range['from']);
+            $to   = Carbon::parse($range['to']);
+            if ($to->lt($from)) continue;
+            $cursor = $from->copy();
+            while ($cursor->lte($to)) {
+                $toInsert[] = [
+                    'property_id' => $propiedad->id,
+                    'date'        => $cursor->format('Y-m-d'),
+                    'reason'      => 'personal',
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
+                ];
+                $cursor->addDay();
+            }
+        }
+        if (!empty($toInsert)) {
+            BlockedDate::insert(collect($toInsert)->unique('date')->values()->all());
+        }
+    }
+
+    private function groupDateRanges(array $sortedDates): array
+    {
+        if (empty($sortedDates)) return [];
+        sort($sortedDates); // ensure sorted
+        $ranges = [];
+        $start  = $sortedDates[0];
+        $end    = $sortedDates[0];
+        for ($i = 1; $i < count($sortedDates); $i++) {
+            $nextDay = date('Y-m-d', strtotime($end . ' +1 day'));
+            if ($sortedDates[$i] === $nextDay) {
+                $end = $sortedDates[$i];
+            } else {
+                $ranges[] = ['from' => $start, 'to' => $end];
+                $start    = $end = $sortedDates[$i];
+            }
+        }
+        $ranges[] = ['from' => $start, 'to' => $end];
+        return $ranges;
     }
 
     private function syncServices(Property $propiedad, array $services): void

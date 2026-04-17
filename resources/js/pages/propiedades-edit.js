@@ -168,7 +168,10 @@
         chkNum(form.querySelector('[name="bedrooms"]'),      'Las habitaciones son obligatorias.');
         chkNum(form.querySelector('[name="bathrooms"]'),     'Los baños son obligatorios.');
         chkNum(form.querySelector('[name="parking_spots"]'), 'Los estacionamientos son obligatorios.');
-        chk(form.querySelector('[name="price_per_hour"]'), 'El precio por hora es obligatorio.');
+        var chkHora = form.querySelector('#chk-rents-by-hour');
+        if (chkHora && chkHora.checked) {
+            chk(form.querySelector('[name="price_per_hour"]'), 'El precio por hora es obligatorio.');
+        }
 
         if (errores.length > 0) {
             var scrollTarget = errores[0].closest('div') || errores[0];

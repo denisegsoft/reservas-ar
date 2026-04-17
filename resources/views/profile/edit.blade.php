@@ -405,7 +405,7 @@ const CSRF = document.querySelector('meta[name=csrf-token]')?.content ?? '';
 const SERVICE_DATA = {
     whatsapp: {
         icon:        '💬',
-        title:       'Chatbot para WhatsApp',
+        title:       'Chatbot para tu WhatsApp',
         description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un chatbot inteligente para tu WhatsApp Business.',
         benefits: [
             { emoji: '🤖', bg: '#dcfce7', text: '<strong>Respuestas automáticas</strong> para consultas frecuentes' },

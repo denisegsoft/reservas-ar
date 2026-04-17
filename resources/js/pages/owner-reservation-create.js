@@ -11,5 +11,7 @@ window.abrirCalendarioDisponibilidad = function () {
     const propId   = document.querySelector('[name="property_id"]')?.value;
     const propName = document.querySelector('[name="property_id"] option:checked')?.text ?? 'Propiedad';
     if (!propId) { alert('Primero seleccioná una propiedad.'); return; }
-    calendarModal.open(propName, (window.RC_DISP_RESERVAS || {})[propId] ?? []);
+    const reservas = (window.RC_DISP_RESERVAS || {})[propId] ?? [];
+    const blocked  = (window.RC_BLOCKED_DATES || {})[propId] ?? [];
+    calendarModal.open(propName, reservas, blocked);
 };

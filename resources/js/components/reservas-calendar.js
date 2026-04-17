@@ -9,10 +9,11 @@ const calendarModal = (() => {
     const MESES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const SEMANA = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-    let _data = [], _year, _month, _modal;
+    let _data = [], _blocked = new Set(), _year, _month, _modal;
 
-    function open(nombre, reservas) {
-        _data = reservas;
+    function open(nombre, reservas, blockedDates) {
+        _data    = reservas;
+        _blocked = new Set(blockedDates || []);
         document.getElementById('cal-nombre').textContent = nombre;
         document.getElementById('cal-detail').innerHTML = '';
         const now = new Date();
@@ -61,8 +62,12 @@ const calendarModal = (() => {
             const res     = dayMap[dateStr] || [];
             const isToday = dateStr === today;
 
-            let bg = '#f9fafb', color = '#6b7280', border = '1px solid transparent', cursor = 'default';
-            if (res.length) {
+            const isBlocked = _blocked.has(dateStr);
+            let bg = '#f9fafb', color = '#6b7280', border = '1px solid transparent', cursor = 'default', extra = '';
+            if (isBlocked && !res.length) {
+                bg = '#f3f4f6'; color = '#9ca3af'; border = '1px solid #e5e7eb';
+                extra = 'text-decoration:line-through;';
+            } else if (res.length) {
                 const hasPending   = res.some(r => r.status === 'pending');
                 const hasConfirmed = res.some(r => r.status === 'confirmed');
                 if (hasPending && hasConfirmed)  { bg = '#fef3c7'; color = '#92400e'; border = '1px solid #fcd34d'; }
@@ -73,11 +78,11 @@ const calendarModal = (() => {
             const todayStyle = isToday ? 'outline:2px solid #6366f1;outline-offset:1px;font-weight:700;' : '';
 
             html += `<div onclick="${res.length ? `calendarModal.detail('${dateStr}')` : ''}"
-                style="text-align:center;padding:7px 2px;border-radius:8px;font-size:.8rem;background:${bg};color:${color};border:${border};cursor:${cursor};${todayStyle}">${d}</div>`;
+                style="text-align:center;padding:7px 2px;border-radius:8px;font-size:.8rem;background:${bg};color:${color};border:${border};cursor:${cursor};${extra}${todayStyle}">${d}</div>`;
         }
 
         html += `</div>
-        <div style="display:flex;gap:16px;margin-top:1rem;justify-content:center">
+        <div style="display:flex;gap:16px;margin-top:1rem;justify-content:center;flex-wrap:wrap">
             <div style="display:flex;align-items:center;gap:6px">
                 <div style="width:13px;height:13px;border-radius:4px;background:#fef9c3;border:1px solid #fde047"></div>
                 <span style="font-size:.72rem;color:#6b7280">Pendiente</span>
@@ -86,6 +91,10 @@ const calendarModal = (() => {
                 <div style="width:13px;height:13px;border-radius:4px;background:#dcfce7;border:1px solid #86efac"></div>
                 <span style="font-size:.72rem;color:#6b7280">Confirmada</span>
             </div>
+            ${_blocked.size ? `<div style="display:flex;align-items:center;gap:6px">
+                <div style="width:13px;height:13px;border-radius:4px;background:#f3f4f6;border:1px solid #e5e7eb"></div>
+                <span style="font-size:.72rem;color:#6b7280">No disponible</span>
+            </div>` : ''}
         </div>`;
 
         if (!_data.length) {

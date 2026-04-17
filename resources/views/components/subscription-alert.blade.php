@@ -59,7 +59,7 @@
             </div>
             <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
                 <span class="text-base flex-shrink-0">🤖</span>
-                <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot para WhatsApp 24/7</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot para tu WhatsApp 24/7</span>
             </div>
             <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
                 <span class="text-base flex-shrink-0">🌐</span>

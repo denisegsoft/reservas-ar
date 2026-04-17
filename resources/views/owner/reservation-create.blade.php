@@ -291,6 +291,7 @@
 <script>
 window.RC_PROPERTIES    = @json($propiedades->map(fn($p) => ['id' => $p->id, 'price_per_day' => (float) $p->price_per_day])->values());
 window.RC_DISP_RESERVAS = @json($reservasPorPropiedad);
+window.RC_BLOCKED_DATES = @json($blockedPorPropiedad);
 </script>
 @vite(['resources/js/pages/owner-reservation-create.js'])
 @endpush

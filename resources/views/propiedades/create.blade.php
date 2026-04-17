@@ -363,6 +363,49 @@
             </div>
         </div>
 
+        {{-- Fechas no disponibles --}}
+        <div class="mt-6 border-t border-gray-100 pt-5"
+             x-data="{
+                ranges: {{ json_encode(old('blocked_ranges', [])) }},
+                addRow() { this.ranges.push({from:'',to:''}) },
+                removeRow(i) { this.ranges.splice(i,1) },
+                onFromChange(i) { if (this.ranges[i].to && this.ranges[i].to < this.ranges[i].from) this.ranges[i].to = this.ranges[i].from }
+             }">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-700">Fechas no disponibles</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Bloqueá rangos de fechas por motivos personales. No se podrán reservar esos días.</p>
+                </div>
+                <button type="button" @click="addRow()"
+                    class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                    + Agregar rango
+                </button>
+            </div>
+            <div class="space-y-2">
+                <template x-for="(row, i) in ranges" :key="i">
+                    <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Desde</label>
+                            <input type="date" :name="`blocked_ranges[${i}][from]`" x-model="row.from"
+                                @change="onFromChange(i)"
+                                class="px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">Hasta</label>
+                            <input type="date" :name="`blocked_ranges[${i}][to]`" x-model="row.to"
+                                :min="row.from"
+                                class="px-3 py-1.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <button type="button" @click="removeRow(i)"
+                            class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-100 transition-colors mt-4" title="Eliminar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+            <p x-show="ranges.length === 0" class="text-xs text-gray-400 italic">Sin fechas bloqueadas configuradas.</p>
+        </div>
+
         {{-- Amenities --}}
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Comodidades</h2>

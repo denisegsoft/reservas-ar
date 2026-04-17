@@ -150,18 +150,22 @@ class DashboardController extends Controller
                 ->with('info', 'Necesitás activar tu suscripción para crear reservas.');
         }
 
-        $propiedades = Auth::user()->propiedades()->active()->with('services')->get();
+        $propiedades = Auth::user()->propiedades()->active()->with('services', 'blockedDates')->get();
         $clientes    = User::where('role', 'user')->orderBy('name')->get();
 
         $reservasPorPropiedad = [];
+        $blockedPorPropiedad  = [];
         foreach ($propiedades as $p) {
             $reservasPorPropiedad[$p->id] = $this->formatReservationsForCalendar(
                 $p->reservations()->active()
                     ->get(['id', 'check_in', 'check_out', 'status', 'guests', 'total_amount', 'user_id'])
             );
+            $blockedPorPropiedad[$p->id] = $p->blockedDates->pluck('date')
+                ->map(fn($d) => $d->format('Y-m-d'))
+                ->values();
         }
 
-        return view('owner.reservation-create', compact('propiedades', 'clientes', 'reservasPorPropiedad'));
+        return view('owner.reservation-create', compact('propiedades', 'clientes', 'reservasPorPropiedad', 'blockedPorPropiedad'));
     }
 
     public function storeReservation(Request $request)
