@@ -112,38 +112,15 @@
                     <p id="err_whatsapp_link" class="mt-1 text-sm text-red-600 hidden"></p>
                 </div>
 
-                @if(!$hasWaRequest)
-                <div x-data="{ sent: false, loading: false,
-                    async send() {
-                        if (this.sent || this.loading) return;
-                        this.loading = true;
-                        try {
-                            await fetch('{{ route('profile.request-whatsapp') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                                    'Accept': 'application/json',
-                                },
-                            });
-                            this.sent = true;
-                        } catch(e) {}
-                        this.loading = false;
-                    }
-                }">
-                    <p class="text-xs text-gray-400">
-                        ¿Necesitas automatizar las respuestas en tu número de WhatsApp Business?
-                        <button type="button" @click="send"
-                            :disabled="sent || loading"
-                            class="font-medium underline text-green-600 hover:text-green-800 disabled:opacity-50 disabled:no-underline disabled:cursor-default transition-colors">
-                            <span x-show="!sent && !loading">Haz clic aquí y te ayudamos</span>
-                            <span x-show="loading" class="inline-flex items-center gap-1">
-                                <svg class="btn-spinner w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0110 10" /></svg>
-                                Enviando...
-                            </span>
-                            <span x-show="sent">¡Solicitud enviada! Te contactaremos pronto.</span>
-                        </button>
-                    </p>
-                </div>
+                @if(!auth()->user()->hasSubscription())
+                <p class="text-xs text-gray-400">
+                    ¿Necesitas un chatbot para tu WhatsApp Business?
+                    <button type="button"
+                        onclick="profileRequestService('{{ route('profile.request-whatsapp') }}', 'whatsapp')"
+                        class="font-medium underline text-green-600 hover:text-green-800 transition-colors">
+                        Haz clic aquí y te ayudamos
+                    </button>
+                </p>
                 @endif
             </div>
 
@@ -192,35 +169,14 @@
             </div>
 
             {{-- CTA: solicitar web/redes --}}
-            @if(!$hasWebRequest)
-            <div x-data="{ sent: false, loading: false,
-                async send() {
-                    if (this.sent || this.loading) return;
-                    this.loading = true;
-                    try {
-                        const res = await fetch('{{ route('profile.request-website') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                                'Accept': 'application/json',
-                            },
-                        });
-                        this.sent = true;
-                    } catch(e) {}
-                    this.loading = false;
-                }
-            }" class="mt-1">
+            @if(!auth()->user()->hasSubscription())
+            <div class="mt-1">
                 <p class="text-xs text-gray-400">
                     ¿No tienes web profesional ni redes?
-                    <button type="button" @click="send"
-                        :disabled="sent || loading"
-                        class="font-medium underline text-indigo-500 hover:text-indigo-700 disabled:opacity-50 disabled:no-underline disabled:cursor-default transition-colors">
-                        <span x-show="!sent && !loading">Haz clic aquí si necesitas una</span>
-                        <span x-show="loading" class="inline-flex items-center gap-1">
-                            <svg class="btn-spinner w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0110 10" /></svg>
-                            Enviando...
-                        </span>
-                        <span x-show="sent">¡Solicitud enviada! Te contactaremos pronto.</span>
+                    <button type="button"
+                        onclick="profileRequestService('{{ route('profile.request-website') }}', 'website')"
+                        class="font-medium underline text-indigo-500 hover:text-indigo-700 transition-colors">
+                        Haz clic aquí si necesitas una
                     </button>
                 </p>
             </div>
@@ -370,11 +326,130 @@
 </div>
 @endsection
 
+{{-- Modal servicios adicionales --}}
+<div class="modal fade" id="modalSuscripcionRequerida" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content border-0" style="border-radius:1.75rem;overflow:hidden;box-shadow:0 32px 64px -12px rgba(0,0,0,.3);">
+
+            {{-- Header gradiente --}}
+            <div style="position:relative;padding:1.75rem 1.5rem 1.5rem;background:linear-gradient(135deg,#4338ca 0%,#6d28d9 55%,#9333ea 100%);overflow:hidden;">
+                {{-- Círculos decorativos --}}
+                <div style="position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08);top:-28px;right:-28px;pointer-events:none;"></div>
+                <div style="position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);top:16px;right:52px;pointer-events:none;"></div>
+                {{-- Cerrar --}}
+                <button type="button" data-bs-dismiss="modal"
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;background:rgba(255,255,255,.2);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;"
+                        onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
+                    <svg width="13" height="13" fill="none" stroke="white" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                {{-- Ícono + título --}}
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div id="modalSuscripcionIcon"
+                         style="width:54px;height:54px;border-radius:1rem;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.65rem;flex-shrink:0;">💬</div>
+                    <div style="min-width:0;">
+                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:.3rem;">Servicio premium</div>
+                        <div id="modalSuscripcionTitle" style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1.2;">Servicio</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Cuerpo --}}
+            <div style="padding:1.4rem 1.5rem 1.5rem;">
+                <p id="modalSuscripcionDesc" style="font-size:.875rem;color:#6b7280;line-height:1.6;margin-bottom:1.2rem;">
+                    Para acceder a este servicio necesitás activar tu suscripción.
+                </p>
+
+                {{-- Beneficios --}}
+                <div id="modalSuscripcionBenefits" style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.4rem;"></div>
+
+                {{-- Precio + CTA --}}
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-radius:1.1rem;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #e0e7ff;">
+                    <div>
+                        <div style="font-size:.7rem;color:#9ca3af;margin-bottom:.2rem;">Pago único · Sin renovaciones</div>
+                        <div style="font-size:1.7rem;font-weight:900;color:#111827;line-height:1;">
+                            ${{ number_format($subscriptionPrice, 0, ',', '.') }}
+                            <span style="font-size:.85rem;font-weight:400;color:#9ca3af;">ARS</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('subscription.payment') }}"
+                       style="flex-shrink:0;display:inline-flex;align-items:center;gap:.4rem;color:#fff;font-weight:700;font-size:.875rem;padding:.7rem 1.2rem;border-radius:.875rem;background:linear-gradient(135deg,#4338ca,#6d28d9);box-shadow:0 6px 20px rgba(99,102,241,.35);white-space:nowrap;text-decoration:none;"
+                       onmouseover="this.style.boxShadow='0 8px 25px rgba(99,102,241,.5)'" onmouseout="this.style.boxShadow='0 6px 20px rgba(99,102,241,.35)'">
+                        Activar ahora
+                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </a>
+                </div>
+
+                {{-- Seguridad --}}
+                <div style="display:flex;align-items:center;justify-content:center;gap:.35rem;margin-top:.75rem;font-size:.72rem;color:#9ca3af;">
+                    <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+                    Pago seguro vía MercadoPago
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 window.PROFILE_ROUTE_UPDATE          = '{{ route('profile.update') }}';
 window.PROFILE_ROUTE_PASSWORD_UPDATE = '{{ route('password.update') }}';
 window.PROFILE_ROUTE_DESTROY         = '{{ route('profile.destroy') }}';
+
+const CSRF = document.querySelector('meta[name=csrf-token]')?.content ?? '';
+
+const SERVICE_DATA = {
+    whatsapp: {
+        icon:        '💬',
+        title:       'Chatbot para WhatsApp',
+        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un chatbot inteligente para tu WhatsApp Business.',
+        benefits: [
+            { emoji: '🤖', bg: '#dcfce7', text: '<strong>Respuestas automáticas</strong> para consultas frecuentes' },
+            { emoji: '🕐', bg: '#dbeafe', text: 'Atención <strong>24/7</strong>, incluso cuando no estás disponible' },
+            { emoji: '📲', bg: '#e0e7ff', text: 'Gestión de <strong>reservas y consultas</strong> sin esfuerzo' },
+            { emoji: '📈', bg: '#f3e8ff', text: 'Más conversiones con <strong>seguimiento automático</strong>' },
+        ],
+    },
+    website: {
+        icon:        '🌐',
+        title:       'Web profesional + Redes',
+        description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional y te asesoramos en redes para hacer crecer tu negocio.',
+        benefits: [
+            { emoji: '🎨', bg: '#e0e7ff', text: '<strong>Sitio web</strong> profesional a medida de tu negocio' },
+            { emoji: '🎯', bg: '#fce7f3', text: '<strong>Asesoría en marketing</strong> y redes sociales' },
+            { emoji: '📸', bg: '#ffedd5', text: 'Estrategia de contenido para <strong>Instagram y Facebook</strong>' },
+            { emoji: '🚀', bg: '#dcfce7', text: 'Mayor visibilidad y <strong>más reservas</strong>' },
+        ],
+    },
+};
+
+async function profileRequestService(url, type) {
+    fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+    }).catch(() => {});
+
+    const data = SERVICE_DATA[type] ?? SERVICE_DATA.website;
+
+    document.getElementById('modalSuscripcionIcon').textContent  = data.icon;
+    document.getElementById('modalSuscripcionTitle').textContent = data.title;
+    document.getElementById('modalSuscripcionDesc').textContent  = data.description;
+
+    const list = document.getElementById('modalSuscripcionBenefits');
+    list.innerHTML = data.benefits.map(b => `
+        <div class="flex items-center gap-3">
+            <div class="flex items-center justify-center rounded-xl flex-shrink-0 text-base"
+                 style="width:32px;height:32px;background:${b.bg};">${b.emoji}</div>
+            <p class="text-sm text-gray-700 mb-0">${b.text}</p>
+        </div>
+    `).join('');
+
+    new bootstrap.Modal(document.getElementById('modalSuscripcionRequerida')).show();
+}
 </script>
 @vite(['resources/js/pages/profile-edit.js'])
 @endpush

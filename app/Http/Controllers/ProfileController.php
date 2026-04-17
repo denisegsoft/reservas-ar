@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Setting;
 use App\Models\Suggestion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -30,9 +31,10 @@ class ProfileController extends Controller
             ->exists();
 
         return view('profile.edit', [
-            'user'          => $request->user(),
-            'hasWebRequest' => $hasWebRequest,
-            'hasWaRequest'  => $hasWaRequest,
+            'user'             => $request->user(),
+            'hasWebRequest'    => $hasWebRequest,
+            'hasWaRequest'     => $hasWaRequest,
+            'subscriptionPrice' => (int) Setting::get('subscription_price', '3000'),
         ]);
     }
 

@@ -51,16 +51,32 @@
             </div>
         </div>
 
+        {{-- Beneficios incluidos --}}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
+                <span class="text-base flex-shrink-0">📞</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Contacto directo con clientes</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
+                <span class="text-base flex-shrink-0">🤖</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot para WhatsApp 24/7</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
+                <span class="text-base flex-shrink-0">🌐</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Sitio web profesional</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
+                <span class="text-base flex-shrink-0">🎯</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Asesoría en redes sociales</span>
+            </div>
+        </div>
+
         {{-- Mensaje de impacto --}}
-        @if($views > 0 || $messages > 0)
-        <div class="mb-4 flex flex-wrap items-center gap-x-1 text-sm text-gray-600">
-            @if($views > 0)
-            <span>🔥 Tus propiedades ya tienen&nbsp;</span>
-            <strong class="text-indigo-700"> visitas</strong>
-            <span>—</span>
-            <strong class="text-red-600">hay clientes que quieren contactarte</strong>
-            <span>&nbsp;y no pueden.</span>
-            @endif
+        @if($views > 0)
+        <div class="flex items-center gap-1.5 text-sm text-gray-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+            <span class="text-base">🔥</span>
+            <span>Tus propiedades ya tienen visitas —</span>
+            <strong class="text-red-600">hay clientes que quieren contactarte y no pueden.</strong>
         </div>
         @endif
 

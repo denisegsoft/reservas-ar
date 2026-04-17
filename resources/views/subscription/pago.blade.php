@@ -73,6 +73,27 @@
                         <p class="text-indigo-200 text-xs mt-0.5">Gestioná propiedades, reservas, clientes y ganancias</p>
                     </div>
                 </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
+                    <span class="text-xl mt-0.5">🤖</span>
+                    <div>
+                        <p class="text-white font-semibold text-sm">Chatbot para WhatsApp Business</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Automatizá las respuestas de tu empresa en WhatsApp Business y atendé a tus clientes las 24 hs</p>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
+                    <span class="text-xl mt-0.5">🌐</span>
+                    <div>
+                        <p class="text-white font-semibold text-sm">Sitio web profesional</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Creamos tu página web a medida para mostrar tu negocio al mundo</p>
+                    </div>
+                </div>
+                <div class="sm:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
+                    <span class="text-xl mt-0.5">🎯</span>
+                    <div>
+                        <p class="text-white font-semibold text-sm">Asesoría en marketing</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Te ayudamos a posicionar tu negocio, atraer más clientes y crecer en redes sociales con estrategia real</p>
+                    </div>
+                </div>
             </div>
 
             {{-- Price + Pay button --}}
@@ -124,7 +145,7 @@
                 <ul class="text-amber-700 text-sm space-y-1">
                     <li>• Los clientes no ven tu información de contacto</li>
                     <li>• No podés ver quién solicitó una reserva</li>
-                    <li>• Acceso limitado a la plataforma</li>
+                    <li>• Acceso limitado a la plataforma y servicios adicionales</li>
                 </ul>
             </div>
         </div>
