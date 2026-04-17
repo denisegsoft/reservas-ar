@@ -263,7 +263,7 @@ class PropertyController extends Controller
         $uploadedPaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('propiedades', 'public');
+                $path = $this->storeAsWebp($image);
                 $uploadedPaths[] = $path;
                 PropertyImage::create([
                     'property_id' => $propiedad->id,
@@ -394,7 +394,7 @@ class PropertyController extends Controller
         if ($request->hasFile('images')) {
             $maxOrder = $propiedad->images()->max('order') ?? 0;
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('propiedades', 'public');
+                $path = $this->storeAsWebp($image);
                 $uploadedPaths[] = $path;
                 PropertyImage::create([
                     'property_id' => $propiedad->id,
@@ -585,6 +585,26 @@ class PropertyController extends Controller
             'date_discounts'    => $clean($request->input('date_discounts', []),    ['date_from', 'date_to', 'discount']),
             'weekday_discounts' => $clean($request->input('weekday_discounts', []), ['days', 'discount']),
         ]);
+    }
+
+    private function storeAsWebp(\Illuminate\Http\UploadedFile $image): string
+    {
+        $filename = Str::uuid() . '.webp';
+        $destPath = storage_path('app/public/propiedades/' . $filename);
+
+        $ext = strtolower($image->getClientOriginalExtension());
+        if ($ext === 'png') {
+            $gdImage = imagecreatefrompng($image->getRealPath());
+        } elseif ($ext === 'gif') {
+            $gdImage = imagecreatefromgif($image->getRealPath());
+        } else {
+            $gdImage = imagecreatefromjpeg($image->getRealPath());
+        }
+
+        imagewebp($gdImage, $destPath, 82);
+        imagedestroy($gdImage);
+
+        return 'propiedades/' . $filename;
     }
 
     private function filterDiscounts(array &$data): void

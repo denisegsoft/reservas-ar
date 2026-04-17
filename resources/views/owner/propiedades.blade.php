@@ -47,6 +47,7 @@
             <div class="relative">
                 <div class="h-44 bg-gray-900 flex items-center justify-center overflow-hidden">
                     <img src="{{ $propiedad->cover_image_url }}" style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;"
+                         loading="lazy"
                          onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80'">
                 </div>
                 <div class="absolute top-3 right-3">

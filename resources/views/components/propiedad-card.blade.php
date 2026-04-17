@@ -3,6 +3,7 @@
         <a href="{{ route('properties.show', $propiedad->slug) }}" class="flex items-center justify-center w-full h-full bg-gray-900">
             <img src="{{ $propiedad->cover_image_url }}"
                  alt="{{ $propiedad->name }}"
+                 loading="lazy"
                  style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;"
                  class="group-hover:scale-105 transition-transform duration-500"
                  onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80'">
