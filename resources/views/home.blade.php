@@ -35,7 +35,7 @@ $_orgSchema = json_encode([
 
 {{-- HERO --}}
 <section class="relative min-h-[90vh] flex items-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #4338ca 100%);">
-    <div class="absolute inset-0 bg-cover bg-center opacity-10" style='background-image:url("{{ asset('images/background.png') }}")' alt="Paisaje" class="w-full h-full object-contain" />')"></div>
+    <div class="absolute inset-0 bg-cover bg-center opacity-10" style='background-image:url("{{ asset('images/background.webp') }}")' alt="Paisaje" class="w-full h-full object-contain" />')"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center w-full">
         <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium px-4 py-1.5 rounded-full mb-8">
             <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block"></span>
