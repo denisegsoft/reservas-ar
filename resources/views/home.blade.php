@@ -51,10 +51,10 @@ $_orgSchema = json_encode([
 
         <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-4xl mx-auto">
             <form action="{{ route('properties.index') }}" method="GET">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div class="text-left">
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Provincia</label>
-                        <select name="state" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
+                        <select name="state" id="home-state" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
                             <option value="">Todas las provincias</option>
                             @foreach($provinces as $prov)
                             <option value="{{ $prov }}">{{ $prov }}</option>
@@ -62,9 +62,15 @@ $_orgSchema = json_encode([
                         </select>
                     </div>
                     <div class="text-left">
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Ciudad</label>
-                        <select name="city" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
-                            <option value="">Todas las ciudades</option>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Partido</label>
+                        <select name="partido" id="home-partido" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
+                            <option value="">Todos los partidos</option>
+                        </select>
+                    </div>
+                    <div class="text-left">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Localidad</label>
+                        <select name="locality" id="home-locality" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
+                            <option value="">Todas las localidades</option>
                         </select>
                     </div>
                     <div class="text-left">
@@ -177,3 +183,7 @@ $_orgSchema = json_encode([
 </section>
 
 @endsection
+
+@push('scripts')
+@vite('resources/js/pages/home.js')
+@endpush

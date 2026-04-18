@@ -24,6 +24,7 @@ export default defineConfig({
                 'resources/js/pages/owner-reservation-create.js',
                 'resources/js/pages/owner-reservation-show.js',
                 'resources/js/pages/reservations-process-pending.js',
+                'resources/js/pages/home.js',
             ],
             refresh: true,
         }),
