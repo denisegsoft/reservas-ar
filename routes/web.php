@@ -86,6 +86,10 @@ Route::get('/mis-reservas', [ReservationController::class, 'myReservations'])->n
     Route::post('/sugerencias', [SuggestionController::class, 'store'])->name('suggestions.store');
 });
 
+// Enlace firmado desde el mail → login automático + redirect a pago
+Route::get('/suscripcion/activar', [SubscriptionController::class, 'activateFromMail'])
+    ->name('subscription.activate-from-mail');
+
 // Subscription routes (owner/admin only)
 Route::middleware(['auth', 'avatar'])->prefix('usuario')->name('subscription.')->group(function () {
     Route::get('/suscripcion/pagar', [SubscriptionController::class, 'redirectToMP'])->name('pay');

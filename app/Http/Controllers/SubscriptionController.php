@@ -23,6 +23,19 @@ class SubscriptionController extends Controller
         MercadoPagoConfig::setAccessToken(config('services.mercadopago.access_token'));
     }
 
+    public function activateFromMail(Request $request)
+    {
+        if (! $request->hasValidSignature()) {
+            return redirect()->route('login')
+                ->with('error', 'El enlace expiró. Iniciá sesión para activar tu suscripción.');
+        }
+
+        $user = User::findOrFail($request->query('user'));
+        auth()->login($user);
+
+        return redirect()->route('subscription.payment');
+    }
+
     private function isPublicUrl(): bool
     {
         $url = config('app.url', '');

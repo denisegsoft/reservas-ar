@@ -28,7 +28,7 @@ Con un **único pago de ${{ number_format($subscriptionPrice, 0, ',', '.') }} AR
 🎯 **Asesoría en marketing** — Te ayudamos a posicionar tu negocio, atraer más clientes y crecer en redes sociales con estrategia real
 
 
-<x-mail::button :url="route('subscription.payment')" color="green">
+<x-mail::button :url="$activationUrl" color="green">
 Activar mi suscripción
 </x-mail::button>
 
