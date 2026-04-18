@@ -27,7 +27,13 @@ document.getElementById('input-partido').addEventListener('input', function() {
     var q = this.value.trim().toLowerCase();
     var dd = document.getElementById('dd-partido');
     dd.innerHTML = '';
-    if (!q) { dd.classList.add('hidden'); return; }
+    if (!q) {
+        dd.classList.add('hidden');
+        partidoId = null;
+        var inpL = document.getElementById('input-localidad');
+        inpL.value = ''; inpL.disabled = true; inpL._localidades = [];
+        return;
+    }
     var filtered = partidoOptions.filter(function(p){ return p.name.toLowerCase().includes(q); }).slice(0, 20);
     if (!filtered.length) { dd.classList.add('hidden'); return; }
     filtered.forEach(function(p) {
@@ -48,6 +54,12 @@ document.getElementById('input-partido').addEventListener('input', function() {
 
 document.getElementById('input-partido').addEventListener('blur', function() {
     setTimeout(function(){ document.getElementById('dd-partido').classList.add('hidden'); }, 150);
+    // Si escribió algo pero no eligió del dropdown, habilitar localidad para texto libre
+    if (this.value.trim() && !partidoId) {
+        var inpL = document.getElementById('input-localidad');
+        inpL.disabled = false;
+        inpL._localidades = [];
+    }
 });
 
 function cargarLocalidades(pid) {
