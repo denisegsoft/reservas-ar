@@ -87,13 +87,6 @@
                         <p class="text-indigo-200 text-xs mt-0.5">Creamos tu página web a medida para mostrar tu negocio al mundo</p>
                     </div>
                 </div>
-                <div class="sm:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
-                    <span class="text-xl mt-0.5">🎯</span>
-                    <div>
-                        <p class="text-white font-semibold text-sm">Asesoría en marketing</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Te ayudamos a posicionar tu negocio, atraer más clientes y crecer en redes sociales con estrategia real</p>
-                    </div>
-                </div>
             </div>
 
             {{-- Price + Pay button --}}
@@ -102,8 +95,8 @@
                     <div>
                         <p class="text-gray-400 text-xs font-medium">Pago único · Sin renovaciones</p>
                         @if($discount)
-                        <p class="text-gray-400 text-sm line-through">${{ number_format($basePrice, 0, ',', '.') }} ARS</p>
-                        <p class="text-gray-900 text-3xl font-black">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
+                        <p class="text-red-400 text-xl font-bold line-through leading-tight">${{ number_format($basePrice, 0, ',', '.') }} <span class="text-base font-semibold">ARS</span></p>
+                        <p class="text-gray-900 text-3xl font-black leading-tight">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
                         <span class="inline-block mt-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
                         @else
                         <p class="text-gray-900 text-3xl font-black">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>

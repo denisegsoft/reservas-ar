@@ -34,7 +34,9 @@ class ProfileController extends Controller
             'user'             => $request->user(),
             'hasWebRequest'    => $hasWebRequest,
             'hasWaRequest'     => $hasWaRequest,
-            'subscriptionPrice' => (int) Setting::get('subscription_price', '3000'),
+            'subscriptionPrice'    => \App\Http\Controllers\SubscriptionController::price(),
+            'subscriptionBasePrice' => \App\Http\Controllers\SubscriptionController::basePrice(),
+            'subscriptionDiscount'  => \App\Http\Controllers\SubscriptionController::discountInfo(),
         ]);
     }
 

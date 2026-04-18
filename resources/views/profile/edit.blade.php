@@ -368,10 +368,20 @@
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-radius:1.1rem;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #e0e7ff;">
                     <div>
                         <div style="font-size:.7rem;color:#9ca3af;margin-bottom:.2rem;">Pago único · Sin renovaciones</div>
+                        @if($subscriptionDiscount)
+                        <div style="font-size:1rem;font-weight:700;color:#f87171;text-decoration:line-through;line-height:1.2;">
+                            ${{ number_format($subscriptionBasePrice, 0, ',', '.') }} ARS
+                        </div>
+                        @endif
                         <div style="font-size:1.7rem;font-weight:900;color:#111827;line-height:1;">
                             ${{ number_format($subscriptionPrice, 0, ',', '.') }}
                             <span style="font-size:.85rem;font-weight:400;color:#9ca3af;">ARS</span>
                         </div>
+                        @if($subscriptionDiscount)
+                        <div style="display:inline-block;margin-top:.3rem;font-size:.68rem;font-weight:700;background:#dcfce7;color:#15803d;padding:.15rem .5rem;border-radius:20px;">
+                            🏷️ {{ $subscriptionDiscount['pct'] }}% OFF{{ $subscriptionDiscount['label'] ? ' · ' . $subscriptionDiscount['label'] : '' }}
+                        </div>
+                        @endif
                     </div>
                     <a href="{{ route('subscription.payment') }}"
                        style="flex-shrink:0;display:inline-flex;align-items:center;gap:.4rem;color:#fff;font-weight:700;font-size:.875rem;padding:.7rem 1.2rem;border-radius:.875rem;background:linear-gradient(135deg,#4338ca,#6d28d9);box-shadow:0 6px 20px rgba(99,102,241,.35);white-space:nowrap;text-decoration:none;"
@@ -420,8 +430,7 @@ const SERVICE_DATA = {
         description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional y te asesoramos en redes para hacer crecer tu negocio. También incluye un chatbot para tu WhatsApp Business para que atiendas clientes las 24 hs.',
         benefits: [
             { emoji: '🎨', bg: '#e0e7ff', text: '<strong>Sitio web</strong> profesional a medida de tu negocio' },
-            { emoji: '🎯', bg: '#fce7f3', text: '<strong>Asesoría en marketing</strong> y redes sociales' },
-            { emoji: '📸', bg: '#ffedd5', text: 'Estrategia de contenido para <strong>Instagram y Facebook</strong>' },
+            { emoji: '📸', bg: '#ffedd5', text: 'Unificamos y potenciamos el manejo de tus redes sociales' },
             { emoji: '🚀', bg: '#dcfce7', text: 'Mayor visibilidad y <strong>más reservas</strong>' },
         ],
     },

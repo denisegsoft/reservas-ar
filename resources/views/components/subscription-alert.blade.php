@@ -31,9 +31,9 @@
                     </span>
                 </p>
                 <p class="text-gray-500 text-sm mt-0.5">
-                    Activá por
+                    Activá
                     @if($discount)
-                        <span class="line-through text-gray-400">${{ number_format($basePrice, 0, ',', '.') }}</span>
+                        por <span class="line-through text-red-400 font-semibold">${{ number_format($basePrice, 0, ',', '.') }} ARS</span>
                         <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
                         <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full align-middle">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
                     @else
