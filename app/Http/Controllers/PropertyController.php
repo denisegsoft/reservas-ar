@@ -612,14 +612,14 @@ class PropertyController extends Controller
         $destPath = storage_path('app/public/propiedades/' . $filename);
 
         $gdImage = imagecreatefromstring(file_get_contents($image->getRealPath()));
-        if ($gdImage === false) {
-            throw new \RuntimeException('No se pudo procesar la imagen.');
+
+        if ($gdImage !== false) {
+            imagewebp($gdImage, $destPath, 82);
+            imagedestroy($gdImage);
+            return 'propiedades/' . $filename;
         }
 
-        imagewebp($gdImage, $destPath, 82);
-        imagedestroy($gdImage);
-
-        return 'propiedades/' . $filename;
+        return $image->store('propiedades', 'public');
     }
 
     private function filterDiscounts(array &$data): void
