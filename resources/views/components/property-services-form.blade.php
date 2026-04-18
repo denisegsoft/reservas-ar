@@ -46,15 +46,15 @@
     {{-- Agregar nuevo --}}
     <div class="border border-dashed border-gray-200 rounded-xl p-4">
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Agregar servicio</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+        <div class="flex flex-col sm:flex-row gap-3 mb-3">
             <input type="text" x-model="newName" placeholder="Nombre (ej: Limpieza final)"
-                   class="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-            <div class="flex gap-2">
+                   class="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+            <div class="grid grid-cols-3 sm:flex sm:gap-2 gap-2">
                 <input type="number" x-model="newPrice" placeholder="Precio $" min="0" step="0.01"
-                       class="flex-1 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+                       class="sm:w-32 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
                 <input type="number" x-model="newQty" placeholder="Cant." min="0.01" step="0.01"
-                       class="w-20 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-                <select x-model="newUnit" class="px-2 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+                       class="sm:w-20 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
+                <select x-model="newUnit" class="sm:w-28 px-2 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
                     <template x-for="u in units" :key="u">
                         <option :value="u" x-text="u"></option>
                     </template>

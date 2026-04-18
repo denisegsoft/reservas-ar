@@ -361,10 +361,9 @@
                 <p x-show="rows.length === 0" class="text-xs text-gray-400 italic">Sin descuentos por día de semana configurados.</p>
                 @error('weekday_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
             </div>
-        </div>
 
-        {{-- Fechas no disponibles --}}
-        <div class="mt-6 border-t border-gray-100 pt-5"
+            {{-- Fechas no disponibles --}}
+            <div class="mt-6 border-t border-gray-100 pt-5"
              x-data="{
                 ranges: {{ json_encode(old('blocked_ranges', [])) }},
                 addRow() { this.ranges.push({from:'',to:''}) },
@@ -404,6 +403,7 @@
                 </template>
             </div>
             <p x-show="ranges.length === 0" class="text-xs text-gray-400 italic">Sin fechas bloqueadas configuradas.</p>
+            </div>
         </div>
 
         {{-- Amenities --}}
@@ -422,11 +422,11 @@
             </div>
             <p class="text-sm font-semibold text-gray-700 mb-2">Agregar comodidad personalizada</p>
             <div id="custom-amenities-list" class="flex flex-wrap gap-2 mb-3"></div>
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
                 <input type="text" id="custom-amenity-input" placeholder="Ej: Cancha de padel, Sauna..."
                     class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 <button type="button" onclick="addAmenity()"
-                    class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 text-indigo-700 font-semibold text-sm rounded-xl transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                    class="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 text-indigo-700 font-semibold text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Agregar
                 </button>
@@ -438,7 +438,7 @@
         {{-- Rules --}}
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Reglas del espacio (opcional)</h2>
-            <div class="flex gap-2 mb-4">
+            <div class="flex flex-col sm:flex-row gap-2 mb-4">
                 <input type="text" id="regla-input"
                     class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                     placeholder="Ej: No se permite música alta">
