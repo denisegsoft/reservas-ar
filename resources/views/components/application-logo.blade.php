@@ -3,7 +3,7 @@
         <img width="50" src="{{ asset('images/logo.png') }}" alt="Logo" class="object-contain" />
     </div>
     <div class="leading-tight">
-        <div class="text-base font-black text-gray-900">ReservaTuEspacio
+        <div class="text-base font-black text-gray-900">Reserva<span>Tu</span>Espacio</div>
         <div class="text-[10px] text-gray-400 hidden sm:block">El espacio ideal para tu evento</div>
     </div>
 </div>
