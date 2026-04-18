@@ -195,7 +195,7 @@ class SubscriptionController extends Controller
             static::activateSubscription($user->id);
 
             return redirect()->route('owner.dashboard')
-                ->with('success', '¡Suscripción activada! Ahora podés ver quién te contacta, leer mensajes y gestionar tus reservas.');
+                ->with('subscription_activated', true);
         }
 
         return redirect()->route('owner.dashboard')

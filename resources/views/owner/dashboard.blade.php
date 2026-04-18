@@ -134,3 +134,49 @@
 </div>
 
 @endsection
+@if(session("subscription_activated"))
+@push("scripts")
+<div class="modal fade" id="modalSuscripcionActiva" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 px-5 pt-5 pb-3" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+                <div class="w-100 text-center">
+                    <div class="display-4 mb-2">🎉</div>
+                    <h4 class="modal-title text-white fw-black fs-3">¡Suscripción activada!</h4>
+                    <p class="text-white text-opacity-75 mb-0 mt-1">Tu pago fue procesado correctamente</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-5 py-4">
+                <p class="text-center text-muted mb-4">A partir de ahora tenés acceso completo a todos los beneficios:</p>
+                <div class="row g-3 mb-4">
+                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#f0fdf4"><span class="fs-4">📞</span><div><div class="fw-bold text-dark small">Contacto directo</div><div class="text-muted" style="font-size:.8rem">Ves los datos de tus clientes en cada reserva</div></div></div></div>
+                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#eff6ff"><span class="fs-4">💬</span><div><div class="fw-bold text-dark small">Mensajes desbloqueados</div><div class="text-muted" style="font-size:.8rem">Leé y respondé mensajes sin restricciones</div></div></div></div>
+                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#fdf4ff"><span class="fs-4">📈</span><div><div class="fw-bold text-dark small">Panel completo</div><div class="text-muted" style="font-size:.8rem">Gestioná propiedades, reservas y ganancias</div></div></div></div>
+                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#fff7ed"><span class="fs-4">💰</span><div><div class="fw-bold text-dark small">Más ventas</div><div class="text-muted" style="font-size:.8rem">Posicionamiento, marketing y asesoría de ventas</div></div></div></div>
+                </div>
+                <div class="rounded-3 p-4 text-center" style="background:linear-gradient(135deg,#f0f9ff,#faf5ff);border:1px dashed #c4b5fd">
+                    <p class="fw-bold mb-1" style="color:#4f46e5">🚀 Próximamente te contactamos para entregarte:</p>
+                    <div class="d-flex justify-content-center gap-4 mt-2 flex-wrap">
+                        <div class="text-center"><div class="fs-3">🤖</div><div class="small fw-semibold text-dark">Chatbot WhatsApp</div><div class="text-muted" style="font-size:.75rem">Atención automática 24/7</div></div>
+                        <div class="text-center"><div class="fs-3">🌐</div><div class="small fw-semibold text-dark">Sitio web profesional</div><div class="text-muted" style="font-size:.75rem">A medida de tu negocio</div></div>
+                    </div>
+                    <p class="text-muted mt-3 mb-0" style="font-size:.82rem">Nos comunicaremos al email registrado para coordinar los detalles y comenzar a trabajar juntos.</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-5 pb-5 pt-0 justify-content-center">
+                <button type="button" class="btn btn-primary px-5 py-2 rounded-3 fw-bold" data-bs-dismiss="modal" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;">
+                    ¡Empezar a usar mis beneficios!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var modal = new bootstrap.Modal(document.getElementById("modalSuscripcionActiva"), { backdrop: "static" });
+    modal.show();
+});
+</script>
+@endpush
+@endif
