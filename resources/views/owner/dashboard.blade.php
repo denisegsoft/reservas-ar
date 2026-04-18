@@ -137,38 +137,65 @@
 @if(session("subscription_activated"))
 @push("scripts")
 <div class="modal fade" id="modalSuscripcionActiva" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-0 px-5 pt-5 pb-3" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
-                <div class="w-100 text-center">
-                    <div class="display-4 mb-2">🎉</div>
-                    <h4 class="modal-title text-white fw-black fs-3">¡Suscripción activada!</h4>
-                    <p class="text-white text-opacity-75 mb-0 mt-1">Tu pago fue procesado correctamente</p>
-                </div>
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body px-5 py-4">
-                <p class="text-center text-muted mb-4">A partir de ahora tenés acceso completo a todos los beneficios:</p>
-                <div class="row g-3 mb-4">
-                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#f0fdf4"><span class="fs-4">📞</span><div><div class="fw-bold text-dark small">Contacto directo</div><div class="text-muted" style="font-size:.8rem">Ves los datos de tus clientes en cada reserva</div></div></div></div>
-                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#eff6ff"><span class="fs-4">💬</span><div><div class="fw-bold text-dark small">Mensajes desbloqueados</div><div class="text-muted" style="font-size:.8rem">Leé y respondé mensajes sin restricciones</div></div></div></div>
-                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#fdf4ff"><span class="fs-4">📈</span><div><div class="fw-bold text-dark small">Panel completo</div><div class="text-muted" style="font-size:.8rem">Gestioná propiedades, reservas y ganancias</div></div></div></div>
-                    <div class="col-6"><div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background:#fff7ed"><span class="fs-4">💰</span><div><div class="fw-bold text-dark small">Más ventas</div><div class="text-muted" style="font-size:.8rem">Posicionamiento, marketing y asesoría de ventas</div></div></div></div>
-                </div>
-                <div class="rounded-3 p-4 text-center" style="background:linear-gradient(135deg,#f0f9ff,#faf5ff);border:1px dashed #c4b5fd">
-                    <p class="fw-bold mb-1" style="color:#4f46e5">🚀 Próximamente te contactamos para entregarte:</p>
-                    <div class="d-flex justify-content-center gap-4 mt-2 flex-wrap">
-                        <div class="text-center"><div class="fs-3">🤖</div><div class="small fw-semibold text-dark">Chatbot WhatsApp</div><div class="text-muted" style="font-size:.75rem">Atención automática 24/7</div></div>
-                        <div class="text-center"><div class="fs-3">🌐</div><div class="small fw-semibold text-dark">Sitio web profesional</div><div class="text-muted" style="font-size:.75rem">A medida de tu negocio</div></div>
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content border-0" style="border-radius:1.75rem;overflow:hidden;box-shadow:0 32px 64px -12px rgba(0,0,0,.3);">
+
+            {{-- Header --}}
+            <div style="position:relative;padding:1.75rem 1.5rem 1.5rem;background:linear-gradient(135deg,#4338ca 0%,#6d28d9 55%,#9333ea 100%);overflow:hidden;">
+                <div style="position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08);top:-28px;right:-28px;pointer-events:none;"></div>
+                <div style="position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);top:16px;right:52px;pointer-events:none;"></div>
+                <button type="button" data-bs-dismiss="modal"
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;background:rgba(255,255,255,.2);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;"
+                        onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
+                    <svg width="13" height="13" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div style="width:54px;height:54px;border-radius:1rem;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.65rem;flex-shrink:0;">🎉</div>
+                    <div>
+                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:.3rem;">Pago aprobado</div>
+                        <div style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1.2;">¡Suscripción activada!</div>
                     </div>
-                    <p class="text-muted mt-3 mb-0" style="font-size:.82rem">Nos comunicaremos al email registrado para coordinar los detalles y comenzar a trabajar juntos.</p>
                 </div>
             </div>
-            <div class="modal-footer border-0 px-5 pb-5 pt-0 justify-content-center">
-                <button type="button" class="btn btn-primary px-5 py-2 rounded-3 fw-bold" data-bs-dismiss="modal" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;">
+
+            {{-- Cuerpo --}}
+            <div style="padding:1.4rem 1.5rem;">
+                <p style="font-size:.875rem;color:#6b7280;line-height:1.6;margin-bottom:1.1rem;">A partir de ahora tenés acceso completo a todos los beneficios:</p>
+
+                <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;">
+                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#f0fdf4;">
+                        <span style="font-size:1.1rem;">📞</span>
+                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Contacto directo</div><div style="font-size:.75rem;color:#9ca3af;">Ves los datos de tus clientes en cada reserva</div></div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#eff6ff;">
+                        <span style="font-size:1.1rem;">💬</span>
+                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Mensajes desbloqueados</div><div style="font-size:.75rem;color:#9ca3af;">Leé y respondé mensajes sin restricciones</div></div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#fdf4ff;">
+                        <span style="font-size:1.1rem;">📈</span>
+                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Panel completo</div><div style="font-size:.75rem;color:#9ca3af;">Gestioná propiedades, reservas y ganancias</div></div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#fff7ed;">
+                        <span style="font-size:1.1rem;">💰</span>
+                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Más ventas</div><div style="font-size:.75rem;color:#9ca3af;">Posicionamiento, marketing y asesoría de ventas</div></div>
+                    </div>
+                </div>
+
+                <div style="padding:.9rem 1rem;border-radius:1rem;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px dashed #c4b5fd;text-align:center;margin-bottom:1.2rem;">
+                    <div style="font-size:.78rem;font-weight:700;color:#4f46e5;margin-bottom:.6rem;">🚀 Próximamente te contactamos para entregarte:</div>
+                    <div style="display:flex;justify-content:center;gap:1.5rem;">
+                        <div><div style="font-size:1.4rem;">🤖</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Chatbot WhatsApp</div></div>
+                        <div><div style="font-size:1.4rem;">🌐</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Sitio web</div></div>
+                    </div>
+                    <div style="font-size:.72rem;color:#9ca3af;margin-top:.6rem;">Te escribiremos al email registrado para coordinar los detalles.</div>
+                </div>
+
+                <button type="button" data-bs-dismiss="modal"
+                    style="width:100%;padding:.75rem;border:none;border-radius:.875rem;background:linear-gradient(135deg,#4338ca,#6d28d9);color:#fff;font-weight:700;font-size:.875rem;cursor:pointer;">
                     ¡Empezar a usar mis beneficios!
                 </button>
             </div>
+
         </div>
     </div>
 </div>
