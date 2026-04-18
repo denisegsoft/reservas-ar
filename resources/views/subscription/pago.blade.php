@@ -104,9 +104,7 @@
                         @if($discount)
                         <p class="text-gray-400 text-sm line-through">${{ number_format($basePrice, 0, ',', '.') }} ARS</p>
                         <p class="text-gray-900 text-3xl font-black">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
-                        @if($discount['label'])
-                        <span class="inline-block mt-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">🏷️ {{ $discount['label'] }}</span>
-                        @endif
+                        <span class="inline-block mt-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
                         @else
                         <p class="text-gray-900 text-3xl font-black">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
                         @endif

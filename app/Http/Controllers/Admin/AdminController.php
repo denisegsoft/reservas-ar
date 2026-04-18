@@ -117,7 +117,7 @@ class AdminController extends Controller
         Setting::set('reviews_enabled',             $request->boolean('reviews_enabled')      ? '1' : '0');
         Setting::set('subscription_enabled',        $request->boolean('subscription_enabled') ? '1' : '0');
         Setting::set('subscription_price',          (string) max(1, (int) $request->input('subscription_price', 3000)));
-        Setting::set('subscription_discount',       (string) max(0, (int) $request->input('subscription_discount', 0)));
+        Setting::set('subscription_discount',       (string) min(100, max(0, (int) $request->input('subscription_discount', 0))));
         Setting::set('subscription_discount_label', trim($request->input('subscription_discount_label', '')));
 
         return back()->with('success', 'Configuración guardada.');

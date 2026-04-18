@@ -20,17 +20,17 @@ class SubscriptionController extends Controller
 
     public static function discountInfo(): ?array
     {
-        $amount = (int) Setting::get('subscription_discount', '0');
-        $label  = trim(Setting::get('subscription_discount_label', ''));
-        if ($amount <= 0) return null;
-        return ['amount' => $amount, 'label' => $label];
+        $pct   = (int) Setting::get('subscription_discount', '0');
+        $label = trim(Setting::get('subscription_discount_label', ''));
+        if ($pct <= 0 || $pct > 100) return null;
+        return ['pct' => $pct, 'label' => $label];
     }
 
     public static function price(): int
     {
         $base     = static::basePrice();
         $discount = static::discountInfo();
-        return $discount ? max(1, $base - $discount['amount']) : $base;
+        return $discount ? max(1, (int) round($base * (1 - $discount['pct'] / 100))) : $base;
     }
 
     public function __construct()

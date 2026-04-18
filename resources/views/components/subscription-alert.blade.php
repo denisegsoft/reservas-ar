@@ -35,9 +35,7 @@
                     @if($discount)
                         <span class="line-through text-gray-400">${{ number_format($basePrice, 0, ',', '.') }}</span>
                         <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
-                        @if($discount['label'])
-                            <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full align-middle">🏷️ {{ $discount['label'] }}</span>
-                        @endif
+                        <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full align-middle">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
                     @else
                         <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
                     @endif
