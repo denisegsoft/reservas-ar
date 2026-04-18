@@ -61,11 +61,6 @@
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripción corta</label>
-                    <input type="text" name="short_description" value="{{ old('short_description', $propiedad->short_description) }}"
-                        class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripción completa *</label>
                     <textarea name="description" rows="5" required
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none">{{ old('description', $propiedad->description) }}</textarea>

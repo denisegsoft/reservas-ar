@@ -406,7 +406,7 @@ const SERVICE_DATA = {
     whatsapp: {
         icon:        '💬',
         title:       'Chatbot para tu WhatsApp',
-        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un chatbot inteligente para tu WhatsApp Business.',
+        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un chatbot inteligente para tu WhatsApp Business. Además, te creamos un sitio web profesional para que tu negocio tenga presencia online.',
         benefits: [
             { emoji: '🤖', bg: '#dcfce7', text: '<strong>Respuestas automáticas</strong> para consultas frecuentes' },
             { emoji: '🕐', bg: '#dbeafe', text: 'Atención <strong>24/7</strong>, incluso cuando no estás disponible' },
@@ -417,7 +417,7 @@ const SERVICE_DATA = {
     website: {
         icon:        '🌐',
         title:       'Web profesional + Redes',
-        description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional y te asesoramos en redes para hacer crecer tu negocio.',
+        description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional y te asesoramos en redes para hacer crecer tu negocio. También incluye un chatbot para tu WhatsApp Business para que atiendas clientes las 24 hs.',
         benefits: [
             { emoji: '🎨', bg: '#e0e7ff', text: '<strong>Sitio web</strong> profesional a medida de tu negocio' },
             { emoji: '🎯', bg: '#fce7f3', text: '<strong>Asesoría en marketing</strong> y redes sociales' },
