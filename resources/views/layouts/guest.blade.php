@@ -127,7 +127,7 @@
                 </svg>
             </div>
             <div class="text-xl font-black text-gray-900">
-                Reserva<span class="text-indigo-600">Tu</span>Espacio
+                ReservaTuEspacio
             </div>
         </div>
 

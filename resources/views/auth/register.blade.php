@@ -91,7 +91,7 @@
             <label class="block text-sm font-semibold text-gray-700 mb-1.5">
                 Teléfono <span class="text-gray-400 font-normal">(opcional)</span>
             </label>
-            <x-phone-input :value="old('phone', '')" />
+            <x-phone-input :value="old('phone', '')" :show-whatsapp="false" />
         </div>
 
         {{-- Newsletter --}}
