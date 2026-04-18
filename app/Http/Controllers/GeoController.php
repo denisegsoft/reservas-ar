@@ -8,7 +8,12 @@ class GeoController extends Controller
 {
     public function partidos(Request $request)
     {
-        $province = \App\Models\Province::where('name', $request->province)->first();
+        if ($request->filled('province_id')) {
+            $province = \App\Models\Province::find((int) $request->province_id);
+        } else {
+            $province = \App\Models\Province::where('name', $request->province)->first();
+        }
+
         if (!$province) return response()->json([]);
 
         return \App\Models\Partido::where('province_id', $province->id)
