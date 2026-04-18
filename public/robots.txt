@@ -17,4 +17,4 @@ Allow: /propiedades
 Allow: /soporte
 Allow: /
 
-Sitemap: /sitemap.xml
+Sitemap: https://reservatuespacio.com.ar/sitemap.xml
