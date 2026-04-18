@@ -129,8 +129,8 @@
                         <div class="relative">
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">Partido / Departamento *</label>
                             <input type="text" name="partido" x-model="partidoInput" required autocomplete="off"
-                                :disabled="!provinceId" @input="onPartidoInput" @focus="onPartidoInput" @blur="setTimeout(() => showPartidoDD = false, 150)"
-                                class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                                @input="onPartidoInput" @focus="onPartidoInput" @blur="onPartidoBlur"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                                 placeholder="Ej: Pilar">
                             @error('partido')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             <div x-show="loadingPartidos" class="absolute right-3 top-9">
@@ -149,8 +149,8 @@
                         <div class="relative">
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">Localidad *</label>
                             <input type="text" name="locality" x-model="localidadInput" required autocomplete="off"
-                                :disabled="!partidoId" @input="onLocalidadInput" @focus="onLocalidadInput" @blur="setTimeout(() => showLocalidadDD = false, 150)"
-                                class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                                @input="onLocalidadInput" @focus="onLocalidadInput" @blur="setTimeout(() => showLocalidadDD = false, 150)"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                                 placeholder="Ej: Villa Rosa">
                             @error('locality')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                             <div x-show="loadingLocs" class="absolute right-3 top-9">

@@ -66,7 +66,11 @@ Alpine.data('addressAutocomplete', (initProvinceId, initPartido, initLocality) =
         this.partidoFiltered = q
             ? this.partidoOptions.filter(p => p.name.toLowerCase().includes(q)).slice(0, 10)
             : this.partidoOptions.slice(0, 10);
-        this.showPartidoDD = true;
+        this.showPartidoDD = !!q;
+    },
+
+    onPartidoBlur() {
+        setTimeout(() => { this.showPartidoDD = false; }, 150);
     },
 
     selectPartido(p) {

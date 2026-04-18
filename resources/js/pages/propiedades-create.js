@@ -6,10 +6,8 @@ document.getElementById('sel-province').addEventListener('change', function() {
     var provinceId = this.value;
     var provinceName = this.options[this.selectedIndex] ? (this.options[this.selectedIndex].dataset.name || '') : '';
     document.getElementById('inp-state').value = provinceName;
-    var inpP = document.getElementById('input-partido');
-    var inpL = document.getElementById('input-localidad');
-    inpP.value = ''; inpP.disabled = !provinceId;
-    inpL.value = ''; inpL.disabled = true;
+    document.getElementById('input-partido').value = '';
+    document.getElementById('input-localidad').value = '';
     partidoOptions = []; partidoId = null;
     document.getElementById('dd-partido').innerHTML = '';
     document.getElementById('dd-localidad').innerHTML = '';
@@ -30,8 +28,6 @@ document.getElementById('input-partido').addEventListener('input', function() {
     if (!q) {
         dd.classList.add('hidden');
         partidoId = null;
-        var inpL = document.getElementById('input-localidad');
-        inpL.value = ''; inpL.disabled = true; inpL._localidades = [];
         return;
     }
     var filtered = partidoOptions.filter(function(p){ return p.name.toLowerCase().includes(q); }).slice(0, 20);
@@ -54,23 +50,16 @@ document.getElementById('input-partido').addEventListener('input', function() {
 
 document.getElementById('input-partido').addEventListener('blur', function() {
     setTimeout(function(){ document.getElementById('dd-partido').classList.add('hidden'); }, 150);
-    // Si escribió algo pero no eligió del dropdown, habilitar localidad para texto libre
-    if (this.value.trim() && !partidoId) {
-        var inpL = document.getElementById('input-localidad');
-        inpL.disabled = false;
-        inpL._localidades = [];
-    }
 });
 
 function cargarLocalidades(pid) {
     var inpL = document.getElementById('input-localidad');
-    inpL.value = ''; inpL.disabled = true;
+    inpL.value = '';
     document.getElementById('spin-localidad').classList.remove('hidden');
     fetch('/geo/localidades?partido_id=' + pid)
         .then(function(r){ return r.json(); })
         .then(function(data){
             inpL._localidades = data;
-            inpL.disabled = false;
             document.getElementById('spin-localidad').classList.add('hidden');
         });
 }
@@ -112,7 +101,6 @@ document.getElementById('input-localidad').addEventListener('blur', function() {
         .then(function(data){
             partidoOptions = data;
             if (oldPartido) {
-                document.getElementById('input-partido').disabled = false;
                 var match = data.find(function(p){ return p.name === oldPartido; });
                 if (match) {
                     partidoId = match.id;

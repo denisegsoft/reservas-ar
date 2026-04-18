@@ -91,8 +91,8 @@
                     <div class="relative">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Partido / Departamento *</label>
                         <input type="text" id="input-partido" name="partido" value="{{ old('partido') }}" autocomplete="off"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-50 disabled:text-gray-400"
-                            placeholder="Escriba..." disabled>
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            placeholder="Escriba...">
                         <div id="spin-partido" class="hidden absolute right-3 top-9">
                             <svg class="animate-spin w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
                         </div>
@@ -103,8 +103,8 @@
                     <div class="relative">
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Localidad *</label>
                         <input type="text" id="input-localidad" name="locality" value="{{ old('locality') }}" autocomplete="off"
-                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-50 disabled:text-gray-400"
-                            placeholder="Escriba..." disabled>
+                            class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            placeholder="Escriba...">
                         <div id="spin-localidad" class="hidden absolute right-3 top-9">
                             <svg class="animate-spin w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
                         </div>
