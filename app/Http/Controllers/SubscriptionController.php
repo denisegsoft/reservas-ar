@@ -13,9 +13,24 @@ use MercadoPago\MercadoPagoConfig;
 
 class SubscriptionController extends Controller
 {
-    public static function price(): int
+    public static function basePrice(): int
     {
         return (int) Setting::get('subscription_price', '3000');
+    }
+
+    public static function discountInfo(): ?array
+    {
+        $amount = (int) Setting::get('subscription_discount', '0');
+        $label  = trim(Setting::get('subscription_discount_label', ''));
+        if ($amount <= 0) return null;
+        return ['amount' => $amount, 'label' => $label];
+    }
+
+    public static function price(): int
+    {
+        $base     = static::basePrice();
+        $discount = static::discountInfo();
+        return $discount ? max(1, $base - $discount['amount']) : $base;
     }
 
     public function __construct()
@@ -124,11 +139,13 @@ class SubscriptionController extends Controller
                 ->with('info', '¡Ya tenés tu suscripción activa!');
         }
 
-        $initPoint = $this->createPreference($user);
-        $price     = static::price();
-        $mpError   = $initPoint ? null : 'No se pudo conectar con MercadoPago.';
+        $initPoint    = $this->createPreference($user);
+        $price        = static::price();
+        $basePrice    = static::basePrice();
+        $discount     = static::discountInfo();
+        $mpError      = $initPoint ? null : 'No se pudo conectar con MercadoPago.';
 
-        return view('subscription.pago', compact('price', 'initPoint', 'mpError'));
+        return view('subscription.pago', compact('price', 'basePrice', 'discount', 'initPoint', 'mpError'));
     }
 
     // Redirige directo a MercadoPago (desde alertas/banners)

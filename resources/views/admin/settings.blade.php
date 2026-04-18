@@ -87,6 +87,40 @@
                 </div>
             </div>
 
+            {{-- Descuento suscripción --}}
+            <div class="p-6">
+                <p class="font-semibold text-gray-900 text-sm mb-1">Descuento en suscripción</p>
+                <p class="text-xs text-gray-500 mb-4">
+                    Si el descuento es mayor a 0, se muestra el precio tachado y el precio final en los banners y en la página de pago.
+                    Dejá en 0 para no aplicar descuento.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-500">-$</span>
+                        <input type="number" name="subscription_discount" min="0" step="1"
+                               value="{{ $settings['subscription_discount'] }}"
+                               class="w-28 px-3 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-right">
+                        <span class="text-sm text-gray-400">ARS</span>
+                    </div>
+                    <div class="flex-1">
+                        <input type="text" name="subscription_discount_label" maxlength="60"
+                               value="{{ $settings['subscription_discount_label'] }}"
+                               placeholder="Motivo del descuento (ej: Lanzamiento, Promo verano...)"
+                               class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    </div>
+                </div>
+                @php
+                    $dsc = (int) $settings['subscription_discount'];
+                    $base = (int) $settings['subscription_price'];
+                @endphp
+                @if($dsc > 0)
+                <p class="text-xs text-green-600 mt-2 font-medium">
+                    Precio final actual: ${{ number_format(max(1, $base - $dsc), 0, ',', '.') }} ARS
+                    (precio base ${{ number_format($base, 0, ',', '.') }} − descuento ${{ number_format($dsc, 0, ',', '.') }})
+                </p>
+                @endif
+            </div>
+
         </div>
 
         <div class="mt-6">

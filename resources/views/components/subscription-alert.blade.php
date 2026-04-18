@@ -4,9 +4,11 @@
 
 @if($user && !$user->isAdmin() && !$user->hasSubscription() && $user->propiedades()->exists())
 @php
-    $price    = \App\Http\Controllers\SubscriptionController::price();
-    $views    = max((int) $user->propiedades()->sum('views_count'), 10);
-    $messages = \App\Models\Message::where('receiver_id', $user->id)->count();
+    $price     = \App\Http\Controllers\SubscriptionController::price();
+    $basePrice = \App\Http\Controllers\SubscriptionController::basePrice();
+    $discount  = \App\Http\Controllers\SubscriptionController::discountInfo();
+    $views     = max((int) $user->propiedades()->sum('views_count'), 10);
+    $messages  = \App\Models\Message::where('receiver_id', $user->id)->count();
 @endphp
 <div class="mb-8 bg-indigo-50 border border-indigo-200 rounded-2xl shadow-sm overflow-hidden">
     <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-violet-500"></div>
@@ -29,8 +31,17 @@
                     </span>
                 </p>
                 <p class="text-gray-500 text-sm mt-0.5">
-                    Activá por <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>,
-                    pago único sin renovaciones. Desbloqueá el acceso completo para gestionar tus propiedades y ventas.
+                    Activá por
+                    @if($discount)
+                        <span class="line-through text-gray-400">${{ number_format($basePrice, 0, ',', '.') }}</span>
+                        <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
+                        @if($discount['label'])
+                            <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full align-middle">🏷️ {{ $discount['label'] }}</span>
+                        @endif
+                    @else
+                        <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
+                    @endif
+                    , pago único sin renovaciones. Desbloqueá el acceso completo para gestionar tus propiedades y ventas.
                 </p>
             </div>
 

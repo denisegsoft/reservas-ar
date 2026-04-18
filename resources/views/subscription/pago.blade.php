@@ -101,7 +101,15 @@
                 <div class="flex items-center justify-between mb-5">
                     <div>
                         <p class="text-gray-400 text-xs font-medium">Pago único · Sin renovaciones</p>
+                        @if($discount)
+                        <p class="text-gray-400 text-sm line-through">${{ number_format($basePrice, 0, ',', '.') }} ARS</p>
                         <p class="text-gray-900 text-3xl font-black">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
+                        @if($discount['label'])
+                        <span class="inline-block mt-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">🏷️ {{ $discount['label'] }}</span>
+                        @endif
+                        @else
+                        <p class="text-gray-900 text-3xl font-black">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
+                        @endif
                     </div>
                     <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

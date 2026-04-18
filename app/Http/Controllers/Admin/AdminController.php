@@ -100,10 +100,12 @@ class AdminController extends Controller
     public function settings()
     {
         $settings = [
-            'avatar_required'       => Setting::get('avatar_required', '1'),
-            'reviews_enabled'       => Setting::get('reviews_enabled', '1'),
-            'subscription_enabled'  => Setting::get('subscription_enabled', '1'),
-            'subscription_price'    => Setting::get('subscription_price', '3000'),
+            'avatar_required'              => Setting::get('avatar_required', '1'),
+            'reviews_enabled'              => Setting::get('reviews_enabled', '1'),
+            'subscription_enabled'         => Setting::get('subscription_enabled', '1'),
+            'subscription_price'           => Setting::get('subscription_price', '3000'),
+            'subscription_discount'        => Setting::get('subscription_discount', '0'),
+            'subscription_discount_label'  => Setting::get('subscription_discount_label', ''),
         ];
 
         return view('admin.settings', compact('settings'));
@@ -111,10 +113,12 @@ class AdminController extends Controller
 
     public function updateSettings(Request $request)
     {
-        Setting::set('avatar_required',      $request->boolean('avatar_required')     ? '1' : '0');
-        Setting::set('reviews_enabled',      $request->boolean('reviews_enabled')      ? '1' : '0');
-        Setting::set('subscription_enabled', $request->boolean('subscription_enabled') ? '1' : '0');
-        Setting::set('subscription_price',   (string) max(1, (int) $request->input('subscription_price', 3000)));
+        Setting::set('avatar_required',             $request->boolean('avatar_required')     ? '1' : '0');
+        Setting::set('reviews_enabled',             $request->boolean('reviews_enabled')      ? '1' : '0');
+        Setting::set('subscription_enabled',        $request->boolean('subscription_enabled') ? '1' : '0');
+        Setting::set('subscription_price',          (string) max(1, (int) $request->input('subscription_price', 3000)));
+        Setting::set('subscription_discount',       (string) max(0, (int) $request->input('subscription_discount', 0)));
+        Setting::set('subscription_discount_label', trim($request->input('subscription_discount_label', '')));
 
         return back()->with('success', 'Configuración guardada.');
     }
