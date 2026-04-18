@@ -611,13 +611,9 @@ class PropertyController extends Controller
         $filename = Str::uuid() . '.webp';
         $destPath = storage_path('app/public/propiedades/' . $filename);
 
-        $ext = strtolower($image->getClientOriginalExtension());
-        if ($ext === 'png') {
-            $gdImage = imagecreatefrompng($image->getRealPath());
-        } elseif ($ext === 'gif') {
-            $gdImage = imagecreatefromgif($image->getRealPath());
-        } else {
-            $gdImage = imagecreatefromjpeg($image->getRealPath());
+        $gdImage = imagecreatefromstring(file_get_contents($image->getRealPath()));
+        if ($gdImage === false) {
+            throw new \RuntimeException('No se pudo procesar la imagen.');
         }
 
         imagewebp($gdImage, $destPath, 82);
