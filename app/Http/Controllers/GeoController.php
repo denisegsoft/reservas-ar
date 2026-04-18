@@ -8,9 +8,10 @@ class GeoController extends Controller
 {
     public function partidos(Request $request)
     {
-        $request->validate(['province_id' => 'required|integer|min:1']);
+        $province = \App\Models\Province::where('name', $request->province)->first();
+        if (!$province) return response()->json([]);
 
-        return \App\Models\Partido::where('province_id', (int) $request->province_id)
+        return \App\Models\Partido::where('province_id', $province->id)
             ->orderBy('name')
             ->get(['id', 'name']);
     }

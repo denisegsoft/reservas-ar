@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PropertyPublishedNotification;
 use App\Models\BlockedDate;
 use App\Models\City;
 use App\Models\Property;
@@ -10,6 +11,7 @@ use App\Models\PropertyImage;
 use App\Models\PropertyService;
 use App\Models\Province;
 use App\Services\ContactInfoDetector;
+use App\Support\MailHelper;
 use App\Support\PropertyCache;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -28,8 +30,12 @@ class PropertyController extends Controller
             $query->where('state', $request->state);
         }
 
-        if ($request->filled('city')) {
-            $query->where('city', $request->city);
+        if ($request->filled('partido')) {
+            $query->where('partido', $request->partido);
+        }
+
+        if ($request->filled('locality')) {
+            $query->where('locality', $request->locality);
         }
 
         if ($request->filled('guests')) {
@@ -109,12 +115,16 @@ class PropertyController extends Controller
         $amenitiesList = Property::amenitiesList();
         $typesList = Property::typesList();
         $provinces = Province::where('active', true)->orderBy('order')->pluck('name');
-        $cities = $request->filled('state')
-            ? City::whereHas('province', fn($q) => $q->where('name', $request->state))
-                ->where('active', true)->orderBy('order')->pluck('name')
+        $partidos = $request->filled('state')
+            ? \App\Models\Partido::whereHas('province', fn($q) => $q->where('name', $request->state))
+                ->orderBy('name')->get(['id', 'name'])
+            : collect();
+        $localidades = $request->filled('partido')
+            ? \App\Models\Localidad::whereHas('partido', fn($q) => $q->where('name', $request->partido))
+                ->orderBy('name')->pluck('name')
             : collect();
 
-        return view('propiedades.index', compact('propiedades', 'amenitiesList', 'typesList', 'provinces', 'cities'));
+        return view('propiedades.index', compact('propiedades', 'amenitiesList', 'typesList', 'provinces', 'partidos', 'localidades'));
     }
 
     public function show(Property $propiedad)
@@ -285,6 +295,15 @@ class PropertyController extends Controller
         }
 
         if (Auth::user()->needsSubscription()) {
+            if (!$pendingByContact) {
+                MailHelper::send(
+                    Auth::user()->email,
+                    new PropertyPublishedNotification($propiedad->load('owner')),
+                    '[Property]',
+                    ['property_id' => $propiedad->id]
+                );
+            }
+
             return redirect()->route('subscription.payment')
                 ->with('success', $pendingByContact
                     ? 'Tu propiedad está pendiente de revisión. Te avisaremos cuando sea aprobada.'

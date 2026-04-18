@@ -10,6 +10,7 @@ Disallow: /mensajes
 Disallow: /favoritos
 Disallow: /perfil
 Disallow: /sugerencias
+Disallow: /gx91mzqt
 
 # Rutas públicas — permitir explícitamente
 Allow: /propiedades

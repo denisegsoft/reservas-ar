@@ -14,9 +14,9 @@
         ? ($isDesc ? $baseSort . '_asc' : $baseSort . '_desc')
         : $currentSort;
     $toggleQuery = array_merge(request()->except('sort'), ['sort' => $toggleSort]);
-    $hasFilters = request()->hasAny(['state','city','type','guests','price_min','price_max','amenities','bedrooms','bathrooms','parking','rating_min','check_in','check_out']);
+    $hasFilters = request()->hasAny(['state','partido','locality','type','guests','price_min','price_max','amenities','bedrooms','bathrooms','parking','rating_min','check_in','check_out']);
     $activeFilterCount = collect([
-        request('state'), request('city'), request('type'), request('guests'),
+        request('state'), request('partido'), request('locality'), request('type'), request('guests'),
         (request('price_min') || request('price_max')) ? '1' : null,
         request('rating_min'), request('bedrooms'), request('bathrooms'), request('parking'),
         (request('check_in') || request('check_out')) ? '1' : null,
@@ -88,16 +88,22 @@
                     <div class="px-5 py-4 border-b border-gray-100">
                         <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Ubicación</p>
                         <div class="space-y-2">
-                            <select name="state" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                            <select name="state" id="modal-state" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
                                 <option value="">Todas las provincias</option>
                                 @foreach($provinces as $prov)
                                 <option value="{{ $prov }}" {{ request('state')==$prov ? 'selected' : '' }}>{{ $prov }}</option>
                                 @endforeach
                             </select>
-                            <select name="city" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                                <option value="">Todas las ciudades</option>
-                                @foreach($cities as $city)
-                                <option value="{{ $city }}" {{ request('city')==$city ? 'selected' : '' }}>{{ $city }}</option>
+                            <select name="partido" id="modal-partido" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                <option value="">Todos los partidos</option>
+                                @foreach($partidos as $p)
+                                <option value="{{ $p->name }}" {{ request('partido')==$p->name ? 'selected' : '' }}>{{ $p->name }}</option>
+                                @endforeach
+                            </select>
+                            <select name="locality" id="modal-locality" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                <option value="">Todas las localidades</option>
+                                @foreach($localidades as $loc)
+                                <option value="{{ $loc }}" {{ request('locality')==$loc ? 'selected' : '' }}>{{ $loc }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -288,10 +294,16 @@
                                         <option value="{{ $prov }}" {{ request('state')==$prov ? 'selected' : '' }}>{{ $prov }}</option>
                                         @endforeach
                                     </select>
-                                    <select name="city" id="sidebar-city" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
-                                        <option value="">Todas las ciudades</option>
-                                        @foreach($cities as $city)
-                                        <option value="{{ $city }}" {{ request('city')==$city ? 'selected' : '' }}>{{ $city }}</option>
+                                    <select name="partido" id="sidebar-partido" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
+                                        <option value="">Todos los partidos</option>
+                                        @foreach($partidos as $p)
+                                        <option value="{{ $p->name }}" {{ request('partido')==$p->name ? 'selected' : '' }}>{{ $p->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <select name="locality" id="sidebar-locality" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
+                                        <option value="">Todas las localidades</option>
+                                        @foreach($localidades as $loc)
+                                        <option value="{{ $loc }}" {{ request('locality')==$loc ? 'selected' : '' }}>{{ $loc }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -502,9 +514,14 @@
                         {{ request('state') }}<a href="{{ route('properties.index', array_merge(request()->except('state','city'), [])) }}" class="hover:text-red-500 ml-0.5">×</a>
                     </span>
                     @endif
-                    @if(request('city'))
+                    @if(request('partido'))
                     <span class="inline-flex items-center gap-1 text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-full font-medium">
-                        {{ request('city') }}<a href="{{ route('properties.index', request()->except('city')) }}" class="hover:text-red-500 ml-0.5">×</a>
+                        {{ request('partido') }}<a href="{{ route('properties.index', request()->except('partido','locality')) }}" class="hover:text-red-500 ml-0.5">×</a>
+                    </span>
+                    @endif
+                    @if(request('locality'))
+                    <span class="inline-flex items-center gap-1 text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-full font-medium">
+                        {{ request('locality') }}<a href="{{ route('properties.index', request()->except('locality')) }}" class="hover:text-red-500 ml-0.5">×</a>
                     </span>
                     @endif
                     @if(request('type'))
