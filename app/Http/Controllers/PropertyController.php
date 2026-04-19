@@ -10,7 +10,6 @@ use App\Models\PropertyAmenityLog;
 use App\Models\PropertyImage;
 use App\Models\PropertyService;
 use App\Models\Province;
-use App\Services\ContactInfoDetector;
 use App\Support\MailHelper;
 use App\Support\PropertyCache;
 use Carbon\Carbon;
@@ -286,27 +285,16 @@ class PropertyController extends Controller
             }
         }
 
-        // Si no tiene suscripción, verificar si hay datos de contacto
-        $pendingByContact = false;
-        if (Auth::user()->needsSubscription() && $this->hasContactInfo($request, $data, $uploadedPaths)) {
-            $propiedad->update(['status' => 'pending']);
-            $pendingByContact = true;
-        }
-
         if (Auth::user()->needsSubscription()) {
-            if (!$pendingByContact) {
-                MailHelper::send(
-                    Auth::user()->email,
-                    new PropertyPublishedNotification($propiedad->load('owner')),
-                    '[Property]',
-                    ['property_id' => $propiedad->id]
-                );
-            }
+            MailHelper::send(
+                Auth::user()->email,
+                new PropertyPublishedNotification($propiedad->load('owner')),
+                '[Property]',
+                ['property_id' => $propiedad->id]
+            );
 
             return redirect()->route('subscription.payment')
-                ->with('success', $pendingByContact
-                    ? 'Tu propiedad está pendiente de revisión. Te avisaremos cuando sea aprobada.'
-                    : 'Tu propiedad fue publicada. Activá tu suscripción para que los clientes puedan contactarte.')
+                ->with('success', 'Tu propiedad fue publicada. Activá tu suscripción para que los clientes puedan contactarte.')
                 ->with('success_property_slug', $propiedad->slug);
         }
 
@@ -431,20 +419,6 @@ class PropertyController extends Controller
         // Services
         $this->syncServices($propiedad, $request->input('services', []));
 
-        // Si no tiene suscripción, verificar datos de contacto en textos y todas las imágenes
-        if (Auth::user()->needsSubscription()) {
-            $allImagePaths = $propiedad->images()->pluck('path')->toArray();
-            if ($this->hasContactInfo($request, $data, $allImagePaths)) {
-                $propiedad->update(['status' => 'pending']);
-                return redirect()->route('owner.properties.index')
-                    ->with('warning', 'Tu propiedad está pendiente de revisión. Te avisaremos cuando sea aprobada.');
-            }
-            // Sin info de contacto: restaurar a active si estaba pendiente por esta razón
-            if ($propiedad->status === 'pending') {
-                $propiedad->update(['status' => 'active']);
-            }
-        }
-
         PropertyCache::clear($propiedad);
 
         return redirect()->route('owner.properties.index')
@@ -559,36 +533,6 @@ class PropertyController extends Controller
             ->pluck('name');
 
         return response()->json($cities);
-    }
-
-    /**
-     * Checks name, descriptions and uploaded images for contact info.
-     * Returns true if anything suspicious is found.
-     */
-    private function hasContactInfo(Request $request, array $data, array $storedImagePaths = []): bool
-    {
-        $detector = new ContactInfoDetector();
-
-        $texts = array_filter([
-            $data['name']              ?? null,
-            $data['description']       ?? null,
-            $data['short_description'] ?? null,
-        ]);
-
-        foreach ($texts as $text) {
-            if ($detector->foundInText($text)) {
-                return true;
-            }
-        }
-
-        foreach ($storedImagePaths as $relativePath) {
-            $fullPath = Storage::disk('public')->path($relativePath);
-            if ($detector->foundInImage($fullPath)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function stripEmptyDiscountRows(Request $request): void
