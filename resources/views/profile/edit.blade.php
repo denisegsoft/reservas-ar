@@ -48,7 +48,7 @@
                     <input id="avatar_file" name="avatar_file" type="file" accept="image/*" class="sr-only" @change="change($event)">
                 </div>
                 <div class="text-sm text-gray-500">
-                    <p class="font-medium text-gray-700">{{ $user->full_name }}</p>
+                    <p data-fullname class="font-medium text-gray-700">{{ $user->full_name }}</p>
                     <p class="mt-0.5">Haz clic en el ícono de cámara para cambiar tu foto.</p>
                     <p class="mt-0.5">Máximo 3 MB. Formatos: JPG, PNG, GIF, WebP.</p>
                     <p id="err_avatar_file" class="mt-1 text-red-600 hidden"></p>

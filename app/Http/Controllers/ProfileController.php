@@ -67,6 +67,7 @@ class ProfileController extends Controller
             return response()->json([
                 'message'    => 'Perfil actualizado correctamente.',
                 'avatar_url' => $user->avatar_url,
+                'full_name'  => $user->full_name,
             ]);
         }
 

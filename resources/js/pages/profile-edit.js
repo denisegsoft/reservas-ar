@@ -71,6 +71,9 @@ document.getElementById('profileInfoForm').addEventListener('submit', async func
             if (data.avatar_url) {
                 document.querySelectorAll('img[data-avatar]').forEach(img => img.src = data.avatar_url);
             }
+            if (data.full_name) {
+                document.querySelectorAll('[data-fullname]').forEach(el => el.textContent = data.full_name);
+            }
         } else if (res.status === 422) {
             showFieldErrors(this, data.errors ?? {});
             showAlert('profileInfoAlert', 'Revisá los errores del formulario.', 'error');
