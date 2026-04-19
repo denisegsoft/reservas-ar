@@ -77,11 +77,11 @@
 
         {{-- Mensaje de impacto --}}
         @if($views > 0)
-        <div class="flex items-center gap-1.5 text-sm text-gray-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+        {{-- <div class="flex items-center gap-1.5 text-sm text-gray-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
             <span class="text-base">🔥</span>
             <span>Tus propiedades ya tienen visitas —</span>
             <strong class="text-red-600">hay clientes que quieren contactarte y no pueden.</strong>
-        </div>
+        </div> --}}
         @endif
 
     </div>
