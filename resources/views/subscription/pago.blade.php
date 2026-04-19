@@ -69,7 +69,7 @@
                     <span class="text-xl mt-0.5">🤖</span>
                     <div>
                         <p class="text-white font-semibold text-sm">Chatbot inteligente para tu WhatsApp Business</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Ahorra tu tiempo y automatizá las respuestas de tu empresa en WhatsApp Business y atendé a tus clientes las 24 hs</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Ahorra tu tiempo, automatizá las respuestas en WhatsApp y atendé a tus clientes las 24 hs</p>
                     </div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
