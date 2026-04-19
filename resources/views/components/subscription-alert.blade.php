@@ -15,7 +15,7 @@
     <div class="p-5 sm:p-6">
 
         {{-- Fila superior --}}
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4 w-full">
             <div class="w-11 h-11 rounded-xl bg-white border border-indigo-200 flex items-center justify-center text-xl flex-shrink-0 shadow-sm">🔒</div>
 
             <div class="flex-1 min-w-0">
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <div class="flex-shrink-0 flex flex-col items-end gap-1.5">
+            <div class="flex-shrink-0 flex flex-col sm:items-end items-start gap-1.5">
                 <a href="{{ route('subscription.pay') }}"
                    class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm whitespace-nowrap">
                     Activar ahora
@@ -55,7 +55,7 @@
         </div>
 
         {{-- Beneficios incluidos --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
             <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
                 <span class="text-base flex-shrink-0">🤖</span>
                 <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot inteligente para tu WhatsApp 24/7</span>
