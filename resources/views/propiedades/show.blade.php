@@ -107,7 +107,10 @@ $reviewsSchema = [
             {{-- Image gallery --}}
             <div class="rounded-2xl overflow-hidden mb-6 aspect-video bg-gray-900 flex items-center justify-center">
                 @if($propiedad->images->count())
-                <div x-data="{ active: 0 }" class="relative w-full h-full flex items-center justify-center">
+                <div x-data="{ active: 0, touchStartX: 0 }"
+                     @touchstart="touchStartX = $event.touches[0].clientX"
+                     @touchend="let diff = touchStartX - $event.changedTouches[0].clientX; if(Math.abs(diff) > 40){ if(diff > 0){ active = (active + 1) % {{ $propiedad->images->count() }} } else { active = (active - 1 + {{ $propiedad->images->count() }}) % {{ $propiedad->images->count() }} } }"
+                     class="relative w-full h-full flex items-center justify-center">
                     @foreach($propiedad->images as $i => $image)
                     <img x-show="active === {{ $i }}" src="{{ $image->url }}" alt="{{ $propiedad->name }}"
                          style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;"
