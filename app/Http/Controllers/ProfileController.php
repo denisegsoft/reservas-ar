@@ -63,6 +63,8 @@ class ProfileController extends Controller
 
         $user->save();
 
+        $user->propiedades()->each(function ($p) { \App\Support\PropertyCache::clear($p); });
+
         if ($request->expectsJson()) {
             return response()->json([
                 'message'    => 'Perfil actualizado correctamente.',
