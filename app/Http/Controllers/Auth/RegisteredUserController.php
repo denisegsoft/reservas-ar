@@ -52,6 +52,6 @@ class RegisteredUserController extends Controller
             return redirect()->route('avatar.setup');
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('profile.edit')->with('status', 'registered');
     }
 }
