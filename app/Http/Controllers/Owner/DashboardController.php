@@ -133,7 +133,11 @@ class DashboardController extends Controller
     {
 
         $propiedades = Auth::user()->propiedades()->active()->with('services', 'blockedDates')->get();
-        $clientes    = User::where('role', 'user')->orderBy('name')->get();
+        $ownerPropertyIds = Auth::user()->propiedades()->pluck('id');
+        $clientes = User::where('role', 'user')
+            ->whereHas('reservations', fn($q) => $q->whereIn('property_id', $ownerPropertyIds))
+            ->orderBy('name')
+            ->get();
 
         $reservasPorPropiedad = [];
         $blockedPorPropiedad  = [];
