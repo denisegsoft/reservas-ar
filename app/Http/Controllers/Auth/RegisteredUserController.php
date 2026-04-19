@@ -48,9 +48,9 @@ class RegisteredUserController extends Controller
             return AuthenticatedSessionController::processPendingAndRedirect($user, $request);
         }
 
-        if (Setting::get('avatar_required', '1') === '1') {
+        /* if (Setting::get('avatar_required', '1') === '1') {
             return redirect()->route('avatar.setup');
-        }
+        } */
 
         return redirect()->route('profile.edit')->with('status', 'registered');
     }
