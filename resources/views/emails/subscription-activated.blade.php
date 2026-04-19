@@ -7,7 +7,7 @@ Tu pago fue procesado correctamente y tu suscripción en **{{ config('app.name')
 
 ## Lo que ya podés usar hoy
 
-📊 **Panel de gestión completo** — Gestioná propiedades, reservas, clientes y ganancias en un solo lugar
+📊 **Panel de gestión personalizado** — Gestioná propiedades, reservas, clientes y ganancias en un solo lugar
 
 📱 **Gestión de redes y publicaciones** — Gestioná todas tus redes sociales y publicaciones desde el panel
 

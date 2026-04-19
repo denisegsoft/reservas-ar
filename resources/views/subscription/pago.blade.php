@@ -54,7 +54,7 @@
                 <div class="sm:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
                     <span class="text-xl mt-0.5">📊</span>
                     <div>
-                        <p class="text-white font-semibold text-sm">Panel de gestión completo</p>
+                        <p class="text-white font-semibold text-sm">Panel de gestión personalizado</p>
                         <p class="text-indigo-200 text-xs mt-0.5">Gestioná propiedades, reservas, clientes y ganancias en un solo lugar</p>
                     </div>
                 </div>
