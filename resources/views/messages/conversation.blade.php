@@ -71,13 +71,41 @@
         </div>
 
         {{-- Input --}}
-        <div class="border-t border-gray-100 p-4">
+        <div class="border-t border-gray-100 p-4"
+             x-data="{
+                 listening: false,
+                 supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                 startVoice() {
+                     if (!this.supported) return;
+                     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                     const rec = new SR(); rec.lang = 'es-AR'; rec.interimResults = false;
+                     this.listening = true;
+                     rec.onresult = (e) => {
+                         const ta = document.getElementById('msg-textarea');
+                         ta.value += (ta.value ? ' ' : '') + e.results[0][0].transcript;
+                         ta.dispatchEvent(new Event('input', { bubbles: true }));
+                         this.listening = false;
+                     };
+                     rec.onerror = rec.onend = () => { this.listening = false; };
+                     rec.start();
+                 }
+             }">
+            <p x-show="listening" class="text-xs text-red-500 mb-1.5 animate-pulse">Escuchando... hablá ahora</p>
             <div class="flex gap-3">
-                <textarea x-model="body" rows="1" maxlength="1000"
+                <textarea id="msg-textarea" x-model="body" rows="1" maxlength="1000"
                     placeholder="Escribi tu mensaje..."
                     :disabled="sending"
                     @keydown.enter.prevent="if(!$event.shiftKey) send()"
                     class="flex-1 px-4 py-2.5 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all disabled:opacity-50"></textarea>
+                <button type="button" x-show="supported" @click="startVoice()"
+                        :title="listening ? 'Escuchando...' : 'Dictá tu mensaje'"
+                        :class="listening ? 'bg-red-100 text-red-500 animate-pulse' : 'bg-gray-100 text-gray-400 hover:bg-indigo-100 hover:text-indigo-600'"
+                        class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 self-end transition-all focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                    </svg>
+                </button>
                 <button @click="send()" :disabled="sending || !body.trim()"
                         class="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl flex items-center justify-center transition-all flex-shrink-0 self-end disabled:opacity-50">
                     <svg x-show="!sending" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

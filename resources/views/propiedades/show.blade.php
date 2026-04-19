@@ -556,9 +556,38 @@ $reviewsSchema = [
                             </div>
                             @error('rating')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Tu comentario</label>
-                            <textarea name="comment" rows="3" required minlength="10" maxlength="1000"
+                        <div class="mb-4"
+                             x-data="{
+                                 listening: false,
+                                 supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                                 startVoice() {
+                                     if (!this.supported) return;
+                                     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                     const rec = new SR(); rec.lang = 'es-AR'; rec.interimResults = false;
+                                     this.listening = true;
+                                     rec.onresult = (e) => {
+                                         const ta = document.getElementById('review-comment');
+                                         ta.value += (ta.value ? ' ' : '') + e.results[0][0].transcript;
+                                         this.listening = false;
+                                     };
+                                     rec.onerror = rec.onend = () => { this.listening = false; };
+                                     rec.start();
+                                 }
+                             }">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-gray-600">Tu comentario</label>
+                                <button type="button" x-show="supported" @click="startVoice()"
+                                        :title="listening ? 'Escuchando...' : 'Dictá tu comentario'"
+                                        :class="listening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-indigo-600'"
+                                        class="flex items-center gap-1 text-xs transition-colors focus:outline-none">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                                    </svg>
+                                    <span x-text="listening ? 'Escuchando...' : 'Dictá'"></span>
+                                </button>
+                            </div>
+                            <textarea id="review-comment" name="comment" rows="3" required minlength="10" maxlength="1000"
                                 placeholder="Contanos qué te pareció el lugar, la atención, la limpieza..."
                                 class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-white">{{ old('comment') }}</textarea>
                             @error('comment')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror

@@ -26,15 +26,72 @@
                     </select>
                     @error('type')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nombre de la propiedad *</label>
-                    <input type="text" name="name" value="{{ old('name') }}"
+                <div x-data="{
+                        listening: false,
+                        supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                        startVoice(targetId) {
+                            if (!this.supported) return;
+                            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                            const rec = new SR(); rec.lang = 'es-AR'; rec.interimResults = false;
+                            this.listening = true;
+                            rec.onresult = (e) => {
+                                const el = document.getElementById(targetId);
+                                el.value += (el.value ? ' ' : '') + e.results[0][0].transcript;
+                                el.dispatchEvent(new Event('input', { bubbles: true }));
+                                this.listening = false;
+                            };
+                            rec.onerror = rec.onend = () => { this.listening = false; };
+                            rec.start();
+                        }
+                    }">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-sm font-semibold text-gray-700">Nombre de la propiedad *</label>
+                        <button type="button" x-show="supported" @click="startVoice('create-name')"
+                                :title="listening ? 'Escuchando...' : 'Dictá el nombre'"
+                                :class="listening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-indigo-600'"
+                                class="flex items-center gap-1 text-xs transition-colors focus:outline-none">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                            </svg>
+                            <span x-text="listening ? 'Escuchando...' : 'Dictá'"></span>
+                        </button>
+                    </div>
+                    <input id="create-name" type="text" name="name" value="{{ old('name') }}"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ponle un nombre a tu propiedad">
                     @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripción completa *</label>
-                    <textarea name="description" rows="5"
+                <div x-data="{
+                        listening: false,
+                        supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                        startVoice() {
+                            if (!this.supported) return;
+                            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                            const rec = new SR(); rec.lang = 'es-AR'; rec.interimResults = false;
+                            this.listening = true;
+                            rec.onresult = (e) => {
+                                const ta = document.getElementById('create-desc');
+                                ta.value += (ta.value ? ' ' : '') + e.results[0][0].transcript;
+                                this.listening = false;
+                            };
+                            rec.onerror = rec.onend = () => { this.listening = false; };
+                            rec.start();
+                        }
+                    }">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-sm font-semibold text-gray-700">Descripción completa *</label>
+                        <button type="button" x-show="supported" @click="startVoice()"
+                                :title="listening ? 'Escuchando...' : 'Dictá la descripción'"
+                                :class="listening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-indigo-600'"
+                                class="flex items-center gap-1 text-xs transition-colors focus:outline-none">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                            </svg>
+                            <span x-text="listening ? 'Escuchando...' : 'Dictá'"></span>
+                        </button>
+                    </div>
+                    <textarea id="create-desc" name="description" rows="5"
                         class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Describe tu propiedad, que la hace especial, el ambiente, los alrededores...">{{ old('description') }}</textarea>
                     @error('description')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
