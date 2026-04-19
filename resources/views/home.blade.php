@@ -49,45 +49,55 @@ $_orgSchema = json_encode([
             Un lugar exclusivo de quintas y salones para eventos. Encontra el espacio ideal y coordiná tu reserva fácilmente.
         </p>
 
-        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-4xl mx-auto">
-            <form action="{{ route('properties.index') }}" method="GET">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div class="text-left">
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Provincia</label>
-                        <select name="state" id="home-state" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
-                            <option value="">Todas las provincias</option>
-                            @foreach($provinces as $prov)
-                            <option value="{{ $prov }}">{{ $prov }}</option>
-                            @endforeach
-                        </select>
+        <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-3xl mx-auto"
+             x-data="{
+                listening: false,
+                supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                startVoice() {
+                    if (!this.supported) return;
+                    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const rec = new SR();
+                    rec.lang = 'es-AR';
+                    rec.interimResults = false;
+                    rec.maxAlternatives = 1;
+                    this.listening = true;
+                    rec.onresult = (e) => {
+                        document.getElementById('home-q').value = e.results[0][0].transcript;
+                        this.listening = false;
+                        this.$nextTick(() => document.getElementById('home-search-form').submit());
+                    };
+                    rec.onerror = () => { this.listening = false; };
+                    rec.onend   = () => { this.listening = false; };
+                    rec.start();
+                }
+             }">
+            <form id="home-search-form" action="{{ route('properties.index') }}" method="GET">
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">¿Qué estás buscando?</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                        </svg>
+                        <input id="home-q" type="text" name="q" autocomplete="off"
+                               placeholder="Ej: quinta con pileta en Pilar, salón para 100 personas, casa de campo..."
+                               class="w-full pl-12 pr-14 py-4 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 placeholder-gray-400">
+                        <button type="button" x-show="supported" @click="startVoice"
+                                :title="listening ? 'Escuchando...' : 'Buscar por voz'"
+                                :class="listening
+                                    ? 'text-red-500 bg-red-50 animate-pulse'
+                                    : 'text-gray-400 hover:text-indigo-600 hover:bg-indigo-50'"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-colors focus:outline-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="text-left">
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Partido</label>
-                        <select name="partido" id="home-partido" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
-                            <option value="">Todos los partidos</option>
-                        </select>
-                    </div>
-                    <div class="text-left">
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Localidad</label>
-                        <select name="locality" id="home-locality" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
-                            <option value="">Todas las localidades</option>
-                        </select>
-                    </div>
-                    <div class="text-left">
-                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Tipo de propiedad</label>
-                        <select name="type" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-gray-700">
-                            <option value="">Todos los tipos</option>
-                            @foreach(\App\Models\Property::typesList() as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    <p x-show="listening" class="text-xs text-red-500 mt-1.5 text-center animate-pulse">Escuchando... hablá ahora</p>
                 </div>
-                <div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all duration-200 shadow-lg shadow-indigo-200 hover:shadow-indigo-300">
-                        Buscar Propiedades
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all duration-200 shadow-lg shadow-indigo-200 hover:shadow-indigo-300">
+                    Buscar Propiedades
+                </button>
             </form>
         </div>
 

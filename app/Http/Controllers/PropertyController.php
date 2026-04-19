@@ -25,6 +25,27 @@ class PropertyController extends Controller
     {
         $query = Property::active()->with('images');
 
+        if ($request->filled('q')) {
+            $words = array_filter(preg_split('/\s+/', trim($request->q)));
+            $filteredQuery = clone $query;
+            foreach ($words as $word) {
+                $like = '%' . $word . '%';
+                $filteredQuery->where(function ($q) use ($like) {
+                    $q->where('name', 'like', $like)
+                      ->orWhere('description', 'like', $like)
+                      ->orWhere('short_description', 'like', $like)
+                      ->orWhere('locality', 'like', $like)
+                      ->orWhere('partido', 'like', $like)
+                      ->orWhere('state', 'like', $like)
+                      ->orWhere('address', 'like', $like)
+                      ->orWhere('type', 'like', $like);
+                });
+            }
+            if ($filteredQuery->count() > 0) {
+                $query = $filteredQuery;
+            }
+        }
+
         if ($request->filled('state')) {
             $query->where('state', $request->state);
         }

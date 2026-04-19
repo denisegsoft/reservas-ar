@@ -217,18 +217,20 @@ document.addEventListener('alpine:init', () => {
     var stickyDiv    = col.querySelector('.sticky');
     var cardDiv      = stickyDiv.firstElementChild;
     var priceGrid    = document.getElementById('booking-price-grid');
-    var mobilePrices = document.getElementById('mobile-prices');
-    var fab          = document.getElementById('fab-reservar');
-    var sheet        = document.getElementById('booking-sheet');
-    var sheetInner   = document.getElementById('sheet-inner');
-    var formSlot     = document.getElementById('sheet-form-slot');
-    var inMobile     = false;
+    var mobilePrices  = document.getElementById('mobile-prices');
+    var mobileWa      = document.getElementById('mobile-whatsapp');
+    var fab           = document.getElementById('fab-reservar');
+    var sheet         = document.getElementById('booking-sheet');
+    var sheetInner    = document.getElementById('sheet-inner');
+    var formSlot      = document.getElementById('sheet-form-slot');
+    var inMobile      = false;
 
     function applyMobile() {
         if (inMobile) return;
         inMobile = true;
         col.style.display = 'none';
         mobilePrices.style.display = 'block';
+        if (mobileWa) mobileWa.style.display = 'block';
         fab.style.display = 'block';
         if (priceGrid) priceGrid.style.display = 'none';
         formSlot.appendChild(cardDiv);
@@ -242,6 +244,7 @@ document.addEventListener('alpine:init', () => {
         stickyDiv.appendChild(cardDiv);
         col.style.display = '';
         mobilePrices.style.display = 'none';
+        if (mobileWa) mobileWa.style.display = 'none';
         fab.style.display = 'none';
         if (priceGrid) priceGrid.style.display = '';
     }

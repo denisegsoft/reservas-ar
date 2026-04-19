@@ -14,9 +14,9 @@
         ? ($isDesc ? $baseSort . '_asc' : $baseSort . '_desc')
         : $currentSort;
     $toggleQuery = array_merge(request()->except('sort'), ['sort' => $toggleSort]);
-    $hasFilters = request()->hasAny(['state','partido','locality','type','guests','price_min','price_max','amenities','bedrooms','bathrooms','parking','rating_min','check_in','check_out']);
+    $hasFilters = request()->hasAny(['q','state','partido','locality','type','guests','price_min','price_max','amenities','bedrooms','bathrooms','parking','rating_min','check_in','check_out']);
     $activeFilterCount = collect([
-        request('state'), request('partido'), request('locality'), request('type'), request('guests'),
+        request('q'), request('state'), request('partido'), request('locality'), request('type'), request('guests'),
         (request('price_min') || request('price_max')) ? '1' : null,
         request('rating_min'), request('bedrooms'), request('bathrooms'), request('parking'),
         (request('check_in') || request('check_out')) ? '1' : null,
@@ -83,6 +83,46 @@
 
                 {{-- Body --}}
                 <div class="modal-body p-0">
+
+                    {{-- Búsqueda por texto --}}
+                    <div class="px-5 py-4 border-b border-gray-100"
+                         x-data="{
+                            listening: false,
+                            supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                            startVoice() {
+                                if (!this.supported) return;
+                                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                const rec = new SR(); rec.lang = 'es-AR'; rec.interimResults = false;
+                                this.listening = true;
+                                rec.onresult = (e) => {
+                                    document.getElementById('modal-q').value = e.results[0][0].transcript;
+                                    this.listening = false;
+                                    this.$nextTick(() => this.$el.closest('form').submit());
+                                };
+                                rec.onerror = rec.onend = () => { this.listening = false; };
+                                rec.start();
+                            }
+                         }">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Buscar</p>
+                        <div class="relative">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                            </svg>
+                            <input id="modal-q" type="text" name="q" value="{{ request('q') }}" autocomplete="off"
+                                   placeholder="Pileta, Pilar, salón, quincho..."
+                                   class="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 placeholder-gray-400">
+                            <button type="button" x-show="supported" @click="startVoice"
+                                    :title="listening ? 'Escuchando...' : 'Buscar por voz'"
+                                    :class="listening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-indigo-600'"
+                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors focus:outline-none">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <p x-show="listening" class="text-xs text-red-500 mt-1.5 animate-pulse">Escuchando... hablá ahora</p>
+                    </div>
 
                     {{-- Ubicación --}}
                     <div class="px-5 py-4 border-b border-gray-100">
@@ -279,6 +319,51 @@
                                     Limpiar
                                 </a>
                                 @endif
+                            </div>
+
+                            {{-- Búsqueda por texto --}}
+                            <div class="px-5 py-4 border-b border-gray-100"
+                                 x-data="{
+                                    listening: false,
+                                    supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+                                    startVoice() {
+                                        if (!this.supported) return;
+                                        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                                        const rec = new SR(); rec.lang = 'es-AR'; rec.interimResults = false;
+                                        this.listening = true;
+                                        rec.onresult = (e) => {
+                                            document.getElementById('sidebar-q').value = e.results[0][0].transcript;
+                                            this.listening = false;
+                                            this.$nextTick(() => document.getElementById('filter-form').submit());
+                                        };
+                                        rec.onerror = rec.onend = () => { this.listening = false; };
+                                        rec.start();
+                                    }
+                                 }">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Buscar</label>
+                                <div class="flex gap-2">
+                                    <div class="relative flex-1">
+                                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                                        </svg>
+                                        <input id="sidebar-q" type="text" name="q" value="{{ request('q') }}" autocomplete="off"
+                                               placeholder="Pileta, Pilar, salón..."
+                                               class="w-full pl-9 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 placeholder-gray-400">
+                                        <button type="button" x-show="supported" @click="startVoice"
+                                                :title="listening ? 'Escuchando...' : 'Buscar por voz'"
+                                                :class="listening ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-indigo-600'"
+                                                class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors focus:outline-none">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4M12 3a4 4 0 014 4v4a4 4 0 01-8 0V7a4 4 0 014-4z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <button type="submit" class="flex items-center justify-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+                                    </button>
+                                </div>
+                                <p x-show="listening" class="text-xs text-red-500 mt-1.5 animate-pulse">Escuchando... hablá ahora</p>
                             </div>
 
                             {{-- Ubicación --}}
