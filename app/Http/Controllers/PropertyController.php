@@ -89,7 +89,7 @@ class PropertyController extends Controller
             $checkOut = $request->check_out;
 
             $query->whereDoesntHave('reservations', function ($q) use ($checkIn, $checkOut) {
-                $q->whereIn('status', ['confirmed', 'pending'])
+                $q->where('status', 'confirmed')
                   ->where(function ($q) use ($checkIn, $checkOut) {
                       $q->whereBetween('check_in', [$checkIn, $checkOut])
                         ->orWhereBetween('check_out', [$checkIn, $checkOut])

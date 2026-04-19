@@ -184,7 +184,7 @@
                 <div style="padding:.9rem 1rem;border-radius:1rem;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px dashed #c4b5fd;text-align:center;margin-bottom:1.2rem;">
                     <div style="font-size:.78rem;font-weight:700;color:#4f46e5;margin-bottom:.6rem;">🚀 Próximamente te contactamos para entregarte:</div>
                     <div style="display:flex;justify-content:center;gap:1.5rem;">
-                        <div><div style="font-size:1.4rem;">🤖</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Chatbot WhatsApp</div></div>
+                        <div><div style="font-size:1.4rem;">🤖</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Chatbot inteligente WhatsApp</div></div>
                         <div><div style="font-size:1.4rem;">🌐</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Sitio web</div></div>
                     </div>
                     <div style="font-size:.72rem;color:#9ca3af;margin-top:.6rem;">Te escribiremos al email registrado para coordinar los detalles.</div>

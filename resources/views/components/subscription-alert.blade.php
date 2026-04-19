@@ -30,17 +30,16 @@
                         Tus clientes están solicitando reservas pero no pueden contactarte
                     </span>
                 </p>
-                <p class="text-gray-500 text-sm mt-0.5">
-                    Activá
+                <div class="mt-2 flex flex-wrap items-center gap-2">
                     @if($discount)
-                        por <span class="line-through text-red-400 font-semibold">${{ number_format($basePrice, 0, ',', '.') }} ARS</span>
-                        <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
-                        <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full align-middle">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
+                        <span class="text-sm text-gray-400 font-medium" style="text-decoration: line-through;">${{ number_format($basePrice, 0, ',', '.') }} ARS</span>
+                        <span class="text-lg font-black text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</span>
+                        <span class="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
                     @else
-                        <strong class="text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</strong>
+                        <span class="text-lg font-black text-indigo-600">${{ number_format($price, 0, ',', '.') }} ARS</span>
                     @endif
-                    , pago único sin renovaciones. Desbloqueá el acceso completo para gestionar tus propiedades y ventas.
-                </p>
+                    <span class="text-xs text-gray-400">· pago único, sin renovaciones</span>
+                </div>
             </div>
 
             <div class="flex-shrink-0 flex flex-col items-end gap-1.5">
@@ -68,15 +67,11 @@
             </div>
             <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
                 <span class="text-base flex-shrink-0">🤖</span>
-                <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot para tu WhatsApp 24/7</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot inteligente para tu WhatsApp 24/7</span>
             </div>
             <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
                 <span class="text-base flex-shrink-0">🌐</span>
                 <span class="text-xs text-gray-600 font-medium leading-tight">Sitio web profesional</span>
-            </div>
-            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
-                <span class="text-base flex-shrink-0">🎯</span>
-                <span class="text-xs text-gray-600 font-medium leading-tight">Asesoría en redes sociales</span>
             </div>
         </div>
 

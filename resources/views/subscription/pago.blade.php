@@ -76,8 +76,8 @@
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
                     <span class="text-xl mt-0.5">🤖</span>
                     <div>
-                        <p class="text-white font-semibold text-sm">Chatbot para tu WhatsApp Business</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Automatizá las respuestas de tu empresa en WhatsApp Business y atendé a tus clientes las 24 hs</p>
+                        <p class="text-white font-semibold text-sm">Chatbot inteligente para tu WhatsApp Business</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Ahorra tu tiempo y automatizá las respuestas de tu empresa en WhatsApp Business y atendé a tus clientes las 24 hs</p>
                     </div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
@@ -95,7 +95,7 @@
                     <div>
                         <p class="text-gray-400 text-xs font-medium">Pago único · Sin renovaciones</p>
                         @if($discount)
-                        <p class="text-red-400 text-xl font-bold line-through leading-tight">${{ number_format($basePrice, 0, ',', '.') }} <span class="text-base font-semibold">ARS</span></p>
+                        <p class="text-red-400 text-xl font-bold leading-tight" style="text-decoration: line-through;">${{ number_format($basePrice, 0, ',', '.') }} <span class="text-base font-semibold">ARS</span></p>
                         <p class="text-gray-900 text-3xl font-black leading-tight">${{ number_format($price, 0, ',', '.') }} <span class="text-lg font-semibold text-gray-400">ARS</span></p>
                         <span class="inline-block mt-1 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">🏷️ {{ $discount['pct'] }}% OFF{{ $discount['label'] ? ' · ' . $discount['label'] : '' }}</span>
                         @else

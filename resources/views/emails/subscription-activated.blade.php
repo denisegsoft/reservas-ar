@@ -25,7 +25,7 @@ Ir a mi panel
 
 Estamos preparando todo para brindarte los siguientes servicios. Te escribiremos al email registrado para coordinar los detalles:
 
-🤖 **Chatbot para tu WhatsApp Business** — Configuramos un chatbot inteligente para que tu negocio atienda clientes las 24 hs automáticamente, incluso cuando no estás disponible
+🤖 **Chatbot inteligente para tu WhatsApp Business** — Configuramos un Chatbot inteligente inteligente para que tu negocio atienda clientes las 24 hs automáticamente, incluso cuando no estás disponible
 
 🌐 **Sitio web profesional** — Creamos tu página web a medida para mostrar tu negocio al mundo y atraer más reservas
 

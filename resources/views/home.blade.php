@@ -170,7 +170,7 @@ $_orgSchema = json_encode([
 <section class="bg-gradient-to-br from-indigo-600 to-purple-700 py-20 mx-4 sm:mx-8 rounded-3xl mb-20">
     <div class="max-w-3xl mx-auto px-8 text-center">
         <h2 class="text-3xl sm:text-4xl font-black text-white mb-4">Tenes una propiedad?</h2>
-        <p class="text-indigo-200 text-lg mb-8">Publica tu espacio gratis y empieza a recibir reservas hoy mismo. Gestiona todo desde tu panel. Tu registro tambien incluye web profesional para tu negocio, chatbot para tu whatsapp, y muchas novedades más...</p>
+        <p class="text-indigo-200 text-lg mb-8">Publica tu espacio gratis y empieza a recibir reservas hoy mismo. Gestiona todo desde tu panel. Tu registro tambien incluye web profesional para tu negocio, Chatbot inteligente para tu whatsapp, y muchas novedades más...</p>
         <div class="flex items-center justify-center gap-4 flex-wrap">
             <a href="{{ route('register') }}" class="bg-white hover:bg-gray-50 text-indigo-700 font-bold px-8 py-3.5 rounded-2xl transition-all shadow-lg hover:shadow-xl">
                 Publicar mi Propiedad

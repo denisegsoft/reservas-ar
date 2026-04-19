@@ -114,7 +114,7 @@
 
                 @if(!auth()->user()->hasSubscription())
                 <p class="text-xs text-gray-400">
-                    ¿Necesitas un chatbot para tu WhatsApp Business?
+                    ¿Necesitas un Chatbot inteligente para tu WhatsApp Business?
                     <button type="button"
                         onclick="profileRequestService('{{ route('profile.request-whatsapp') }}', 'whatsapp')"
                         class="font-medium underline text-green-600 hover:text-green-800 transition-colors">
@@ -415,8 +415,8 @@ const CSRF = document.querySelector('meta[name=csrf-token]')?.content ?? '';
 const SERVICE_DATA = {
     whatsapp: {
         icon:        '💬',
-        title:       'Chatbot para tu WhatsApp',
-        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un chatbot inteligente para tu WhatsApp Business. Además, te creamos un sitio web profesional para que tu negocio tenga presencia online.',
+        title:       'Chatbot inteligente para tu WhatsApp',
+        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un Chatbot inteligente inteligente para tu WhatsApp Business. Además, te creamos un sitio web profesional para que tu negocio tenga presencia online.',
         benefits: [
             { emoji: '🤖', bg: '#dcfce7', text: '<strong>Respuestas automáticas</strong> para consultas frecuentes' },
             { emoji: '🕐', bg: '#dbeafe', text: 'Atención <strong>24/7</strong>, incluso cuando no estás disponible' },
@@ -427,9 +427,10 @@ const SERVICE_DATA = {
     website: {
         icon:        '🌐',
         title:       'Web profesional + Redes',
-        description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional y te asesoramos en redes para hacer crecer tu negocio. También incluye un chatbot para tu WhatsApp Business para que atiendas clientes las 24 hs.',
+        description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional para hacer crecer tu negocio. También incluye un Chatbot inteligente para tu WhatsApp Business para que ahorres tu tiempo y atiendas clientes las 24 hs.',
         benefits: [
             { emoji: '🎨', bg: '#e0e7ff', text: '<strong>Sitio web</strong> profesional a medida de tu negocio' },
+            { emoji: '🤖', bg: '#dcfce7', text: 'Reservas 24/7 con el Chatbot inteligente para Whatsapp' },
             { emoji: '📸', bg: '#ffedd5', text: 'Unificamos y potenciamos el manejo de tus redes sociales' },
             { emoji: '🚀', bg: '#dcfce7', text: 'Mayor visibilidad y <strong>más reservas</strong>' },
         ],
