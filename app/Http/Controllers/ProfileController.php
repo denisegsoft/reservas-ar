@@ -48,6 +48,21 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
         $validated['newsletter'] = $request->boolean('newsletter');
+
+        $socialBases = [
+            'social_instagram' => 'https://instagram.com/',
+            'social_facebook'  => 'https://facebook.com/',
+            'social_twitter'   => 'https://x.com/',
+            'social_tiktok'    => 'https://tiktok.com/@',
+            'social_youtube'   => 'https://youtube.com/@',
+            'website'          => 'https://',
+        ];
+        foreach ($socialBases as $field => $base) {
+            if (isset($validated[$field]) && rtrim($validated[$field], '/') === rtrim($base, '/')) {
+                $validated[$field] = null;
+            }
+        }
+
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
