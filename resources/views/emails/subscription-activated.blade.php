@@ -15,6 +15,8 @@ Tu pago fue procesado correctamente y tu suscripción en **{{ config('app.name')
 
 💰 **Concretá más ventas** — Posicionamiento, marketing y asesoría para atraer más clientes
 
+📱 **Gestión de redes y publicaciones** — Gestioná todas tus redes sociales y publicaciones desde el panel
+
 <x-mail::button :url="route('owner.dashboard')">
 Ir a mi panel
 </x-mail::button>

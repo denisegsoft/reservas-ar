@@ -179,6 +179,10 @@
                         <span style="font-size:1.1rem;">💰</span>
                         <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Más ventas</div><div style="font-size:.75rem;color:#9ca3af;">Posicionamiento, marketing y asesoría de ventas</div></div>
                     </div>
+                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#f0f9ff;">
+                        <span style="font-size:1.1rem;">📱</span>
+                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Gestión de redes y publicaciones</div><div style="font-size:.75rem;color:#9ca3af;">Gestioná todas tus redes sociales y publicaciones desde el panel</div></div>
+                    </div>
                 </div>
 
                 <div style="padding:.9rem 1rem;border-radius:1rem;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px dashed #c4b5fd;text-align:center;margin-bottom:1.2rem;">
