@@ -399,9 +399,9 @@ $reviewsSchema = [
                         <p class="text-xs text-gray-400 mb-3 flex items-center gap-1">
                             <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             Estadía:
-                            @if($propiedad->min_days) mínimo {{ $propiedad->min_days }} día{{ $propiedad->min_days > 1 ? 's' : '' }}@endif
+                            @if($propiedad->min_days) mínimo {{ $propiedad->min_days }} noche{{ $propiedad->min_days > 1 ? 's' : '' }}@endif
                             @if($propiedad->min_days && $propiedad->max_days) · @endif
-                            @if($propiedad->max_days) máximo {{ $propiedad->max_days }} día{{ $propiedad->max_days > 1 ? 's' : '' }}@endif
+                            @if($propiedad->max_days) máximo {{ $propiedad->max_days }} noche{{ $propiedad->max_days > 1 ? 's' : '' }}@endif
                         </p>
                         @endif
 
