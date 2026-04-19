@@ -73,6 +73,10 @@
                 <span class="text-base flex-shrink-0">🌐</span>
                 <span class="text-xs text-gray-600 font-medium leading-tight">Sitio web profesional</span>
             </div>
+            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
+                <span class="text-base flex-shrink-0">📊</span>
+                <span class="text-xs text-gray-600 font-medium leading-tight">Panel para gestionar reservas, clientes, ventas completo</span>
+            </div>
         </div>
 
         {{-- Mensaje de impacto --}}
