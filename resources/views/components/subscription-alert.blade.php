@@ -23,12 +23,7 @@
                     <p class="font-bold text-gray-900 text-base">Tu cuenta está limitada</p>
                 </div>
                 <p class="text-gray-500 text-sm mt-0.5">
-                    <span class="inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                        Tus clientes están solicitando reservas pero no pueden contactarte
-                    </span>
+                    Activá tu cuenta y desbloqueá todas las herramientas para gestionar y hacer crecer tu negocio.
                 </p>
                 <div class="mt-2 flex flex-wrap items-center gap-2">
                     @if($discount)
@@ -60,11 +55,7 @@
         </div>
 
         {{-- Beneficios incluidos --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-            <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
-                <span class="text-base flex-shrink-0">📞</span>
-                <span class="text-xs text-gray-600 font-medium leading-tight">Contacto directo con clientes</span>
-            </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
             <div class="flex items-center gap-2 bg-white/70 border border-indigo-100 rounded-xl px-3 py-2">
                 <span class="text-base flex-shrink-0">🤖</span>
                 <span class="text-xs text-gray-600 font-medium leading-tight">Chatbot inteligente para tu WhatsApp 24/7</span>

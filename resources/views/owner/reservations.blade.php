@@ -3,7 +3,10 @@
 @section('sidebar') @include('components.user-sidebar') @endsection
 @section('content')
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    @include('components.subscription-alert')
+</div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-2xl font-black text-gray-900">Reservas recibidas</h1>

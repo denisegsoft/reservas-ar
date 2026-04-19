@@ -13,8 +13,7 @@ class MessageController extends Controller
 {
     private function ownerRequiresSubscription(): bool
     {
-        $user = auth()->user();
-        return $user->isOwner() && $user->needsSubscription();
+        return false;
     }
 
     // Inbox: lista de conversaciones
@@ -62,14 +61,10 @@ class MessageController extends Controller
         $authUser = auth()->user();
         $reservationId = request('reservation');
 
-        // Solo marcar como leídos si el propietario tiene suscripción activa
-        $ownerBlocked = $authUser->isOwner() && !$authUser->isAdmin() && !$authUser->hasSubscription();
-        if (!$ownerBlocked) {
-            Message::where('sender_id', $user->id)
-                ->where('receiver_id', $authId)
-                ->whereNull('read_at')
-                ->update(['read_at' => now()]);
-        }
+        Message::where('sender_id', $user->id)
+            ->where('receiver_id', $authId)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
 
         $messages = Message::where(function ($q) use ($authId, $user) {
                 $q->where('sender_id', $authId)->where('receiver_id', $user->id);
@@ -98,7 +93,7 @@ class MessageController extends Controller
             'read_at'        => $m->read_at,
         ])->values();
 
-        return view('messages.conversation', compact('user', 'messages', 'messagesData', 'reservation', 'ownerBlocked'));
+        return view('messages.conversation', compact('user', 'messages', 'messagesData', 'reservation'));
     }
 
     // Enviar mensaje

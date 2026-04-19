@@ -85,14 +85,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
-                    @if(auth()->user()->hasSubscription())
                     <span class="text-xs text-gray-500">{{ number_format($propiedad->views_count, 0, ',', '.') }} {{ $propiedad->views_count === 1 ? 'vista' : 'vistas' }}</span>
-                    @endif
-                    @if(!auth()->user()->hasSubscription())
-                    <span class="ml-auto text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-                        🔒 Sin contacto
-                    </span>
-                    @endif
                 </div>
                 <div class="flex gap-2">
                     <a href="{{ route('properties.show', $propiedad->slug) }}" target="_blank" class="flex-1 text-center bg-green-100 hover:bg-green-200 text-gray-700 text-sm font-medium py-2 rounded-xl transition-colors">
@@ -119,7 +112,7 @@
                     ]);
                 @endphp
                 <button type="button"
-                        onclick="{{ auth()->user()->hasSubscription() ? 'calendarModal.open(' . Js::from($propiedad->name) . ', ' . Js::from($reservasData) . ')' : 'new bootstrap.Modal(document.getElementById(\'calendarModal\')).show()' }}"
+                        onclick="calendarModal.open({{ Js::from($propiedad->name) }}, {{ Js::from($reservasData) }})"
                         class="w-full mt-2 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl transition-colors"
                         style="background:#eff6ff;color:#1d4ed8;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -145,11 +138,10 @@
     @endif
 </div>
 
-@php $hasSub = auth()->user()->hasSubscription() || auth()->user()->isAdmin(); @endphp
 <x-calendar-modal
     title="Reservas"
-    :locked="!$hasSub"
-    :footer-link="$hasSub ? ['href' => route('owner.reservations'), 'label' => 'Ver todas las reservas →'] : null"
+    :locked="false"
+    :footer-link="['href' => route('owner.reservations'), 'label' => 'Ver todas las reservas →']"
 />
 
 {{-- Modal confirmar eliminación (Bootstrap) --}}

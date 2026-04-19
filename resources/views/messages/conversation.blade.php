@@ -37,53 +37,6 @@
     @endif
 
     {{-- Mensajes --}}
-    @if($ownerBlocked)
-    {{-- Vista bloqueada para propietario sin suscripción --}}
-    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-4">
-        {{-- Mensajes difuminados como preview --}}
-        <div class="p-6 min-h-[200px] relative select-none pointer-events-none" aria-hidden="true">
-            <div class="space-y-4 blur-sm opacity-40">
-                <div class="flex gap-2 justify-start">
-                    <div class="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0 mt-1"></div>
-                    <div class="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-2.5 max-w-xs">
-                        <div class="h-3 bg-gray-300 rounded w-32 mb-1.5"></div>
-                        <div class="h-3 bg-gray-300 rounded w-20"></div>
-                    </div>
-                </div>
-                <div class="flex gap-2 justify-end">
-                    <div class="bg-indigo-100 rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xs">
-                        <div class="h-3 bg-indigo-200 rounded w-40 mb-1.5"></div>
-                        <div class="h-3 bg-indigo-200 rounded w-24"></div>
-                    </div>
-                </div>
-                <div class="flex gap-2 justify-start">
-                    <div class="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0 mt-1"></div>
-                    <div class="bg-gray-100 rounded-2xl rounded-bl-sm px-4 py-2.5 max-w-xs">
-                        <div class="h-3 bg-gray-300 rounded w-48 mb-1.5"></div>
-                        <div class="h-3 bg-gray-300 rounded w-28"></div>
-                    </div>
-                </div>
-            </div>
-            {{-- Overlay con CTA --}}
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="bg-white/95 backdrop-blur-sm rounded-3xl border border-indigo-100 shadow-xl p-8 text-center max-w-sm mx-4">
-                    <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">🔒</div>
-                    <h3 class="font-black text-gray-900 text-lg mb-2">Mensajes bloqueados</h3>
-                    <p class="text-gray-500 text-sm mb-5 leading-relaxed">
-                        Activá tu suscripción por <strong class="text-indigo-600">${{ number_format(\App\Models\Setting::get('subscription_price', '3000'), 0, ',', '.') }} ARS</strong> (pago único)
-                        para leer y responder los mensajes de tus clientes.
-                    </p>
-                    <a href="{{ route('subscription.payment') }}"
-                       class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl transition-colors text-sm shadow-lg shadow-indigo-100">
-                        Activar suscripción
-                    </a>
-                    <p class="text-xs text-gray-400 mt-3">Pago único · Sin renovaciones</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    @else
-    {{-- Vista normal con mensajes --}}
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-4" x-data="chat">
         <div class="p-6 space-y-4 min-h-[300px] max-h-[500px] overflow-y-auto" x-ref="container">
             <template x-if="messages.length === 0">
@@ -139,7 +92,6 @@
             </div>
         </div>
     </div>
-    @endif
 
 </div>
 

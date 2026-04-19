@@ -47,28 +47,6 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Cliente</h2>
 
-            @if(!auth()->user()->hasSubscription() && !auth()->user()->isAdmin())
-            {{-- Bloqueado: sin suscripción --}}
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 text-gray-400">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-gray-400">● ● ● ● ● ●</p>
-                    <p class="text-sm text-gray-300 mt-0.5">● ● ● ● ● ● ● ● ● ●</p>
-                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                        <p class="text-amber-800 text-xs font-semibold mb-1">🔒 Datos bloqueados</p>
-                        <p class="text-amber-700 text-xs">Activá tu suscripción para ver el nombre, teléfono y contacto de quienes te reservan.</p>
-                        <a href="{{ route('subscription.payment') }}"
-                           class="inline-block mt-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-1.5 rounded-xl transition-colors">
-                            Activar suscripción →
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @else
             {{-- Datos del cliente visibles --}}
             <div class="flex items-start gap-4">
                 <img src="{{ $reservation->user->avatar_url }}" class="w-12 h-12 rounded-full object-cover flex-shrink-0">
@@ -103,7 +81,6 @@
                     Enviar mensaje
                 </a>
             </div>
-            @endif
         </div>
 
 

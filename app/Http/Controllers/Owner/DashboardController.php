@@ -48,13 +48,6 @@ class DashboardController extends Controller
         $propiedades = $user->propiedades()->with('images')->get();
 
         $lockedStats = [];
-        if ($user->needsSubscription()) {
-            $lockedStats = [
-                'messages'     => \App\Models\Message::where('receiver_id', $user->id)->count(),
-                'reservations' => Reservation::forOwner($user)->count(),
-                'views'        => max((int) $user->propiedades()->sum('views_count'), 10),
-            ];
-        }
 
         return view('owner.dashboard', compact('stats', 'recentReservations', 'propiedades', 'lockedStats'));
     }
@@ -63,10 +56,6 @@ class DashboardController extends Controller
 
     public function reservations(Request $request)
     {
-        if (Auth::user()->needsSubscription()) {
-            return redirect()->route('subscription.payment')
-                ->with('info', 'Necesitás activar tu suscripción para ver las reservas recibidas.');
-        }
 
         $user        = Auth::user();
         $propiedades = $user->propiedades()->orderBy('name')->get(['id', 'name']);
@@ -88,9 +77,6 @@ class DashboardController extends Controller
 
     public function exportReservations(Request $request)
     {
-        if (Auth::user()->needsSubscription()) {
-            return redirect()->route('subscription.payment');
-        }
 
         $query = Reservation::forOwner(Auth::user())
             ->with(['property', 'user'])
@@ -145,10 +131,6 @@ class DashboardController extends Controller
 
     public function createReservation()
     {
-        if (Auth::user()->needsSubscription()) {
-            return redirect()->route('subscription.payment')
-                ->with('info', 'Necesitás activar tu suscripción para crear reservas.');
-        }
 
         $propiedades = Auth::user()->propiedades()->active()->with('services', 'blockedDates')->get();
         $clientes    = User::where('role', 'user')->orderBy('name')->get();
@@ -238,10 +220,6 @@ class DashboardController extends Controller
 
     public function showReservation(Reservation $reservation)
     {
-        if (Auth::user()->needsSubscription()) {
-            return redirect()->route('subscription.payment')
-                ->with('info', 'Necesitás activar tu suscripción para ver los datos de la reserva.');
-        }
 
         $this->authorizeOwnerReservation($reservation);
 

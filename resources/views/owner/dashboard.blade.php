@@ -32,9 +32,6 @@
             </a>
         </div>
 
-    @elseif(!$hasSub)
-        {{-- Tiene propiedades pero sin suscripción: solo el banner ya incluido arriba --}}
-
     @else
         {{-- Panel completo --}}
 

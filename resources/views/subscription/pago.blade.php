@@ -46,31 +46,23 @@
             </div>
 
             <p class="text-indigo-100 text-sm leading-relaxed mb-6">
-                Con un <strong class="text-white">único pago</strong>, desbloqueás todo lo que necesitás para gestionar
-                tus reservas y conectar con tus clientes. Sin renovaciones.
+                Con un <strong class="text-white">único pago</strong>, desbloqueás todas las herramientas para hacer crecer tu negocio. Sin renovaciones.
             </p>
 
             {{-- Benefits --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-7">
                 <div class="sm:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
+                    <span class="text-xl mt-0.5">📊</span>
+                    <div>
+                        <p class="text-white font-semibold text-sm">Panel de gestión completo</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Gestioná propiedades, reservas, clientes y ganancias en un solo lugar</p>
+                    </div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
                     <span class="text-xl mt-0.5">💰</span>
                     <div>
-                        <p class="text-white font-semibold text-sm">Concretá tus ventas</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Contacto directo con tus clientes y posibles clientes, marketing, posicionamiento, asesoría de ventas</p>
-                    </div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
-                    <span class="text-xl mt-0.5">📞</span>
-                    <div>
-                        <p class="text-white font-semibold text-sm">Recibí reservas</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Los clientes se comunican directamente con vos</p>
-                    </div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
-                    <span class="text-xl mt-0.5">📈</span>
-                    <div>
-                        <p class="text-white font-semibold text-sm">Panel completo</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Gestioná propiedades, reservas, clientes y ganancias</p>
+                        <p class="text-white font-semibold text-sm">Concretá más ventas</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Marketing, posicionamiento y asesoría para atraer más clientes</p>
                     </div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
@@ -138,21 +130,6 @@
                     </svg>
                     <p class="text-xs text-gray-400">Pago 100% seguro procesado por MercadoPago. Tus datos financieros nunca son compartidos con nosotros.</p>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Sin suscripción --}}
-    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-        <div class="flex items-start gap-3">
-            <span class="text-xl flex-shrink-0">⚠️</span>
-            <div>
-                <p class="text-amber-800 font-semibold text-sm mb-1">Sin suscripción activa:</p>
-                <ul class="text-amber-700 text-sm space-y-1">
-                    <li>• Los clientes no ven tu información de contacto</li>
-                    <li>• No podés ver quién solicitó una reserva</li>
-                    <li>• Acceso limitado a la plataforma y servicios adicionales</li>
-                </ul>
             </div>
         </div>
     </div>

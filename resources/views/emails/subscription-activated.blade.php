@@ -7,15 +7,11 @@ Tu pago fue procesado correctamente y tu suscripción en **{{ config('app.name')
 
 ## Lo que ya podés usar hoy
 
-📞 **Contacto directo con clientes** — Ves los datos de contacto de cada persona que reserva
-
-💬 **Mensajes desbloqueados** — Leé y respondé todos los mensajes sin restricciones
-
-📈 **Panel completo** — Gestioná propiedades, reservas, clientes y ganancias en un solo lugar
-
-💰 **Concretá más ventas** — Posicionamiento, marketing y asesoría para atraer más clientes
+📊 **Panel de gestión completo** — Gestioná propiedades, reservas, clientes y ganancias en un solo lugar
 
 📱 **Gestión de redes y publicaciones** — Gestioná todas tus redes sociales y publicaciones desde el panel
+
+💰 **Concretá más ventas** — Posicionamiento, marketing y asesoría para atraer más clientes
 
 <x-mail::button :url="route('owner.dashboard')">
 Ir a mi panel

@@ -12,28 +12,7 @@
         </div>
     </div>
 
-    {{-- Banner bloqueo para owners sin suscripción --}}
-    @if(auth()->user()->isOwner() && !auth()->user()->isAdmin() && !auth()->user()->hasSubscription())
-    <div class="mb-6 relative overflow-hidden rounded-3xl shadow-md"
-         style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
-        <div class="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full pointer-events-none"></div>
-        <div class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5">
-            <div class="flex items-start gap-3">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-lg flex-shrink-0">🔒</div>
-                <div>
-                    <p class="text-white font-bold text-sm">Mensajes bloqueados</p>
-                    <p class="text-indigo-200 text-xs mt-0.5 max-w-xs">
-                        Podés recibir mensajes, pero no leerlos ni responder hasta activar tu suscripción.
-                    </p>
-                </div>
-            </div>
-            <a href="{{ route('subscription.payment') }}"
-               class="flex-shrink-0 bg-white text-indigo-700 font-bold px-4 py-2 rounded-xl text-xs hover:bg-indigo-50 transition-colors shadow whitespace-nowrap">
-                Activar por ${{ number_format(\App\Models\Setting::get('subscription_price', '3000'), 0, ',', '.') }} →
-            </a>
-        </div>
-    </div>
-    @endif
+    @include('components.subscription-alert')
 
     @if($conversations->isEmpty())
         <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-16 text-center">

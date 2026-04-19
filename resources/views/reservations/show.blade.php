@@ -56,9 +56,9 @@
         </div>
     </div>
 
-    {{-- Contacto del propietario (visible si tiene suscripción activa) --}}
+    {{-- Contacto del propietario --}}
     @php $owner = $reservation->property->owner; @endphp
-    @if($owner->hasSubscription())
+    @if(true)
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 mb-5">
         <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Contacto del Propietario</h3>
         <div class="flex items-start gap-4">
