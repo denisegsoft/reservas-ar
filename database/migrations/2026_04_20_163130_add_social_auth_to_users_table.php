@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('google_id')->nullable()->after('avatar');
             $table->string('facebook_id')->nullable()->after('google_id');
-            $table->string('password')->nullable()->change();
+            \DB::statement('ALTER TABLE users MODIFY password VARCHAR(255) NULL DEFAULT NULL');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['google_id', 'facebook_id', 'social_avatar']);
+            $table->dropColumn(['google_id', 'facebook_id']);
         });
     }
 };
