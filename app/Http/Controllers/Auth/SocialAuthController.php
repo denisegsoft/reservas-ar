@@ -59,6 +59,6 @@ class SocialAuthController extends Controller
             return AuthenticatedSessionController::processPendingAndRedirect($user, $request);
         }
 
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('profile.edit'));
     }
 }
