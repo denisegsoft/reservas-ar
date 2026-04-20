@@ -16,6 +16,7 @@ class User extends Authenticatable
         'bank_holder', 'bank_cbu', 'bank_alias',
         'social_instagram', 'social_facebook', 'social_twitter', 'social_tiktok', 'social_youtube',
         'deleted', 'subscription_paid', 'subscription_paid_at',
+        'google_id', 'facebook_id',
     ];
 
     protected static function booted(): void

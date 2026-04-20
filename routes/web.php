@@ -25,6 +25,9 @@ Route::get('/geo/localidades', [GeoController::class, 'localidades'])->name('geo
 // Sitemap
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
+// Legal
+Route::get('/privacidad', fn() => view('legal.privacidad'))->name('privacidad');
+
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/propiedades', [PropertyController::class, 'index'])->name('properties.index');
