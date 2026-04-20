@@ -100,10 +100,10 @@
             </a>
         </div>
 
-        {{-- Fechas y huéspedes --}}
+        {{-- Fechas y capacidad --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Fechas y huéspedes</h2>
+                <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Fechas y capacidad</h2>
                 <button type="button" onclick="abrirCalendario()"
                         class="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Huéspedes</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Capacidad</label>
                     <input type="number" name="guests" value="{{ $reservation->guests }}" min="1"
                         class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>

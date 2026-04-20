@@ -9,7 +9,7 @@ Te recordamos que en 2 días comenzará tu estadía en **{{ $reservation->proper
 |---|---|
 | **Check-in** | {{ $reservation->check_in->format('d/m/Y') }}{{ $reservation->check_in_time ? ' a las ' . $reservation->check_in_time : '' }} |
 | **Check-out** | {{ $reservation->check_out->format('d/m/Y') }}{{ $reservation->check_out_time ? ' a las ' . $reservation->check_out_time : '' }} |
-| **Huéspedes** | {{ $reservation->guests }} |
+| **Capacidad** | {{ $reservation->guests }} |
 
 @if($reservation->property->owner->phone)
 **Contacto del propietario:** {{ $reservation->property->owner->phone }}

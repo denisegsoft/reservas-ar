@@ -104,7 +104,7 @@
 
     {{-- Fechas --}}
     <div class="section">
-        <div class="section-title">Fechas y huéspedes</div>
+        <div class="section-title">Fechas y capacidad</div>
         <div class="section-body">
             <div class="grid-2">
                 <div class="col">
@@ -126,7 +126,7 @@
                     <div class="value">{{ $reservation->total_days }} día(s)</div>
                 </div>
                 <div class="col">
-                    <div class="label">Huéspedes</div>
+                    <div class="label">Capacidad</div>
                     <div class="value">{{ $reservation->guests }}</div>
                 </div>
             </div>

@@ -114,7 +114,7 @@ return [
         'property_id'    => 'propiedad',
         'user_id'        => 'cliente',
         'client_name'    => 'nombre del cliente',
-        'guests'         => 'huéspedes',
+        'guests'         => 'capacidad',
         'email'          => 'correo electrónico',
         'password'       => 'contraseña',
         'name'           => 'nombre',

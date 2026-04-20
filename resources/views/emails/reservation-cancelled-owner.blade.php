@@ -9,7 +9,7 @@ El cliente **{{ $reservation->user->name }}** canceló su reserva en **{{ $reser
 |---|---|
 | **Check-in** | {{ $reservation->check_in->format('d/m/Y') }} |
 | **Check-out** | {{ $reservation->check_out->format('d/m/Y') }} |
-| **Huéspedes** | {{ $reservation->guests }} |
+| **Capacidad** | {{ $reservation->guests }} |
 | **Total** | ${{ number_format($reservation->total_amount, 0, ',', '.') }} |
 
 Las fechas quedaron liberadas y están disponibles para nuevas reservas.

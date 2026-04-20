@@ -226,8 +226,8 @@ class PropertyController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'short_description' => 'nullable|string|max:500',
-            'street_name' => 'required|string|max:255',
-            'street_number' => 'required|string|max:20',
+            'street_name' => 'nullable|string|max:255',
+            'street_number' => 'nullable|string|max:20',
             'locality' => 'required|string|max:255',
             'partido' => 'required|string|max:255',
             'state' => 'required|string',
@@ -264,7 +264,7 @@ class PropertyController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
-        $data['address'] = trim($data['street_name'] . ' ' . $data['street_number']);
+        $data['address'] = trim(($data['street_name'] ?? '') . ' ' . ($data['street_number'] ?? '')) ?: null;
         $data['city'] = $data['locality'];
         $data['country'] = $data['country'] ?? 'Argentina';
         $data['user_id'] = Auth::id();
@@ -346,8 +346,8 @@ class PropertyController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'short_description' => 'nullable|string|max:500',
-            'street_name' => 'required|string|max:255',
-            'street_number' => 'required|string|max:20',
+            'street_name' => 'nullable|string|max:255',
+            'street_number' => 'nullable|string|max:20',
             'locality' => 'required|string|max:255',
             'partido' => 'required|string|max:255',
             'state' => 'required|string',
@@ -384,7 +384,7 @@ class PropertyController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
-        $data['address'] = trim($data['street_name'] . ' ' . $data['street_number']);
+        $data['address'] = trim(($data['street_name'] ?? '') . ' ' . ($data['street_number'] ?? '')) ?: null;
         $data['city'] = $data['locality'];
         $data['country'] = $data['country'] ?? 'Argentina';
         $data['rules'] = $request->filled('rules') ? explode("\n", $request->rules) : null;

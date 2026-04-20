@@ -97,7 +97,7 @@ class DashboardController extends Controller
 
             fputcsv($handle, [
                 'ID', 'Cliente', 'Email', 'Teléfono', 'Propiedad',
-                'Check-in', 'Check-out', 'Días', 'Huéspedes',
+                'Check-in', 'Check-out', 'Días', 'Capacidad',
                 'Total', 'Estado', 'Pago', 'Fecha de reserva', 'Notas',
             ], ';');
 
