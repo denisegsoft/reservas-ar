@@ -15,9 +15,6 @@
             <ul class="list-disc pl-6 mt-2 space-y-1">
                 <li>Nombre y apellido</li>
                 <li>Dirección de correo electrónico</li>
-                <li>Número de teléfono (opcional)</li>
-                <li>Foto de perfil (cuando usás login con Google o Facebook)</li>
-                <li>Información de reservas realizadas</li>
             </ul>
         </section>
 
@@ -28,7 +25,7 @@
                 <li>Gestionar tu cuenta y las reservas que realizás</li>
                 <li>Comunicarnos con vos sobre tus reservas o consultas</li>
                 <li>Mejorar la experiencia en la plataforma</li>
-                <li>Enviarte notificaciones relevantes sobre tus reservas</li>
+
             </ul>
             <p class="mt-3">No vendemos ni compartimos tus datos personales con terceros con fines comerciales.</p>
         </section>
@@ -50,12 +47,12 @@
 
         <section>
             <h2 class="text-xl font-semibold text-gray-800 mb-3">6. Eliminación de datos</h2>
-            <p>Podés solicitar la eliminación de tu cuenta y todos tus datos personales en cualquier momento escribiéndonos a <a href="mailto:{{ config('mail.from.address', 'contacto@reservatuespacio.com.ar') }}" class="text-indigo-600 hover:underline">contacto@reservatuespacio.com.ar</a>. Procesaremos tu solicitud dentro de los 30 días hábiles.</p>
+            <p>Podés solicitar la eliminación de tu cuenta y todos tus datos personales en cualquier momento desde la plataforma.</p>
         </section>
 
         <section>
             <h2 class="text-xl font-semibold text-gray-800 mb-3">7. Contacto</h2>
-            <p>Si tenés alguna consulta sobre esta política de privacidad podés escribirnos a <a href="mailto:{{ config('mail.from.address', 'contacto@reservatuespacio.com.ar') }}" class="text-indigo-600 hover:underline">contacto@reservatuespacio.com.ar</a>.</p>
+            <p>Si tenés alguna consulta sobre esta política de privacidad podés escribirnos a <a href="mailto:{{ config('mail.from.address', 'hola@reservatuespacio.com.ar') }}" class="text-indigo-600 hover:underline">hola@reservatuespacio.com.ar</a>.</p>
         </section>
 
     </div>

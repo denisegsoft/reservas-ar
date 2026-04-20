@@ -269,7 +269,7 @@
         </div>
         @endunless
         <div class="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-xs">© {{ date('Y') }} ReservaTuEspacio. Todos los derechos reservados.</p>
+            <p class="text-xs">© {{ date('Y') }} ReservaTuEspacio. Todos los derechos reservados. &mdash; <a href="{{ route('privacidad') }}" class="underline hover:text-white transition-colors">Política de privacidad</a></p>
             <a href="{{ route('support') }}" class="text-xs hover:text-white transition-colors">Soporte</a>
         </div>
     </div>
