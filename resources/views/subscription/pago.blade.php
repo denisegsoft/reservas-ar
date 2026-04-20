@@ -51,7 +51,7 @@
 
             {{-- Benefits --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-7">
-                <div class="sm:col-span-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
                     <span class="text-xl mt-0.5">📊</span>
                     <div>
                         <p class="text-white font-semibold text-sm">Panel de gestión personalizado</p>
@@ -76,14 +76,7 @@
                     <span class="text-xl mt-0.5">🌐</span>
                     <div>
                         <p class="text-white font-semibold text-sm">Sitio web propio</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Creamos tu página web a medida para mostrar tu negocio al mundo</p>
-                    </div>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
-                    <span class="text-xl mt-0.5">📱</span>
-                    <div>
-                        <p class="text-white font-semibold text-sm">Gestión de redes y publicaciones</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Gestioná todas tus redes sociales y publicaciones desde el panel</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Creamos tu página web a medida para más presencia online</p>
                     </div>
                 </div>
             </div>
