@@ -162,8 +162,6 @@
         chk(form.querySelector('[name="state"]'),          'Seleccioná una provincia.');
         chk(form.querySelector('[name="partido"]'),        'El partido es obligatorio.');
         chk(form.querySelector('[name="locality"]'),       'La localidad es obligatoria.');
-        chk(form.querySelector('[name="street_name"]'),    'La calle es obligatoria.');
-        chk(form.querySelector('[name="street_number"]'),  'El número es obligatorio.');
         chk(form.querySelector('[name="capacity"]'),       'La capacidad es obligatoria.');
         chkNum(form.querySelector('[name="bedrooms"]'),      'Las habitaciones son obligatorias.');
         chkNum(form.querySelector('[name="bathrooms"]'),     'Los baños son obligatorios.');

@@ -221,13 +221,13 @@
                     {{-- Fila 2: Calle + Número --}}
                     <div class="flex flex-col sm:flex-row gap-4">
                         <div class="flex-1">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Calle</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Calle <span class="font-normal text-gray-400">(opcional)</span></label>
                             <input type="text" name="street_name" value="{{ old('street_name', $propiedad->street_name) }}"
                                 class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Calle">
                             @error('street_name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div class="sm:w-32">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Número</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Número <span class="font-normal text-gray-400">(opcional)</span></label>
                             <input type="text" name="street_number" value="{{ old('street_number', $propiedad->street_number) }}"
                                 class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="1234">
                             @error('street_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror

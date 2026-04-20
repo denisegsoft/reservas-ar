@@ -299,8 +299,6 @@ function validateForm() {
     })();
     req('partido',        'El partido es obligatorio.');
     req('locality',       'La localidad es obligatoria.');
-    req('street_name',    'La calle es obligatoria.');
-    req('street_number',  'El número es obligatorio.');
     req('capacity',       'La capacidad es obligatoria.');
     reqNum('beds',         'Las camas son obligatorias (podés ingresar 0).');
     reqNum('rooms',        'Los ambientes son obligatorios (podés ingresar 0).');
