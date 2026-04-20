@@ -17,7 +17,7 @@
     @endif
 
     {{-- Social login --}}
-    <div class="space-y-3 mb-6">
+    <div class="space-y-3 mb-6" style="display:none">
         <a href="{{ route('social.redirect', 'google') }}"
            class="flex items-center justify-center gap-3 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 transition-all shadow-sm">
             <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
