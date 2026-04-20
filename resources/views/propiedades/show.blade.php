@@ -196,9 +196,9 @@ $reviewsSchema = [
                     <span class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
                         @if($propiedad->street_name)
-                            {{ $propiedad->street_name }} {{ $propiedad->street_number }}, {{ $propiedad->locality }}, {{ $propiedad->partido }}, {{ $propiedad->state }}, {{ $propiedad->country ?: 'Argentina' }}
+                            {{ $propiedad->street_name }}{{ $propiedad->street_number ? ' ' . $propiedad->street_number : '' }}, {{ $propiedad->locality }}, {{ $propiedad->partido }}, {{ $propiedad->state }}, {{ $propiedad->country ?: 'Argentina' }}
                         @else
-                            {{ $propiedad->address }}, {{ $propiedad->city }}, {{ $propiedad->state }}
+                            {{ $propiedad->locality }}, {{ $propiedad->partido }}, {{ $propiedad->state }}
                         @endif
                     </span>
                     @php
