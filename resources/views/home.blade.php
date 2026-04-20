@@ -46,7 +46,7 @@ $_orgSchema = json_encode([
             <span style="background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">perfecto para vos</span>
         </h1>
         <p class="text-lg sm:text-xl text-white/70 mb-12 max-w-2xl mx-auto font-light">
-            Un lugar exclusivo de quintas y salones para eventos. Encontra el espacio ideal y coordiná tu reserva fácilmente.
+            Un lugar exclusivo de quintas y salones para eventos o estadía. Encontra el lugar ideal y coordiná tu reserva fácilmente.
         </p>
 
         <div class="bg-white rounded-3xl shadow-2xl p-6 max-w-3xl mx-auto"
