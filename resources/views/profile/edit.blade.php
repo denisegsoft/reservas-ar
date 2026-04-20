@@ -421,18 +421,18 @@ const SERVICE_DATA = {
             { emoji: '🤖', bg: '#dcfce7', text: '<strong>Respuestas automáticas</strong> para consultas frecuentes' },
             { emoji: '🕐', bg: '#dbeafe', text: 'Atención <strong>24/7</strong>, incluso cuando no estás disponible' },
             { emoji: '📲', bg: '#e0e7ff', text: 'Gestión de <strong>reservas y consultas</strong> sin esfuerzo' },
-            { emoji: '📈', bg: '#f3e8ff', text: 'Más conversiones con <strong>seguimiento automático</strong>' },
+            { emoji: '📈', bg: '#f3e8ff', text: 'Agenda, clientes, más reservas con <strong>seguimiento automático</strong>' },
         ],
     },
     website: {
         icon:        '🌐',
-        title:       'Web profesional + Redes',
-        description: '¿Todavía no tenés presencia online? Te creamos un sitio profesional para hacer crecer tu negocio. También incluye un Chatbot inteligente para tu WhatsApp Business para que ahorres tu tiempo y atiendas clientes las 24 hs.',
+        title:       'Web propia + Automatización',
+        description: 'Te creamos un sitio propio, para mayor visibilidad y llegar a más clientes. También incluye un Chatbot inteligente en WhatsApp Business para que ahorres tu tiempo y atiendas clientes las 24 hs.',
         benefits: [
             { emoji: '🎨', bg: '#e0e7ff', text: '<strong>Sitio web</strong> profesional a medida de tu negocio' },
             { emoji: '🤖', bg: '#dcfce7', text: 'Reservas 24/7 con el Chatbot inteligente para Whatsapp' },
             { emoji: '📸', bg: '#ffedd5', text: 'Unificamos y potenciamos el manejo de tus redes sociales' },
-            { emoji: '🚀', bg: '#dcfce7', text: 'Mayor visibilidad y <strong>más reservas</strong>' },
+            { emoji: '🚀', bg: '#dcfce7', text: 'Automatiza la gestión de tus reservas' },
         ],
     },
 };
