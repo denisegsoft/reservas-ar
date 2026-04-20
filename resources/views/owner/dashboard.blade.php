@@ -157,44 +157,9 @@
 
             {{-- Cuerpo --}}
             <div style="padding:1.4rem 1.5rem;">
-                <p style="font-size:.875rem;color:#6b7280;line-height:1.6;margin-bottom:1.1rem;">A partir de ahora tenés acceso completo a todos los beneficios:</p>
-
-                <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;">
-                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#f0fdf4;">
-                        <span style="font-size:1.1rem;">📞</span>
-                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Contacto directo</div><div style="font-size:.75rem;color:#9ca3af;">Ves los datos de tus clientes en cada reserva</div></div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#eff6ff;">
-                        <span style="font-size:1.1rem;">💬</span>
-                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Mensajes desbloqueados</div><div style="font-size:.75rem;color:#9ca3af;">Leé y respondé mensajes sin restricciones</div></div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#fdf4ff;">
-                        <span style="font-size:1.1rem;">📈</span>
-                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Panel completo</div><div style="font-size:.75rem;color:#9ca3af;">Gestioná propiedades, reservas y ganancias</div></div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#fff7ed;">
-                        <span style="font-size:1.1rem;">💰</span>
-                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Más ventas</div><div style="font-size:.75rem;color:#9ca3af;">Posicionamiento, marketing y asesoría de ventas</div></div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:.875rem;background:#f0f9ff;">
-                        <span style="font-size:1.1rem;">📱</span>
-                        <div><div style="font-size:.82rem;font-weight:700;color:#111827;">Gestión de redes y publicaciones</div><div style="font-size:.75rem;color:#9ca3af;">Gestioná todas tus redes sociales y publicaciones desde el panel</div></div>
-                    </div>
-                </div>
-
                 <div style="padding:.9rem 1rem;border-radius:1rem;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px dashed #c4b5fd;text-align:center;margin-bottom:1.2rem;">
-                    <div style="font-size:.78rem;font-weight:700;color:#4f46e5;margin-bottom:.6rem;">🚀 Próximamente te contactamos para entregarte:</div>
-                    <div style="display:flex;justify-content:center;gap:1.5rem;">
-                        <div><div style="font-size:1.4rem;">🤖</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Chatbot inteligente WhatsApp</div></div>
-                        <div><div style="font-size:1.4rem;">🌐</div><div style="font-size:.73rem;font-weight:600;color:#111827;">Sitio web</div></div>
-                    </div>
-                    <div style="font-size:.72rem;color:#9ca3af;margin-top:.6rem;">Te escribiremos al email registrado para coordinar los detalles.</div>
+                    <div style="font-size:.72rem;color:#9ca3af;margin-top:.6rem;">Te escribiremos al email o teléfono registrado para coordinar los detalles.</div>
                 </div>
-
-                <button type="button" data-bs-dismiss="modal"
-                    style="width:100%;padding:.75rem;border:none;border-radius:.875rem;background:linear-gradient(135deg,#4338ca,#6d28d9);color:#fff;font-weight:700;font-size:.875rem;cursor:pointer;">
-                    ¡Empezar a usar mis beneficios!
-                </button>
             </div>
 
         </div>

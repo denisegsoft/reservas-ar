@@ -23,11 +23,9 @@ Hoy podés activar tu cuenta por solo **${{ number_format($subscriptionPrice, 0,
 Con un **único pago de ${{ number_format($subscriptionPrice, 0, ',', '.') }} ARS, sin renovaciones**, desbloqueás todo lo que necesitás para gestionar tus reservas y hacer crecer tu negocio.
 @endif
 
-💰 **Concretá tus ventas** — Contacto directo con tus clientes y posibles clientes, marketing, posicionamiento y asesoría de ventas
+💰 **Concretá más ventas** — Nos encargaremos de conectarte con más clientes y concretar reservas
 
-📞 **Recibí reservas** — Los clientes se comunican directamente con vos
-
-📈 **Panel completo** — Gestioná propiedades, reservas, clientes y ganancias
+📈 **Panel personalizado** — Gestioná propiedades, reservas, clientes y ganancias desde un solo lugar
 
 🤖 **Chatbot inteligente para tu WhatsApp Business** — Automatizá las respuestas de tu empresa y atendé a tus clientes las 24 hs
 

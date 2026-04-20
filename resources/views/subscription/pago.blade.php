@@ -62,7 +62,7 @@
                     <span class="text-xl mt-0.5">💰</span>
                     <div>
                         <p class="text-white font-semibold text-sm">Concretá más ventas</p>
-                        <p class="text-indigo-200 text-xs mt-0.5">Marketing, posicionamiento y asesoría para atraer más clientes</p>
+                        <p class="text-indigo-200 text-xs mt-0.5">Nos encargaremos de conectarte con más clientes y concretar reservas</p>
                     </div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
