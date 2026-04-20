@@ -416,7 +416,7 @@ const SERVICE_DATA = {
     whatsapp: {
         icon:        '💬',
         title:       'Chatbot inteligente para tu WhatsApp',
-        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un Chatbot inteligente  para tu WhatsApp Business. Además, te creamos un sitio web profesional para que tu negocio tenga presencia online.',
+        description: '¿Querés que tu negocio responda automáticamente las 24 hs? Te ayudamos a configurar un Chatbot inteligente  para tu WhatsApp Business. Además, te creamos un Sitio web propio para que tu negocio tenga presencia online.',
         benefits: [
             { emoji: '🤖', bg: '#dcfce7', text: '<strong>Respuestas automáticas</strong> para consultas frecuentes' },
             { emoji: '🕐', bg: '#dbeafe', text: 'Atención <strong>24/7</strong>, incluso cuando no estás disponible' },

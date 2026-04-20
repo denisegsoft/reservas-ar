@@ -9,7 +9,7 @@ Estamos preparando todo para brindarte los siguientes servicios. Te escribiremos
 
 🤖 **Chatbot inteligente para tu WhatsApp Business** — Configuramos un Chatbot inteligente para que tu negocio atienda clientes las 24 hs automáticamente, incluso cuando no estás disponible
 
-🌐 **Sitio web profesional** — Creamos tu página web a medida para mostrar tu negocio al mundo y atraer más reservas
+🌐 **Sitio web propio** — Creamos tu página web a medida para mostrar tu negocio al mundo y atraer más reservas
 
 ---
 

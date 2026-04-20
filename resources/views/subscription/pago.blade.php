@@ -75,7 +75,7 @@
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex items-start gap-3">
                     <span class="text-xl mt-0.5">🌐</span>
                     <div>
-                        <p class="text-white font-semibold text-sm">Sitio web profesional</p>
+                        <p class="text-white font-semibold text-sm">Sitio web propio</p>
                         <p class="text-indigo-200 text-xs mt-0.5">Creamos tu página web a medida para mostrar tu negocio al mundo</p>
                     </div>
                 </div>

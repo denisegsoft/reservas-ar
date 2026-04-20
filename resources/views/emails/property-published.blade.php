@@ -31,7 +31,7 @@ Con un **único pago de ${{ number_format($subscriptionPrice, 0, ',', '.') }} AR
 
 🤖 **Chatbot inteligente para tu WhatsApp Business** — Automatizá las respuestas de tu empresa y atendé a tus clientes las 24 hs
 
-🌐 **Sitio web profesional** — Creamos tu página web a medida para mostrar tu negocio al mundo
+🌐 **Sitio web propio** — Creamos tu página web a medida para mostrar tu negocio al mundo
 
 <x-mail::button :url="$activationUrl" color="green">
 @if($subscriptionDiscount)
