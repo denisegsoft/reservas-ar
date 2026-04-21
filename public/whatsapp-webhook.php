@@ -7,7 +7,7 @@
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-define('WHATSAPP_TOKEN',    'EAHwaaJ1IDD0BRfSKr7JCjWof9gqyF906BpL5FQZCLOW3mMMELyWdHhLfAZCZB3hSPQUZCFOhgC5er14Az4EZAPmSxiK26aW2pGYZCXrVKdkJ7MLhZCH8NOYGFlbiog89uQNX28WLEZBXcjghgm6EuGZBZCEOXoJcur9CsJO4nTRrgAiGG3O1Hjteuz1ohDUOZA69tyMZAAvhAwkbzHiUzZBPsgHFv1ZBQdkKZBFL2ZB7m3wlZAKOW0czzfFLuZBQmk1GSRoOVd2KnPQzzxCSRLny4F4NUkEDQP');
+define('WHATSAPP_TOKEN',    'EAHwaaJ1IDD0BRayRPcBYrcqEY3KCZCcI1GVfCL1vhHme7z3ZAWSi6oQg4crRThzQlMdiZAbJNZAPI0sWn8V5pyfUiFF9PSqmABBfAGg9ibzx2hcHvPAa0d2ibKBvD6NhzmTDCRFVB1bnRhIXigB8tF8j3A1lZBUibqMt4yT53A0nPNd4Ai4B0W0JbOmeIslXDyJvluwAbyherBc0hXRhecan1yZAPwoVtbkcZBOR9Mi6pdv5QENehdZAQ68irxU0AQgy5bYyIpfv3sbGZAgfafCxjXgZDZD');
 define('PHONE_NUMBER_ID',   '1086208644574371');
 define('VERIFY_TOKEN',      'reservatuespacio_webhook_2024'); // Lo usás al configurar el webhook en Meta
 
