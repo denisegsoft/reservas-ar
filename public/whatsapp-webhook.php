@@ -7,7 +7,7 @@
 // ============================================================
 // CONFIGURACIÓN
 // ============================================================
-define('WHATSAPP_TOKEN',    'EAHwaaJ1IDD0BRayRPcBYrcqEY3KCZCcI1GVfCL1vhHme7z3ZAWSi6oQg4crRThzQlMdiZAbJNZAPI0sWn8V5pyfUiFF9PSqmABBfAGg9ibzx2hcHvPAa0d2ibKBvD6NhzmTDCRFVB1bnRhIXigB8tF8j3A1lZBUibqMt4yT53A0nPNd4Ai4B0W0JbOmeIslXDyJvluwAbyherBc0hXRhecan1yZAPwoVtbkcZBOR9Mi6pdv5QENehdZAQ68irxU0AQgy5bYyIpfv3sbGZAgfafCxjXgZDZD');
+define('WHATSAPP_TOKEN',    'EAHwaaJ1IDD0BRfWgFKVGKbQCWe81Q37odLrICKO6DkRsO9kfvMZACOi5xQs56FKTehFivmE9oXvV1ndmjpPX6qK7wKDLFXWLxXYGPjcWxwEYcTBBpy2xpLrL2P7SePWLTcVOfSaZAQgKS0jGmv9XIoNNuuYUF32kMcSbRm6Dbja5k2YfVcg0dCPy5lomUitzF07XBJ51WnbXcqL3KnVm8JwMEwEN5fxWJ2pFHgO4ZCrzBCEjDJhnNKScmJTXhOTq6ggRNmsaNVDjEzvwNkd');
 define('PHONE_NUMBER_ID',   '1086208644574371');
 define('VERIFY_TOKEN',      'reservatuespacio_webhook_2024'); // Lo usás al configurar el webhook en Meta
 
@@ -35,6 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = file_get_contents('php://input');
     $data  = json_decode($input, true);
+
+    // LOG para debug
+    file_put_contents(__DIR__ . '/wa-debug.log',
+        date('Y-m-d H:i:s') . " POST recibido:\n" . $input . "\n\n",
+        FILE_APPEND
+    );
 
     // Extraer mensaje entrante
     $entry   = $data['entry'][0]          ?? null;
