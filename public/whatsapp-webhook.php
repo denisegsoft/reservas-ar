@@ -180,6 +180,11 @@ function enviarMensaje(string $to, string $texto): void
             'Content-Type: application/json',
         ],
     ]);
-    curl_exec($ch);
+    $response = curl_exec($ch);
     curl_close($ch);
+
+    file_put_contents(__DIR__ . '/wa-debug.log',
+        date('Y-m-d H:i:s') . " RESPUESTA API: " . $response . "\n\n",
+        FILE_APPEND
+    );
 }
