@@ -123,6 +123,14 @@
                     </svg>
                     <p class="text-xs text-gray-400">Pago 100% seguro procesado por MercadoPago. Tus datos financieros nunca son compartidos con nosotros.</p>
                 </div>
+                @php $contactEmail = \App\Models\Setting::get('contact_email', config('mail.from.address')); @endphp
+                @if($contactEmail)
+                <p class="text-xs text-gray-400 mt-3">
+                    ¿Tenés dudas?
+                    <a href="mailto:{{ $contactEmail }}" class="text-indigo-500 hover:text-indigo-700 font-medium transition-colors">Escribinos a {{ $contactEmail }}</a>
+                    y te responderemos a la brevedad.
+                </p>
+                @endif
             </div>
         </div>
     </div>

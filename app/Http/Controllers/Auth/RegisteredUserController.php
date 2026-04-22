@@ -22,14 +22,22 @@ class RegisteredUserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $isEmail = filter_var($request->login, FILTER_VALIDATE_EMAIL);
+
         $request->validate([
-            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'login'    => [
+                'required', 'string', 'max:255',
+                $isEmail
+                    ? \Illuminate\Validation\Rule::unique('users', 'email')
+                    : \Illuminate\Validation\Rule::unique('users', 'phone'),
+            ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
-            'name'     => 'Usuario',
-            'email'    => $request->email,
+            'name'     => '',
+            'email'    => $isEmail ? strtolower($request->login) : null,
+            'phone'    => $isEmail ? null : $request->login,
             'password' => Hash::make($request->password),
             'role'     => 'user',
         ]);

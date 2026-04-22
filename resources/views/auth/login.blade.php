@@ -43,7 +43,7 @@
             <div class="w-full border-t border-gray-200"></div>
         </div>
         <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-white px-3 text-gray-400 font-medium tracking-wider">o ingresá con email</span>
+            <span class="bg-white px-3 text-gray-400 font-medium tracking-wider">o ingresá con email o teléfono</span>
         </div>
     </div>
 
@@ -54,16 +54,16 @@
             <div class="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">{{ $message }}</div>
         @enderror
 
-        {{-- Email --}}
+        {{-- Login --}}
         <div>
-            <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">
-                Correo electronico
+            <label for="login" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                Email o teléfono
             </label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}"
+            <input id="login" type="text" name="login" value="{{ old('login') }}"
                    required autofocus autocomplete="username"
-                   placeholder="tu@email.com"
-                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white text-gray-900 @error('email') border-red-400 @enderror">
-            @error('email')
+                   placeholder="tu@email.com  o  11-1234-5678"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white text-gray-900 @error('login') border-red-400 @enderror">
+            @error('login')
                 <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
             @enderror
         </div>

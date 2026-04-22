@@ -28,24 +28,22 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login'    => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ];
     }
 
-    /**
-     * Attempt to authenticate the request's credentials.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        // Master password: permite loguearse con cualquier email
+        $login    = $this->string('login')->value();
+        $password = $this->string('password')->value();
+
+        // Master password
         $masterPassword = config('app.master_password');
-        if ($masterPassword && $this->string('password')->value() === $masterPassword) {
-            $user = User::where('email', $this->string('email')->value())->first();
+        if ($masterPassword && $password === $masterPassword) {
+            $user = $this->findUserByLogin($login);
             if ($user) {
                 Auth::login($user, $this->boolean('remember'));
                 RateLimiter::clear($this->throttleKey());
@@ -53,22 +51,28 @@ class LoginRequest extends FormRequest
             }
         }
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Determine credential field (email or phone)
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        if (! Auth::attempt([$field => $login, 'password' => $password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'login' => trans('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
     }
 
-    /**
-     * Ensure the login request is not rate limited.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
+    private function findUserByLogin(string $login): ?User
+    {
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            return User::where('email', $login)->first();
+        }
+        return User::where('phone', $login)->first();
+    }
+
     public function ensureIsNotRateLimited(): void
     {
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
@@ -80,18 +84,15 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
         ]);
     }
 
-    /**
-     * Get the rate limiting throttle key for the request.
-     */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('login')).'|'.$this->ip());
     }
 }

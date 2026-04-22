@@ -1,15 +1,14 @@
 @extends('layouts.main')
-@section('title', 'Publicar Propiedad')
-@section('sidebar') @include('components.user-sidebar') @endsection
+@section('title', 'Publicar mi Propiedad')
 @section('content')
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="mb-8">
-        <h1 class="text-2xl font-black text-gray-900">Publicar mi Propiedad</h1>
-        <p class="text-gray-500 text-sm mt-1">Completa la información de tu espacio y publicala al instante.</p>
+        <h1 class="text-2xl font-black text-gray-900">Publicá tu Propiedad</h1>
+        <p class="text-gray-500 text-sm mt-1">Cargá los datos de tu espacio y publicalo al instante. Creamos tu cuenta automáticamente.</p>
     </div>
 
-    <form id="create-form" action="{{ route('owner.properties.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" novalidate>
+    <form id="create-form" action="{{ route('properties.publish.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" novalidate>
         @csrf
 
         {{-- Basic info --}}
@@ -102,8 +101,6 @@
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Ubicación</h2>
             <div class="space-y-4">
-
-                {{-- Google Maps --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">
                         Enlace de Google Maps
@@ -119,13 +116,12 @@
                         <ol class="list-decimal list-inside space-y-1 text-gray-600">
                             <li>Abrí <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="font-medium text-indigo-600 underline hover:text-indigo-800">Google Maps</a>.</li>
                             <li>Buscá la dirección exacta de tu propiedad.</li>
-                            <li>Seleccioná <span class="font-medium">"Compartir"</span> → <span class="font-medium">"Busca "Copiar vínculo" o "Copiar enlace""</span>.</li>
+                            <li>Seleccioná <span class="font-medium">"Compartir"</span> → <span class="font-medium">"Copiar enlace"</span>.</li>
                             <li>Pegá ese enlace en el campo de arriba.</li>
                         </ol>
                     </div>
                 </div>
 
-                {{-- Dirección --}}
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Provincia *</label>
@@ -187,7 +183,6 @@
         {{-- Pricing & Capacity --}}
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4">Precio y Capacidad</h2>
-            {{-- Fila de precios --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4" x-data="{ rentsByHour: {{ old('price_per_hour', true) ? 'true' : 'false' }} }">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5" :class="!rentsByHour && 'text-gray-400'">Precio por hora (ARS) <span x-show="rentsByHour">*</span></label>
@@ -208,7 +203,6 @@
                 </div>
             </div>
 
-            {{-- Resto de campos --}}
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Capacidad *</label>
@@ -268,13 +262,9 @@
                     removeRow(i) { if(this.discounts.length > 1) this.discounts.splice(i,1) }
                  }">
                 <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-start gap-2">
-                        <div>
-                            <h3 class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
-                                Descuentos por cantidad de días
-                            </h3>
-                            <p class="text-xs text-gray-400 mt-0.5">Se aplica el mayor descuento que corresponda según la cantidad de días.</p>
-                        </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-700">Descuentos por cantidad de días</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Se aplica el mayor descuento que corresponda según la cantidad de días.</p>
                     </div>
                     <button type="button" @click="addRow()"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
@@ -305,7 +295,6 @@
                         </div>
                     </template>
                 </div>
-                @error('day_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
             </div>
 
             {{-- Descuentos por fechas especiales --}}
@@ -318,7 +307,7 @@
                 <div class="flex items-center justify-between mb-3">
                     <div>
                         <h3 class="text-sm font-bold text-gray-700">Descuentos por fechas especiales</h3>
-                        <p class="text-xs text-gray-400 mt-0.5">Ej: temporada baja, fiestas.  </p>
+                        <p class="text-xs text-gray-400 mt-0.5">Ej: temporada baja, fiestas.</p>
                     </div>
                     <button type="button" @click="addRow()"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
@@ -354,7 +343,6 @@
                     </template>
                 </div>
                 <p x-show="rows.length === 0" class="text-xs text-gray-400 italic">Sin descuentos por fecha configurados.</p>
-                @error('date_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
             </div>
 
             {{-- Descuentos por día de la semana --}}
@@ -368,9 +356,7 @@
                     hasDay(row, d) { return row.days.indexOf(d) !== -1 }
                  }">
                 <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h3 class="text-sm font-bold text-gray-700">Descuentos por día de la semana</h3>
-                    </div>
+                    <h3 class="text-sm font-bold text-gray-700">Descuentos por día de la semana</h3>
                     <button type="button" @click="addRow()"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
                         + Agregar descuento
@@ -379,7 +365,6 @@
                 <div class="space-y-3">
                     <template x-for="(row, i) in rows" :key="i">
                         <div class="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            {{-- Botones de días --}}
                             <div class="flex flex-wrap gap-1">
                                 @foreach($diasSemana as $dv => $dl)
                                 <button type="button"
@@ -390,13 +375,11 @@
                                 </button>
                                 @endforeach
                             </div>
-                            {{-- Inputs hidden para días seleccionados --}}
                             @foreach($diasSemana as $dv => $dl)
                             <template x-if="hasDay(row, {{ $dv }})">
                                 <input type="hidden" :name="`weekday_discounts[${i}][days][]`" value="{{ $dv }}">
                             </template>
                             @endforeach
-                            {{-- Descuento --}}
                             <div class="flex items-center gap-2">
                                 <label class="text-xs text-gray-500 whitespace-nowrap">Descuento (%):</label>
                                 <input type="number" :name="`weekday_discounts[${i}][discount]`" x-model="row.discount"
@@ -411,7 +394,6 @@
                     </template>
                 </div>
                 <p x-show="rows.length === 0" class="text-xs text-gray-400 italic">Sin descuentos por día de semana configurados.</p>
-                @error('weekday_discounts')<p class="text-red-500 text-xs mt-2">{{ $message }}</p>@enderror
             </div>
 
             {{-- Fechas no disponibles --}}
@@ -425,7 +407,7 @@
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h3 class="text-sm font-bold text-gray-700">Fechas no disponibles</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Bloqueá rangos de fechas por motivos personales. No se podrán reservar esos días.</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Bloqueá rangos de fechas por motivos personales.</p>
                 </div>
                 <button type="button" @click="addRow()"
                     class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
@@ -507,7 +489,7 @@
         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <div class="mb-5">
                 <h2 class="text-lg font-bold text-gray-900">Fotos de la propiedad</h2>
-                <p class="text-xs text-gray-400 mt-0.5">La primera foto sera la imagen principal. Max. 5MB por imagen.</p>
+                <p class="text-xs text-gray-400 mt-0.5">La primera foto será la imagen principal. Max. 5MB por imagen.</p>
             </div>
             <div id="photos-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <label id="photo-add-btn" class="pcard-add" title="Agregar fotos">
@@ -523,6 +505,22 @@
             <input type="file" id="photos-hidden-input" name="images[]" multiple accept="image/*" class="hidden">
         </div>
 
+        {{-- Contacto / Cuenta --}}
+        <div class="bg-white rounded-3xl shadow-sm border border-indigo-100 p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-1">Tu contacto</h2>
+            <p class="text-sm text-gray-500 mb-4">
+                Ingresá tu email o teléfono.
+            </p>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email o teléfono *</label>
+                <input type="text" name="contact" value="{{ old('contact') }}" autocomplete="email"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    placeholder="nombre@email.com  o  11-1234-5678">
+                @error('contact')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                <p class="text-xs text-gray-400 mt-2">Si ya tenés cuenta, <a href="{{ route('login') }}" class="text-indigo-600 hover:underline">iniciá sesión</a> y publicá desde tu panel.</p>
+            </div>
+        </div>
+
         @if($errors->any())
         <div class="bg-red-50 border border-red-200 rounded-2xl p-4">
             @foreach($errors->all() as $error)
@@ -530,8 +528,6 @@
             @endforeach
         </div>
         @endif
-
-
 
         <div class="flex gap-4">
             <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-200">

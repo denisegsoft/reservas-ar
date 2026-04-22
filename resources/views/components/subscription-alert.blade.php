@@ -70,13 +70,14 @@
             </div>
         </div>
 
-        {{-- Mensaje de impacto --}}
-        @if($views > 0)
-        {{-- <div class="flex items-center gap-1.5 text-sm text-gray-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-            <span class="text-base">🔥</span>
-            <span>Tus propiedades ya tienen visitas —</span>
-            <strong class="text-red-600">hay clientes que quieren contactarte y no pueden.</strong>
-        </div> --}}
+        {{-- Dudas --}}
+        @php $contactEmail = \App\Models\Setting::get('contact_email', config('mail.from.address')); @endphp
+        @if($contactEmail)
+        <p class="text-xs text-gray-400 mt-3">
+            ¿Tenés dudas?
+            <a href="mailto:{{ $contactEmail }}" class="text-indigo-500 hover:text-indigo-700 font-medium transition-colors">Escribinos a {{ $contactEmail }}</a>
+            y te responderemos a la brevedad.
+        </p>
         @endif
 
     </div>

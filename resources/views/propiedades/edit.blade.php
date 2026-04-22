@@ -424,7 +424,7 @@
             @endphp
             <div class="mt-6 border-t border-gray-100 pt-5"
                  x-data="{
-                    rows: {{ json_encode($existingWeekDisc) }},
+                    rows: {{ json_encode($existingWeekDisc) }}.map(r => ({discount: r.discount ?? '', days: (r.days ?? []).map(Number)})),
                     addRow() { this.rows.push({days:[],discount:''}) },
                     removeRow(i) { this.rows.splice(i,1) },
                     toggleDay(row, d) { const idx=row.days.indexOf(d); idx===-1 ? row.days.push(d) : row.days.splice(idx,1) },

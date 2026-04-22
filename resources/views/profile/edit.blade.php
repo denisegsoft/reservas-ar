@@ -398,6 +398,12 @@
                     <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
                     Pago seguro vía MercadoPago
                 </div>
+                @php $contactEmail = \App\Models\Setting::get('contact_email', config('mail.from.address')); @endphp
+                @if($contactEmail)
+                <div style="margin-top:.625rem;text-align:center;font-size:.72rem;color:#9ca3af;">
+                    ¿Tenés dudas? <a href="mailto:{{ $contactEmail }}" style="color:#6366f1;font-weight:500;text-decoration:none;">{{ $contactEmail }}</a>
+                </div>
+                @endif
             </div>
 
         </div>

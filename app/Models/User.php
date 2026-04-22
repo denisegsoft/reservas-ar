@@ -15,7 +15,7 @@ class User extends Authenticatable
         'whatsapp_link', 'website',
         'bank_holder', 'bank_cbu', 'bank_alias',
         'social_instagram', 'social_facebook', 'social_twitter', 'social_tiktok', 'social_youtube',
-        'deleted', 'subscription_paid', 'subscription_paid_at',
+        'deleted', 'subscription_paid', 'subscription_paid_at', 'needs_password_change',
         'google_id', 'facebook_id',
     ];
 
@@ -31,10 +31,11 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at'    => 'datetime',
-            'password'             => 'hashed',
-            'subscription_paid'    => 'boolean',
-            'subscription_paid_at' => 'datetime',
+            'email_verified_at'      => 'datetime',
+            'password'               => 'hashed',
+            'subscription_paid'      => 'boolean',
+            'subscription_paid_at'   => 'datetime',
+            'needs_password_change'  => 'boolean',
         ];
     }
 
@@ -93,6 +94,7 @@ class User extends Authenticatable
             }
             return asset('storage/' . $this->avatar);
         }
-        return "https://ui-avatars.com/api/?name=" . urlencode($this->full_name) . "&background=6366f1&color=fff&size=128";
+        $label = $this->full_name ?: 'SN';
+        return "https://ui-avatars.com/api/?name=" . urlencode($label) . "&background=6366f1&color=fff&size=128";
     }
 }

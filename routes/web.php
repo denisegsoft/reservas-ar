@@ -38,6 +38,10 @@ Route::get('/favoritos/{propiedad:slug}/guardar', [FavoriteController::class, 'l
 // Reservar (público — guarda en sesión si no está logueado)
 Route::post('/propiedades/{propiedad:slug}/reservar', [ReservationController::class, 'store'])->name('reservations.store');
 
+// Publicar propiedad sin login (auto-registro)
+Route::get('/publicar', [PropertyController::class, 'createPublic'])->name('properties.publish');
+Route::post('/publicar', [PropertyController::class, 'storePublic'])->name('properties.publish.store');
+
 // Payment webhook (no auth needed — throttled to prevent abuse)
 Route::post('/webhooks/mercadopago', [PaymentController::class, 'webhook'])
 /*     ->middleware('throttle:120,1') */
@@ -47,6 +51,7 @@ Route::post('/webhooks/mercadopago', [PaymentController::class, 'webhook'])
 Route::middleware('auth')->group(function () {
     Route::get('/completar-perfil', [AvatarSetupController::class, 'show'])->name('avatar.setup');
     Route::post('/completar-perfil', [AvatarSetupController::class, 'store'])->name('avatar.store');
+    Route::post('/password/inicial', [ProfileController::class, 'setInitialPassword'])->name('password.set-initial');
 });
 
 // Authenticated user routes (avatar required)

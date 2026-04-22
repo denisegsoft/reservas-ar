@@ -10,12 +10,16 @@ use App\Models\PropertyAmenityLog;
 use App\Models\PropertyImage;
 use App\Models\PropertyService;
 use App\Models\Province;
+use App\Models\Setting;
+use App\Models\User;
 use App\Support\MailHelper;
 use App\Support\PropertyCache;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -205,6 +209,147 @@ class PropertyController extends Controller
         }
 
         return view('propiedades.show', compact('propiedad', 'unavailableDates', 'similarPropiedades', 'reservaParaReseña'));
+    }
+
+    // Publicar sin login
+    public function createPublic()
+    {
+        if (auth()->check()) {
+            return redirect()->route('owner.properties.create');
+        }
+        $amenitiesList = Property::amenitiesList();
+        $provinces = Province::where('active', true)->orderBy('order')->get(['id', 'name']);
+        return view('propiedades.publicar', compact('amenitiesList', 'provinces'));
+    }
+
+    public function storePublic(Request $request)
+    {
+        if (auth()->check()) {
+            return redirect()->route('owner.properties.create');
+        }
+
+        $this->stripEmptyDiscountRows($request);
+
+        $data = $request->validate([
+            'contact'                    => 'required|string|max:255',
+            'name'                       => 'required|string|max:255',
+            'description'                => 'required|string',
+            'short_description'          => 'nullable|string|max:500',
+            'street_name'                => 'nullable|string|max:255',
+            'street_number'              => 'nullable|string|max:20',
+            'locality'                   => 'required|string|max:255',
+            'partido'                    => 'required|string|max:255',
+            'state'                      => 'required|string',
+            'country'                    => 'nullable|string|max:100',
+            'price_per_hour'             => 'nullable|numeric|min:1',
+            'price_per_day'              => 'required|numeric|min:1',
+            'price_weekend'              => 'nullable|numeric|min:0',
+            'day_discounts'              => 'nullable|array',
+            'day_discounts.*.days'       => 'required_with:day_discounts.*|integer|min:1',
+            'day_discounts.*.discount'   => 'required_with:day_discounts.*|numeric|min:1|max:99',
+            'date_discounts'             => 'nullable|array',
+            'date_discounts.*.date_from' => 'required_with:date_discounts.*|date',
+            'date_discounts.*.date_to'   => 'required_with:date_discounts.*|date',
+            'date_discounts.*.discount'  => 'required_with:date_discounts.*|numeric|min:1|max:99',
+            'date_discounts.*.label'     => 'nullable|string|max:100',
+            'weekday_discounts'          => 'nullable|array',
+            'weekday_discounts.*.days'   => 'required_with:weekday_discounts.*|array',
+            'weekday_discounts.*.discount' => 'required_with:weekday_discounts.*|numeric|min:1|max:99',
+            'capacity'                   => 'required|integer|min:1',
+            'beds'                       => 'required|integer|min:0',
+            'rooms'                      => 'required|integer|min:0',
+            'bathrooms'                  => 'required|integer|min:0',
+            'parking_spots'              => 'required|integer|min:0',
+            'latitude'                   => 'nullable|numeric|between:-90,90',
+            'longitude'                  => 'nullable|numeric|between:-180,180',
+            'map_url'                    => 'nullable|url|max:500',
+            'amenities'                  => 'nullable|array',
+            'rules'                      => 'nullable|string',
+            'min_days'                   => 'nullable|integer|min:1',
+            'max_days'                   => 'nullable|integer|min:1',
+            'type'                       => 'nullable|string|max:100',
+            'available_from'             => 'nullable|date_format:H:i',
+            'available_to'               => 'nullable|date_format:H:i',
+            'images.*'                   => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
+
+        $contact = trim($data['contact']);
+        unset($data['contact']);
+
+        if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
+            $email = strtolower($contact);
+            $phone = null;
+            if (User::where('email', $email)->exists()) {
+                return back()
+                    ->withErrors(['contact' => 'Ya existe una cuenta con ese email. Iniciá sesión para publicar tu propiedad.'])
+                    ->withInput();
+            }
+        } else {
+            $phone = $contact;
+            $email = null;
+            if (User::where('phone', $phone)->exists()) {
+                return back()
+                    ->withErrors(['contact' => 'Ya existe una cuenta con ese teléfono. Iniciá sesión para publicar tu propiedad.'])
+                    ->withInput();
+            }
+        }
+
+        $user = User::create([
+            'name'                  => '',
+            'email'                 => $email,
+            'phone'                 => $phone,
+            'password'              => Hash::make($contact),
+            'role'                  => 'user',
+            'needs_password_change' => true,
+        ]);
+
+        event(new Registered($user));
+        Auth::login($user);
+
+        $data['address'] = trim(($data['street_name'] ?? '') . ' ' . ($data['street_number'] ?? '')) ?: null;
+        $data['city']    = $data['locality'];
+        $data['country'] = $data['country'] ?? 'Argentina';
+        $data['user_id'] = $user->id;
+        $data['slug']    = Str::slug($data['name']);
+        $data['rules']   = $request->filled('rules') ? explode("\n", $request->rules) : null;
+        $data['status']  = 'active';
+        $this->filterDiscounts($data);
+
+        $propiedad = Property::create($data);
+        PropertyCache::clearListings();
+
+        $this->syncBlockedDates($propiedad, $request->input('blocked_ranges', []));
+        $this->syncServices($propiedad, $request->input('services', []));
+
+        $knownKeys = array_keys(Property::amenitiesList());
+        foreach (array_diff($data['amenities'] ?? [], $knownKeys) as $custom) {
+            PropertyAmenityLog::create(['property_id' => $propiedad->id, 'amenity' => $custom]);
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $this->storeAsWebp($image);
+                PropertyImage::create([
+                    'property_id' => $propiedad->id,
+                    'path'        => $path,
+                    'is_primary'  => $index === 0,
+                    'order'       => $index,
+                ]);
+                if ($index === 0) {
+                    $propiedad->update(['cover_image' => $path]);
+                }
+            }
+        }
+
+        $successMsg = '¡Tu propiedad fue publicada! Completá tu perfil para que los clientes puedan contactarte.';
+
+        return redirect()->route('owner.dashboard')
+            ->with('success', $successMsg)
+            ->with('first_publish', [
+                'property_id'   => $propiedad->id,
+                'property_slug' => $propiedad->slug,
+                'contact_type'  => $email !== null ? 'email' : 'teléfono',
+            ]);
     }
 
     // Owner CRUD
@@ -558,14 +703,15 @@ class PropertyController extends Controller
 
     private function stripEmptyDiscountRows(Request $request): void
     {
-        $clean = fn(array $rows, array $keys) => array_values(
-            array_filter($rows, fn($row) => collect($keys)->some(fn($k) => !empty($row[$k])))
+        // Keep only rows where ALL required fields are present and non-empty
+        $cleanAll = fn(array $rows, array $keys) => array_values(
+            array_filter($rows, fn($row) => collect($keys)->every(fn($k) => !empty($row[$k])))
         );
 
         $request->merge([
-            'day_discounts'     => $clean($request->input('day_discounts', []),     ['days', 'discount']),
-            'date_discounts'    => $clean($request->input('date_discounts', []),    ['date_from', 'date_to', 'discount']),
-            'weekday_discounts' => $clean($request->input('weekday_discounts', []), ['days', 'discount']),
+            'day_discounts'     => $cleanAll($request->input('day_discounts', []),     ['days', 'discount']),
+            'date_discounts'    => $cleanAll($request->input('date_discounts', []),    ['date_from', 'date_to', 'discount']),
+            'weekday_discounts' => $cleanAll($request->input('weekday_discounts', []), ['days', 'discount']),
         ]);
     }
 

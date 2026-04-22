@@ -33,6 +33,14 @@ $_orgSchema = json_encode([
 
 @section('content')
 
+<style>
+@@keyframes ownerPulse {
+    0%,100% { box-shadow: 0 0 18px 2px rgba(99,102,241,0.5), 0 0 40px 4px rgba(139,92,246,0.25); }
+    50%      { box-shadow: 0 0 32px 6px rgba(99,102,241,0.85), 0 0 70px 10px rgba(139,92,246,0.45); }
+}
+.owner-cta-btn { animation: ownerPulse 1.8s ease-in-out infinite; }
+</style>
+
 {{-- HERO --}}
 <section class="relative min-h-[90vh] flex items-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #4338ca 100%);">
     <div class="absolute inset-0 bg-cover bg-center opacity-10" style='background-image:url("{{ asset('images/background.webp') }}")' alt="Paisaje" class="w-full h-full object-contain" />')"></div>
@@ -99,6 +107,20 @@ $_orgSchema = json_encode([
                     Buscar Propiedades
                 </button>
             </form>
+        </div>
+
+        {{-- CTA propietario --}}
+        <div class="mt-6 max-w-3xl mx-auto">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-4" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);backdrop-filter:blur(8px)">
+                <div class="text-center sm:text-left">
+                    <p class="text-white font-semibold text-sm leading-snug"> ¿Tienes algún espacio para alquilar?</p>
+                    <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.85)">Publicá tu espacio gratis y te conectamos con más clientes/reservas</p>
+                </div>
+                <a href="{{ route('properties.publish') }}" class="owner-cta-btn shrink-0 inline-flex items-center gap-2 bg-white text-indigo-700 font-bold px-6 py-2.5 rounded-xl text-sm hover:scale-105 transition-transform duration-200 whitespace-nowrap">
+                    Publicar ahora
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5-5 5M6 12h12"/></svg>
+                </a>
+            </div>
         </div>
 
         @if($stats['properties'] >= 1000)
@@ -180,14 +202,14 @@ $_orgSchema = json_encode([
 <section class="bg-gradient-to-br from-indigo-600 to-purple-700 py-20 mx-4 sm:mx-8 rounded-3xl mb-20">
     <div class="max-w-3xl mx-auto px-8 text-center">
         <h2 class="text-3xl sm:text-4xl font-black text-white mb-4">Tenes una propiedad?</h2>
-        <p class="text-indigo-200 text-lg mb-8">Publica tu espacio gratis y empieza a recibir reservas hoy mismo. Gestiona todo desde tu panel. Tu registro tambien incluye web propia para tu negocio, Chatbot inteligente para tu whatsapp, y muchas novedades más...</p>
+        <p class="text-indigo-200 text-lg mb-8">Publica tu espacio gratis y empieza a recibir más reservas hoy mismo. Gestiona todo desde tu panel. Tu registro tambien incluye web propia para tu negocio, chatbot inteligente para tu whatsapp, y muchas novedades más...</p>
         <div class="flex items-center justify-center gap-4 flex-wrap">
             <a href="{{ route('register') }}" class="bg-white hover:bg-gray-50 text-indigo-700 font-bold px-8 py-3.5 rounded-2xl transition-all shadow-lg hover:shadow-xl">
                 Publicar mi Propiedad
             </a>
-            <a href="{{ route('properties.index') }}" class="border-2 border-white/40 hover:border-white text-white font-semibold px-8 py-3.5 rounded-2xl transition-all">
+            {{-- <a href="{{ route('properties.index') }}" class="border-2 border-white/40 hover:border-white text-white font-semibold px-8 py-3.5 rounded-2xl transition-all">
                 Explora las propiedades
-            </a>
+            </a> --}}
         </div>
     </div>
 </section>

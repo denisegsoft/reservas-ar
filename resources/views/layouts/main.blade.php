@@ -75,7 +75,9 @@
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
                         <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->full_name }}" data-avatar class="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-100">
+                        @if(auth()->user()->full_name)
                         <span data-fullname class="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">{{ auth()->user()->full_name }}</span>
+                        @endif
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open" @click.outside="open = false"
@@ -90,11 +92,20 @@
                         {{-- User info --}}
                         <div class="px-4 py-3 border-b border-gray-100 mb-1">
                             <p class="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-                                <span data-fullname>{{ auth()->user()->full_name }}</span>
+                                @if(auth()->user()->full_name)
+                                    <span data-fullname>{{ auth()->user()->full_name }}</span>
+                                @else
+                                    <span data-fullname class="text-gray-400 italic">Sin nombre</span>
+                                @endif
                                 @if(auth()->user()->hasSubscription())
                                 <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                 @endif
                             </p>
+                            @if(!auth()->user()->full_name)
+                            <a href="{{ route('profile.edit') }}" class="text-xs text-indigo-500 hover:text-indigo-700 transition-colors">
+                                Completá tu nombre →
+                            </a>
+                            @endif
                         </div>
 
                         {{-- MI CUENTA --}}
@@ -278,5 +289,191 @@
 @stack('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+@auth
+@if(auth()->user()->needs_password_change && request()->routeIs('owner.dashboard'))
+@php
+    $fp = session('first_publish') ?: [];
+    $fpSlug = $fp['property_slug'] ?? optional(auth()->user()->propiedades()->latest()->first())->slug;
+    $fpContactType = $fp['contact_type'] ?? (auth()->user()->email ? 'email' : 'teléfono');
+@endphp
+<div class="modal fade" id="firstPublishModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+        <div class="modal-content border-0" style="border-radius:1.75rem;overflow:hidden;box-shadow:0 32px 64px -12px rgba(0,0,0,.3);">
+
+            {{-- Header --}}
+            <div style="position:relative;padding:1.75rem 1.5rem 1.5rem;background:linear-gradient(135deg,#4338ca 0%,#6d28d9 55%,#9333ea 100%);overflow:hidden;">
+                <div style="position:absolute;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.07);top:-32px;right:-32px;pointer-events:none;"></div>
+                <div style="position:absolute;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.1);top:18px;right:58px;pointer-events:none;"></div>
+                <button type="button" data-bs-dismiss="modal"
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;background:rgba(255,255,255,.2);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;"
+                        onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
+                    <svg width="13" height="13" fill="none" stroke="white" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div style="width:54px;height:54px;border-radius:1rem;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="28" height="28" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:.25rem;">Publicación exitosa</div>
+                        <div style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1.2;">¡Tu propiedad está online!</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Body --}}
+            <div style="padding:1.4rem 1.5rem 0;">
+
+                {{-- Ver propiedad --}}
+                <a href="{{ $fpSlug ? route('properties.show', $fpSlug) : '#' }}" target="_blank"
+                   style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.65rem 1rem;border-radius:.875rem;background:#eef2ff;border:1px solid #c7d2fe;color:#4338ca;font-size:.875rem;font-weight:600;text-decoration:none;margin-bottom:1.1rem;transition:background .15s;"
+                   onmouseover="this.style.background='#e0e7ff'" onmouseout="this.style.background='#eef2ff'">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Ver mi propiedad
+                </a>
+
+                {{-- Aviso contraseña --}}
+                <div style="display:flex;gap:.65rem;padding:.875rem;border-radius:.875rem;background:#fffbeb;border:1px solid #fde68a;margin-bottom:1.25rem;">
+                    <svg style="flex-shrink:0;margin-top:1px;" width="16" height="16" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p style="margin:0 0 .2rem;font-size:.8rem;font-weight:700;color:#92400e;">Primera vez que ingresás</p>
+                        <p style="margin:0;font-size:.78rem;color:#b45309;line-height:1.45;">Tu contraseña actual es el <strong>{{ $fpContactType }}</strong> que ingresaste. Te recomendamos cambiarla ahora.</p>
+                    </div>
+                </div>
+
+                {{-- Form --}}
+                <div id="fp-form-wrap">
+                    <p style="margin:0 0 .875rem;font-size:.875rem;font-weight:600;color:#111827;">Cambiá tu contraseña</p>
+
+                    <div id="fp-error" style="display:none;padding:.6rem .875rem;border-radius:.75rem;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:.8rem;margin-bottom:.875rem;"></div>
+
+                    <div style="margin-bottom:.75rem;">
+                        <label style="display:block;font-size:.8rem;font-weight:500;color:#374151;margin-bottom:.35rem;">Nueva contraseña</label>
+                        <div style="position:relative;">
+                            <input type="password" id="fp-password" placeholder="Mínimo 8 caracteres" autocomplete="new-password"
+                                   style="width:100%;padding:.625rem .875rem;padding-right:2.75rem;border:1px solid #d1d5db;border-radius:.75rem;font-size:.875rem;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;"
+                                   onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 3px rgba(99,102,241,.15)'" onblur="this.style.borderColor='#d1d5db';this.style.boxShadow='none'">
+                            <button type="button" onclick="fpToggle('fp-password')" tabindex="-1"
+                                    style="position:absolute;right:.625rem;top:50%;transform:translateY(-50%);background:none;border:none;padding:.2rem;cursor:pointer;color:#9ca3af;display:flex;align-items:center;"
+                                    onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='#9ca3af'">
+                                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:1.1rem;">
+                        <label style="display:block;font-size:.8rem;font-weight:500;color:#374151;margin-bottom:.35rem;">Confirmá la contraseña</label>
+                        <div style="position:relative;">
+                            <input type="password" id="fp-confirm" placeholder="Repetí tu nueva contraseña" autocomplete="new-password"
+                                   style="width:100%;padding:.625rem .875rem;padding-right:2.75rem;border:1px solid #d1d5db;border-radius:.75rem;font-size:.875rem;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;"
+                                   onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 3px rgba(99,102,241,.15)'" onblur="this.style.borderColor='#d1d5db';this.style.boxShadow='none'">
+                            <button type="button" onclick="fpToggle('fp-confirm')" tabindex="-1"
+                                    style="position:absolute;right:.625rem;top:50%;transform:translateY(-50%);background:none;border:none;padding:.2rem;cursor:pointer;color:#9ca3af;display:flex;align-items:center;"
+                                    onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='#9ca3af'">
+                                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="fpSubmit()" id="fp-btn"
+                            style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.7rem 1.25rem;border-radius:.875rem;background:linear-gradient(135deg,#4338ca,#6d28d9);color:#fff;font-size:.875rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,.35);transition:box-shadow .2s;"
+                            onmouseover="this.style.boxShadow='0 8px 25px rgba(99,102,241,.5)'" onmouseout="this.style.boxShadow='0 6px 20px rgba(99,102,241,.35)'">
+                        <svg id="fp-spinner" width="16" height="16" fill="none" viewBox="0 0 24 24" style="display:none;animation:spin 1s linear infinite;">
+                            <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,.3)" stroke-width="3"/>
+                            <path d="M12 3a9 9 0 0 1 9 9" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                        <span id="fp-btn-text">Guardar contraseña</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="padding:.875rem 1.5rem 1.25rem;text-align:center;">
+                <button type="button" data-bs-dismiss="modal"
+                        style="background:none;border:none;font-size:.8rem;color:#9ca3af;cursor:pointer;transition:color .15s;"
+                        onmouseover="this.style.color='#6b7280'" onmouseout="this.style.color='#9ca3af'">
+                    Hacer esto después
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+@@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        new bootstrap.Modal(document.getElementById('firstPublishModal')).show();
+    });
+
+    window.fpToggle = function (id) {
+        var inp = document.getElementById(id);
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    };
+
+    window.fpSubmit = function () {
+        var pw  = document.getElementById('fp-password').value;
+        var pw2 = document.getElementById('fp-confirm').value;
+        var err = document.getElementById('fp-error');
+        var btn = document.getElementById('fp-btn');
+        var spinner = document.getElementById('fp-spinner');
+        var btnText = document.getElementById('fp-btn-text');
+
+        err.style.display = 'none';
+
+        if (pw.length < 8) { err.textContent = 'La contraseña debe tener al menos 8 caracteres.'; err.style.display = 'block'; return; }
+        if (pw !== pw2)    { err.textContent = 'Las contraseñas no coinciden.'; err.style.display = 'block'; return; }
+
+        btn.disabled = true;
+        spinner.style.display = 'block';
+        btnText.textContent = 'Guardando...';
+
+        fetch('{{ route('password.set-initial') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+            body: JSON.stringify({ password: pw, password_confirmation: pw2 }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.ok) {
+                document.getElementById('fp-form-wrap').innerHTML =
+                    '<div style="text-align:center;padding:1rem 0 .5rem;">'
+                    + '<svg width="48" height="48" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24" style="display:block;margin:0 auto .75rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                    + '<p style="margin:0 0 .25rem;font-size:.9rem;font-weight:700;color:#15803d;">¡Contraseña guardada!</p>'
+                    + '<p style="margin:0 0 1.25rem;font-size:.8rem;color:#9ca3af;">Ya podés cerrar esta ventana.</p>'
+                    + '<button type="button" data-bs-dismiss="modal" style="display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.75rem;border-radius:.875rem;background:linear-gradient(135deg,#4338ca,#6d28d9);color:#fff;font-size:.875rem;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,.35);">Cerrar</button>'
+                    + '</div>';
+            } else {
+                btn.disabled = false; spinner.style.display = 'none'; btnText.textContent = 'Guardar contraseña';
+                err.textContent = data.message || 'Ocurrió un error. Intentá nuevamente.'; err.style.display = 'block';
+            }
+        })
+        .catch(function () {
+            btn.disabled = false; spinner.style.display = 'none'; btnText.textContent = 'Guardar contraseña';
+            err.textContent = 'Error de conexión. Intentá nuevamente.'; err.style.display = 'block';
+        });
+    };
+}());
+</script>
+@endif
+@endauth
+
 </body>
 </html>
