@@ -5,7 +5,7 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="mb-8">
         <h1 class="text-2xl font-black text-gray-900">Publicá tu Propiedad</h1>
-        <p class="text-gray-500 text-sm mt-1">Cargá los datos de tu espacio y publicalo al instante. Creamos tu cuenta automáticamente.</p>
+        <p class="text-gray-500 text-sm mt-1">Cargá los datos de tu espacio y publicalo al instante. </p>
     </div>
 
     <form id="create-form" action="{{ route('properties.publish.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" novalidate>
