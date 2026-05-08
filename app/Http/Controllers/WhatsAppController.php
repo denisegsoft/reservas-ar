@@ -25,8 +25,15 @@ class WhatsAppController extends Controller
 
         // El buffer/debounce se maneja en el lado Node.js
         // Laravel recibe el mensaje ya consolidado y procesa directo
-        $bot->handle($data['jid'], $data['from'], $data['message']);
-
-        return response()->json(['received' => true]);
+        try {
+            $bot->handle($data['jid'], $data['from'], $data['message']);
+            return response()->json(['received' => true]);
+        } catch (\Exception $e) {
+            // El error aparece en la respuesta JSON (visible en la UI de Node.js)
+            return response()->json([
+                'received' => true,
+                'error'    => $e->getMessage(),
+            ]);
+        }
     }
 }

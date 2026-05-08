@@ -52,17 +52,23 @@ class ClaudeService
                 return $texto;
             }
 
+            $errorBody = $response->json() ?? $response->body();
             Log::error('Claude API error', [
                 'status' => $response->status(),
-                'body'   => $response->body(),
+                'body'   => $errorBody,
             ]);
 
-            return 'Lo siento, tuve un problema al procesar tu consulta. Por favor intentá de nuevo.';
+            throw new \RuntimeException(
+                'Claude HTTP ' . $response->status() . ': ' . json_encode($errorBody)
+            );
+
+        } catch (\RuntimeException $e) {
+            throw $e; // dejar subir para que el controller lo capture
 
         } catch (\Exception $e) {
             Log::error('ClaudeService exception', ['error' => $e->getMessage()]);
 
-            return 'Lo siento, hubo un error. Por favor intentá de nuevo en unos momentos.';
+            throw new \RuntimeException('Claude connection error: ' . $e->getMessage());
         }
     }
 

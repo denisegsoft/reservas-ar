@@ -48,7 +48,7 @@ class WhatsAppBotService
             Cache::put("wa_federacion_{$from}", $federacionEnMensaje, now()->addDays(30));
             Cache::forget("wa_estado_{$from}");
 
-            $respuesta = $this->claude->chat($from, $federacionEnMensaje, $message);
+            $respuesta = $this->llamarClaude($jid, $from, $federacionEnMensaje, $message);
             $this->whatsapp->send($jid, $respuesta);
             return;
         }
@@ -57,7 +57,7 @@ class WhatsAppBotService
         $federacionGuardada = Cache::get("wa_federacion_{$from}");
 
         if ($federacionGuardada) {
-            $respuesta = $this->claude->chat($from, $federacionGuardada, $message);
+            $respuesta = $this->llamarClaude($jid, $from, $federacionGuardada, $message);
             $this->whatsapp->send($jid, $respuesta);
             return;
         }
@@ -72,6 +72,18 @@ class WhatsAppBotService
 
         // 4. No sabemos nada: pedir la federación
         $this->pedirFederacion($jid, $from);
+    }
+
+    private function llamarClaude(string $jid, string $from, string $federacion, string $mensaje): string
+    {
+        try {
+            return $this->claude->chat($from, $federacion, $mensaje);
+        } catch (\Exception $e) {
+            // El usuario recibe un mensaje amigable
+            $this->whatsapp->send($jid, 'Lo siento, tuve un problema al procesar tu consulta. Por favor intentá de nuevo.');
+            // La excepción sube para que el controller la registre en la respuesta JSON
+            throw $e;
+        }
     }
 
     private function detectarFederacion(string $texto): ?string
@@ -97,7 +109,7 @@ class WhatsAppBotService
             Cache::forget("wa_estado_{$from}");
 
             // Primer contacto: Claude saluda al usuario como Candela
-            $respuesta = $this->claude->chat($from, $federacion, 'Hola');
+            $respuesta = $this->llamarClaude($jid, $from, $federacion, 'Hola');
             $this->whatsapp->send($jid, $respuesta);
         } else {
             $this->whatsapp->send($jid,
