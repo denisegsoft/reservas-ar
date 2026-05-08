@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessWhatsAppBuffer;
 use Illuminate\Http\Request;
-use App\Services\WhatsAppBotService;
+use Illuminate\Support\Facades\Cache;
 
 class WhatsAppController extends Controller
 {
-    public function webhook(Request $request, WhatsAppBotService $bot)
+    // Segundos de espera tras el último mensaje antes de responder
+    const BUFFER_DELAY = 5;
+
+    public function webhook(Request $request)
     {
         $secret = $request->bearerToken();
 
@@ -23,7 +27,21 @@ class WhatsAppController extends Controller
             'timestamp' => 'required|numeric',
         ]);
 
-        $bot->handle($data['jid'], $data['from'], $data['message']);
+        $from = $data['from'];
+        $jid  = $data['jid'];
+
+        // Acumular el mensaje en el buffer del usuario
+        $buffer   = Cache::get("wa_buffer_{$from}", []);
+        $buffer[] = trim($data['message']);
+        Cache::put("wa_buffer_{$from}", $buffer, now()->addMinutes(5));
+
+        // Token único: si llega otro mensaje, este job queda obsoleto
+        $token = uniqid('', true);
+        Cache::put("wa_buffer_token_{$from}", $token, now()->addMinutes(5));
+
+        // Procesar después de N segundos de silencio
+        ProcessWhatsAppBuffer::dispatch($jid, $from, $token)
+            ->delay(now()->addSeconds(self::BUFFER_DELAY));
 
         return response()->json(['received' => true]);
     }

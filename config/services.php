@@ -59,4 +59,9 @@ return [
         'api_key'        => env('WHATSAPP_API_KEY'),
     ],
 
+    'claude' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model'   => env('ANTHROPIC_MODEL', 'claude-haiku-4-5'),
+    ],
+
 ];
