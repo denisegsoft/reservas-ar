@@ -17,12 +17,13 @@ class WhatsAppController extends Controller
 
         $data = $request->validate([
             'from'      => 'required|string',
+            'jid'       => 'required|string',
             'message'   => 'required|string',
             'messageId' => 'required|string',
             'timestamp' => 'required|numeric',
         ]);
 
-        $bot->handle($data['from'], $data['message']);
+        $bot->handle($data['jid'], $data['from'], $data['message']);
 
         return response()->json(['received' => true]);
     }

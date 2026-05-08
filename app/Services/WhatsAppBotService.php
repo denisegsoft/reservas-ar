@@ -28,22 +28,22 @@ class WhatsAppBotService
         $this->whatsapp = $whatsapp;
     }
 
-    public function handle(string $from, string $message): void
+    public function handle(string $jid, string $from, string $message): void
     {
         $message = trim($message);
         $estado  = Cache::get("wa_estado_{$from}");
 
         if ($estado === 'esperando_federacion') {
-            $this->handleSeleccionFederacion($from, $message);
+            $this->handleSeleccionFederacion($jid, $from, $message);
             return;
         }
 
         $federacion = $this->detectarFederacion($message);
 
         if ($federacion) {
-            $this->saludar($from, $federacion);
+            $this->saludar($jid, $federacion);
         } else {
-            $this->pedirFederacion($from);
+            $this->pedirFederacion($jid, $from);
         }
     }
 
@@ -60,34 +60,34 @@ class WhatsAppBotService
         return null;
     }
 
-    private function handleSeleccionFederacion(string $from, string $mensaje): void
+    private function handleSeleccionFederacion(string $jid, string $from, string $mensaje): void
     {
         $texto      = strtoupper(trim($mensaje));
         $federacion = self::OPCIONES[$mensaje] ?? self::FEDERACIONES[$texto] ?? null;
 
         if ($federacion) {
             Cache::forget("wa_estado_{$from}");
-            $this->saludar($from, $federacion);
+            $this->saludar($jid, $federacion);
         } else {
-            $this->whatsapp->send($from,
+            $this->whatsapp->send($jid,
                 "No reconocí esa opción. Por favor respondé con el número o nombre de tu federación:\n\n" .
                 "1. FDPATIN\n2. FCBM\n3. FECHIDA\n4. FUN"
             );
         }
     }
 
-    private function saludar(string $from, string $federacion): void
+    private function saludar(string $jid, string $federacion): void
     {
-        $this->whatsapp->send($from,
+        $this->whatsapp->send($jid,
             "¡Hola! Te saluda Candela de {$federacion}. ¿En qué puedo ayudarte hoy?"
         );
     }
 
-    private function pedirFederacion(string $from): void
+    private function pedirFederacion(string $jid, string $from): void
     {
         Cache::put("wa_estado_{$from}", 'esperando_federacion', now()->addHours(2));
 
-        $this->whatsapp->send($from,
+        $this->whatsapp->send($jid,
             "¡Hola! ¿A cuál de nuestras federaciones pertenecés?\n\n" .
             "1. FDPATIN\n2. FCBM\n3. FECHIDA\n4. FUN"
         );
