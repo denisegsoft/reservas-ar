@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\WhatsAppBotService;
 
 class WhatsAppController extends Controller
 {
-    public function webhook(Request $request)
+    public function webhook(Request $request, WhatsAppBotService $bot)
     {
-        // Verificar el secret que manda Node
         $secret = $request->bearerToken();
 
         if ($secret !== config('services.whatsapp.webhook_secret')) {
@@ -22,16 +22,8 @@ class WhatsAppController extends Controller
             'timestamp' => 'required|numeric',
         ]);
 
-        // Por ahora devolvemos los datos recibidos para verificar que llegan bien
-        return response()->json([
-            'received' => true,
-            'data'     => [
-                'from'      => $data['from'],
-                'message'   => $data['message'],
-                'messageId' => $data['messageId'],
-                'timestamp' => $data['timestamp'],
-                'datetime'  => date('Y-m-d H:i:s', $data['timestamp']),
-            ],
-        ]);
+        $bot->handle($data['from'], $data['message']);
+
+        return response()->json(['received' => true]);
     }
 }
