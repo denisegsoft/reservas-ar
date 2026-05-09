@@ -1,4 +1,4 @@
-FEDERACIÓN: FCBM (Federación de Ciclismo de Buenos Aires y Mendoza)
+FEDERACIÓN: FCBM
 
 DESCRIPCIÓN:
 La FCBM organiza eventos y competencias de ciclismo en las provincias de Buenos Aires y Mendoza.

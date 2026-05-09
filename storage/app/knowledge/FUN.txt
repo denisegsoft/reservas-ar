@@ -1,4 +1,4 @@
-FEDERACIÓN: FUN (Federación Universitaria Nacional)
+FEDERACIÓN: FUN
 
 DESCRIPCIÓN:
 La FUN coordina los deportes universitarios a nivel nacional, organizando los Juegos Universitarios Nacionales.
