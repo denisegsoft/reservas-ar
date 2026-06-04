@@ -124,7 +124,6 @@
                 @endif
             </div>
 
-
             {{-- Redes sociales --}}
             <div class="space-y-3">
                 <p class="text-sm font-medium text-gray-700">Redes sociales</p>

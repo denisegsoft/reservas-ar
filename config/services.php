@@ -53,15 +53,4 @@ return [
         'redirect'     => env('FACEBOOK_REDIRECT_URI', '/auth/facebook/callback'),
     ],
 
-    'whatsapp' => [
-        'webhook_secret' => env('WHATSAPP_WEBHOOK_SECRET'),
-        'api_url'        => env('WHATSAPP_API_URL', 'http://localhost:3001'),
-        'api_key'        => env('WHATSAPP_API_KEY'),
-    ],
-
-    'claude' => [
-        'api_key' => env('ANTHROPIC_API_KEY'),
-        'model'   => env('ANTHROPIC_MODEL', 'claude-haiku-4-5'),
-    ],
-
 ];
